@@ -1,4 +1,3 @@
-
 # 🌳 HearDay - Frontend
 
 ## 📌 프로젝트 소개
@@ -21,7 +20,7 @@
 ---
 
 ## 📂 디렉토리 구조
-
+```
 .
 ├── app/                          # expo-router 라우팅 폴더 (자동 라우팅)
 │   ├── (tabs)/                   # 탭 네비게이션 그룹
@@ -60,6 +59,7 @@
 ├── tsconfig.json
 └── package.json
 
+```
 ---
 
 ## 🌱 Git Flow 브랜치 전략
@@ -173,4 +173,3 @@ Feat: 로그인 기능 구현 (#5)
 | --- | --- |
 | 서진 | Login, SignUp, FindID/ChangePW, Home, AI 토론(음성), AI 토론(채팅), Profile |
 | 병훈 | NewsPlaying, NewsArticle, AI 토론 메인, Dictionary, WordBook, SavedNews |
-
