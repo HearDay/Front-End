@@ -1,6 +1,5 @@
 ## ✅ Issue Template
 
-```
 ---
 name: 이슈 생성 템플릿
 about: 이슈를 생성해주세요.
@@ -23,4 +22,3 @@ assignees: ''
 
 ## 💬 Additional Context
 추가 내용
-```
