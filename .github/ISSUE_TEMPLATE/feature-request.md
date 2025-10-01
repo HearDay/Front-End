@@ -1,4 +1,3 @@
-## ✅ Issue Template
 
 ---
 name: 이슈 생성 템플릿
