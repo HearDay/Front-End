@@ -1,12 +1,7 @@
-// metro.config.js
-
-// NativeWind의 Metro 설정이 require 되는 라인입니다.
+const { getDefaultConfig } = require("expo/metro-config");
 const { withNativeWind } = require('nativewind/metro');
-const { getDefaultConfig } = require('expo/metro-config');
+ 
+const config = getDefaultConfig(__dirname)
 
-const config = getDefaultConfig(__dirname);
-
-module.exports = withNativeWind(config, {
-  // global.css 파일 경로를 명시합니다.
-  input: './global.css',
-});
+// global.css is at the project root (./global.css), not inside ./app
+module.exports = withNativeWind(config, { input: "./global.css" });
