@@ -16,12 +16,12 @@ export default function TabLayout() {
           elevation: 0,
         },
         tabBarItemStyle: {
-          paddingTop: 6, // 🔹 위로 약간 띄워서 정중앙 맞춤
-          paddingBottom: 10, // 🔹 하단 여백도 살짝 줘서 안정감 있게
+          paddingTop: 8, 
+          paddingBottom: 10,
         },
         tabBarLabelStyle: {
           fontSize: 12,
-          marginTop: 2, // 🔹 아이콘과 텍스트 간 간격 조정
+          marginTop: 4, 
           color: "#14532D",
         },
         tabBarIcon: ({ focused }) => {
