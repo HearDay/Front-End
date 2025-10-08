@@ -1,6 +1,8 @@
+import NewsCardList from "@/components/common/NewsCardList";
 import { useEffect } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import TopBar from "../../components/common/TopBar";
 
 export default function HomeScreen() {
   useEffect(() => {
@@ -8,14 +10,10 @@ export default function HomeScreen() {
   }, []);
 
   return (
-    // give SafeAreaView explicit flex so inner flex-1 can expand even if tailwind/className isn't applied
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#ffffff' }}>
-      <View className="flex-1 items-center justify-center bg-white" style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: 'yellow' }}>
-        {/* Tailwind-based text (may be transformed by nativewind) */}
-        <Text className="text-5xl font-bold text-indigo-700">Hello World!</Text>
-
-        {/* Inline fallback to confirm rendering independent of nativewind */}
-        <Text style={{ color: 'red', fontSize: 18, marginTop: 12 }}>plain inline text — should be visible</Text>
+    <SafeAreaView className="flex-1 bg-white">
+      <TopBar showBackButton={false} />
+      <View className="flex-1">
+        <NewsCardList background="green" />
       </View>
     </SafeAreaView>
   );
