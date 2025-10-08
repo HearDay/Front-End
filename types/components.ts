@@ -11,6 +11,9 @@ export interface ModalProps {
     title: string
     onConfirm: () => void
     onClose?: () => void
+    confirmText?: string
+    confirmDisabled?: boolean
+    children?: React.ReactNode
 }
 
 //스피너

@@ -1,7 +1,7 @@
 import React from 'react'
 // 우리 컴포넌트 이름과 충돌 방지로 RNModal로 지음
 // Pressable이 TouchableOpacity보다 최신이라고 함
-import { Modal as RNModal, Text, TouchableOpacity, Pressable } from 'react-native'
+import { Pressable, Modal as RNModal, Text, TouchableOpacity, View } from 'react-native'
 import { ModalProps } from '../../types/components'
 
 export const Modal = ({
@@ -9,6 +9,9 @@ export const Modal = ({
   title,
   onConfirm,
   onClose,
+  confirmText = '확인',
+  confirmDisabled = false,
+  children
 }: ModalProps) => {
   return (
     <RNModal
@@ -35,6 +38,11 @@ export const Modal = ({
             {title}
           </Text>
 
+          {/*  children */}
+          {children ? (
+            <View className='mb-6'>{children}</View>
+          ): null }
+          
           {/* 확인 버튼 */}
           <TouchableOpacity
             className="py-3 rounded-xl"
