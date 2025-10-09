@@ -9,12 +9,13 @@ export default function HomeScreen() {
     console.log("HomeScreen rendered");
   }, []);
 
+export default function Index() {
   return (
     <SafeAreaView className="flex-1 bg-white">
       <TopBar showBackButton={false} />
       <View className="flex-1">
         <NewsCardList background="green" />
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
