@@ -1,6 +1,6 @@
-import React from 'react'
-import { TouchableOpacity, Text } from 'react-native';
 import { clsx } from 'clsx';
+import React from 'react';
+import { Text, TouchableOpacity } from 'react-native';
 import { CategoryChipProps } from '../../types/components';
 
 export const CategoryChip = ({
@@ -11,7 +11,7 @@ export const CategoryChip = ({
   <TouchableOpacity
     className={clsx(
       'px-6 py-3 rounded-full',
-      isSelected ? 'bg-[#C8F4D8]' : 'bg-[#F5F5F5]'
+      isSelected ? 'bg-[#B3D7BB]' : 'bg-[#DBFDE0]'
     )}
     onPress={onPress}
     activeOpacity={0.7}

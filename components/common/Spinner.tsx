@@ -13,5 +13,5 @@ export const Spinner = ({
     <View className="flex-1 justify-center items-center">
       <ActivityIndicator size={size} color={color} />
     </View>
-  );
-};
+  )
+}

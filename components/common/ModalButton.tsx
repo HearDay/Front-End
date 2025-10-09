@@ -1,7 +1,6 @@
-import { Pressable, Text, Platform } from 'react-native';
-import { useState } from 'react';
-import { clsx } from 'clsx';
-import { ModalButtonProps } from '../../types/components';
+import { useState } from 'react'
+import { Platform, Pressable, Text } from 'react-native'
+import { ModalButtonProps } from '../../types/components'
 
 export const ModalButton = ({
   title,
@@ -9,24 +8,24 @@ export const ModalButton = ({
   variant = 'voice',
 }: ModalButtonProps) => {
   // ========== 웹용 상태 ==========
-  const [isHovered, setIsHovered] = useState(false);
+  const [isHovered, setIsHovered] = useState(false)
   
   // ========== 앱용 상태 ==========
-  const [isPressed, setIsPressed] = useState(false);
+  const [isPressed, setIsPressed] = useState(false)
 
   const getBackgroundColor = () => {
     // 웹 or 앱 둘 다 체크
-    if (isHovered || isPressed) return '#006716';
+    if (isHovered || isPressed) return '#006716'
 
     switch (variant) {
       case 'voice':
-        return '#DBFDE0';
+        return '#DBFDE0'
       case 'chat':
-        return '#DBFDE0';
+        return '#DBFDE0'
       case 'skip':
-        return '#DBFDE0';
+        return '#DBFDE0'
       default:
-        return '#DBFDE0';
+        return '#DBFDE0'
     }
   };
 
@@ -55,5 +54,5 @@ export const ModalButton = ({
         {title}
       </Text>
     </Pressable>
-  );
-};
+  )
+}
