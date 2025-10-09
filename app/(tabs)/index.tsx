@@ -16,7 +16,7 @@ export default function Index() {
       >
         <NewsCardList background="green" />
 
-        <View className="items-center mt-8">
+        <View className="items-center mt-2">
           <TermsAgreement
             value={{ service: false, privacy: false, marketing: false }}
             onChange={(next) => console.log("약관 상태:", next)}
