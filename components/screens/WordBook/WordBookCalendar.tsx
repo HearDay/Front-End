@@ -20,8 +20,8 @@ export const WordBookCalendar = ({
   const getUnderlineColor = (count: number) => {
     if (count === 0) return null
     if (count <= 3) return 'bg-green-200'
-    if (count <= 7) return 'bg-green-400'
-    return 'bg-green-600'
+    if (count <= 7) return 'bg-green-500'
+    return 'bg-green-900'
   }
 
   const renderDays = () => {
@@ -72,7 +72,7 @@ export const WordBookCalendar = ({
 }
 
   return (
-    <View className="bg-white rounded-2xl p-4 mx-4 mt-4 border border-green-200">
+    <View className="bg-white rounded-2xl p-4 mx-4 mt-4 border border-green-600">
       {/* 월 제목 및 화살표 */}
       <View className="flex-row items-center justify-between mb-4">
         <TouchableOpacity onPress={onPrevMonth}>
@@ -87,12 +87,12 @@ export const WordBookCalendar = ({
       </View>
 
       {/* 구분선 */}
-      <View className="h-px bg-green-200 mb-2" />
+      <View className="h-px bg-green-600 mb-2" />
 
       {/* 요일 */}
       <View className="flex-row justify-around mb-2">
         {['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'].map((d) => (
-          <Text key={d} className="text-xs text-green-300 w-10 text-center">{d}</Text>
+          <Text key={d} className="text-xs text-green-800 w-10 text-center">{d}</Text>
         ))}
       </View>
 

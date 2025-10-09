@@ -1,4 +1,5 @@
 import { Modal } from '@/components/common';
+import TopBar from '@/components/common/TopBar';
 import { addMonths, format, subMonths } from 'date-fns';
 import { useState } from 'react';
 import { Text, View } from 'react-native';
@@ -86,6 +87,7 @@ export const WordBookTest = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
+        <TopBar />
       {/* 캘린더 */}
       <WordBookCalendar
         currentDate={currentDate}

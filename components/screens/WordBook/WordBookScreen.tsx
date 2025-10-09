@@ -89,7 +89,7 @@ export const WordBookScreen = () => {
           onConfirm={() => setShowModal(false)}
           onClose={() => setShowModal(false)}
         >
-          <View className="bg-blue-50 rounded-2xl p-4">
+          <View className="bg-green-50 rounded-2xl p-4">
             {/* TODO: API에서 단어 뜻 가져오기 */}
             <Text className="text-base">단어 뜻이 여기 표시됩니다.</Text>
           </View>
