@@ -1,28 +1,103 @@
-import { ScrollView, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import NewsCardList from "../../components/common/NewsCardList";
-import TopBar from "../../components/common/TopBar";
-import TermsAgreement from "../../components/screens/Login/TermsAgreement";
+import { CategoryChipGroup } from "@/components/common";
+import HeroSection from "@/components/screens/HomePage/HeroSection";
+import NewsCardList from "@/components/screens/HomePage/NewsCardList";
+import NewsCardSlider from "@/components/screens/HomePage/NewsCardSlider";
+import React, { useState } from "react";
+import { Text, View } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
-export default function Index() {
+const HomePage = () => {
+  const userName = "지니"; // 더미 사용자 이름
+
+  // 카테고리 리스트
+  const categories = [
+    "경제",
+    "방송 / 연예",
+    "IT",
+    "쇼핑",
+    "생활",
+    "해외",
+    "스포츠",
+    "정치",
+  ];
+
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const offset = useSharedValue(0); // 애니메이션 상태 (0: 기본, 1: 전환됨)
+
+  const handleSelectCategory = (category: string) => {
+    setSelectedCategory(category);
+    offset.value = withTiming(1, { duration: 600 }); // 슬라이드 업
+  };
+
+  const handleBackToHome = () => {
+    setSelectedCategory(null);
+    offset.value = withTiming(0, { duration: 600 }); // 다시 내려옴
+  };
+
+  const listStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: withTiming((1 - offset.value) * 50) }],
+    opacity: withTiming(offset.value),
+  }));
+
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <TopBar showBackButton={false} />
+    <View className="flex-1 bg-white">
+      {/* 상단 HeroSection (로고는 고정, 나무는 애니메이션) */}
+      <HeroSection offset={offset} />
 
-      <ScrollView
-        className="flex-1"
-        contentContainerStyle={{ paddingBottom: 40 }}
-        showsVerticalScrollIndicator={false}
-      >
-        <NewsCardList background="green" />
+      {selectedCategory ? (
+        <Animated.View style={listStyle}>
+          <View className="flex-row justify-between items-center px-6 mt-7 mb-2">
+            <Text className="text-[17px] font-extrabold text-[#002C14]">
+              {selectedCategory} 관련 뉴스
+            </Text>
+            <Text
+              className="text-[14px] text-gray-600 pr-2"
+              onPress={handleBackToHome}
+            >
+              돌아가기
+            </Text>
+          </View>
 
-        <View className="items-center mt-2">
-          <TermsAgreement
-            value={{ service: false, privacy: false, marketing: false }}
-            onChange={(next) => console.log("약관 상태:", next)}
+          <View className="mb-4 mt-3">
+            <CategoryChipGroup
+              categories={categories}
+              selectedCategory={selectedCategory}
+              onSelectCategory={handleSelectCategory}
+            />
+          </View>
+
+          <NewsCardList background="green" />
+        </Animated.View>
+      ) : (
+        <>
+
+          <View className="px-6 mt-4">
+            <Text className="text-[16px] text-right font-extrabold text-[#002C14] mt-2 mr-2">
+              {userName}님이 좋아할 만한 오늘의 뉴스
+            </Text>
+          </View>
+
+          <NewsCardSlider />
+
+          <View className="px-6 mt-4">
+            <Text className="text-[16px] text-right font-extrabold text-[#002C14] mt-2 mb-4 mr-2">
+              카테고리별로 골라보기
+            </Text>
+          </View>
+
+          <CategoryChipGroup
+            categories={categories}
+            selectedCategory={selectedCategory}
+            onSelectCategory={handleSelectCategory}
           />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+        </>
+      )}
+    </View>
   );
-}
+};
+
+export default HomePage;

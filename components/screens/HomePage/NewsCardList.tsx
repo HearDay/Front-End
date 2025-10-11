@@ -1,7 +1,8 @@
+import NewsCard from "@/components/common/NewsCard";
 import React from "react";
 import { ScrollView, View } from "react-native";
-import NewsCard from "./NewsCard";
 import { newsDummy } from "./NewsCardDummy";
+
 
 type BackgroundVariant = "green" | "white";
 
@@ -13,7 +14,7 @@ const NewsCardList = ({ background = "white" }: NewsCardListProps) => {
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40 }}
+      contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20 }}
     >
       <View className="mt-4">
         {newsDummy.map((item, index) => (

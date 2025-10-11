@@ -13,11 +13,10 @@ export default function ProfilePage() {
       locations={[0, 0.22, 0.54, 0.85]}
       start={{ x: 0.5, y: 0 }}
       end={{ x: 0.5, y: 1 }}
-      // RN에서는 className만으로는 레이아웃 적용이 불안정하므로 style로 flex 지정!! -> 트러블슈팅
+      // RN에서는 className만으로는 레이아웃 적용이 불안정하므로 style로 flex 지정
       style={{ flex: 1 }}
       className="items-center justify-center"
     >
-      {/*  SafeAreaView로 감싸서 iOS 노치 영역 보호 */}
       <SafeAreaView className="flex-1 w-full items-center">
 
         <TopBar showBackButton={false} />
