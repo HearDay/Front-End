@@ -1,5 +1,4 @@
 //AI 도움 여기 조금 손 봐야할
-
 import { Modal } from '@/components/common'
 import { Audio } from 'expo-av'
 import { LinearGradient } from 'expo-linear-gradient'

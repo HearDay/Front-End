@@ -101,3 +101,84 @@ export interface WordBookChipListProps {
   selectedWord: SavedWord | null
   onWordPress: (word: SavedWord) => void
 }
+
+// ========== 기사 본문 관련 ==========
+
+export interface NewsArticleData {
+  id: string
+  title: string
+  imageUrl: string
+  content: string     // 본문
+}
+
+export interface NewsArticleScreenProps {
+  newsId: string
+}
+
+export interface NewsArticleImageProps {
+  imageUrl: string
+  onPress: () => void   // 이미지 클릭 → 본문으로 스크롤
+}
+
+export interface NewsArticleContentProps {
+  content: string
+  highlightWord?: string // 검색한 단어 하이라이트
+  onWordPress: (word: string) => void
+}
+
+// ========== 단어 사전 관련 ==========
+
+export interface DictionarySearchBarProps {
+  visible: boolean
+  onClose: () => void
+  onSearch: (word: string) => void
+}
+
+export interface DictionaryModalProps {
+  visible: boolean
+  word: string
+  isSaved: boolean
+  onClose: () => void
+  onSave: () => void
+}
+
+export interface WordDefinition {
+  word: string
+  definitions: string[]  // ["1. 뜻1", "2. 뜻2"]
+}
+
+// ========== 토론 화면 관련 ==========
+
+export interface DiscussionNewsItem {
+  id: string
+  title: string
+  imageUrl: string
+  summary: string
+  viewedAt: string       // 재생한 시간
+  popularity?: number    // 인기도
+  viewCount?: number     // 조회수
+}
+
+export interface DiscussionActionButtonsProps {
+  onDiscussionPress: () => void
+  onRecordPress: () => void
+}
+
+export interface DiscussionNewsListProps {
+  news: DiscussionNewsItem[]
+  sortBy: 'latest' | 'popular' | 'views'
+  onSortChange: (sort: 'latest' | 'popular' | 'views') => void
+  onNewsPress: (newsId: string) => void
+}
+
+export interface DiscussionNewsCardProps {
+  news: DiscussionNewsItem
+  onPress: () => void
+}
+
+export interface DiscussionModalProps {
+  visible: boolean
+  newsId: string | null
+  onClose: () => void
+  onStartDiscussion: (type: 'voice' | 'chat', newsId: string) => void
+}

@@ -1,22 +1,43 @@
 import { CategoryChipGroup } from '@/components/common'
-import { useState } from 'react'
-import { Text, View } from 'react-native'
+import TopBar from '@/components/common/TopBar'
+import { useRouter } from 'expo-router'
+import { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { SavedNewsItem } from '../../../types/screens'
 import { SavedNewsList } from './SavedNewsList'
 import { SavedNewsSearchBar } from './SavedNewsSearchBar'
 
-export const SavedNewsScreen = () => {
+export function SavedNewsScreen() {
+  const router = useRouter()
   const [selectedCategory, setSelectedCategory] = useState<string | null>('전체')
   const [searchQuery, setSearchQuery] = useState('')
   const [savedNews, setSavedNews] = useState<SavedNewsItem[]>([])
+  const [loading, setLoading] = useState(true)
+
+  // API로 저장된 뉴스 가져오기
+  useEffect(() => {
+    fetchSavedNews()
+  }, [])
+
+  const fetchSavedNews = async () => {
+    try {
+      setLoading(true)
+      // TODO: 실제 API 호출
+      // const response = await newsService.getSavedNews();
+      // setSavedNews(response);
+      
+      console.log('저장된 뉴스 API 호출')
+      
+    } catch (error) {
+      console.error('저장된 뉴스 로드 실패:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   // 카테고리 + 검색어 필터링
   const filteredNews = savedNews.filter(news => {
-    // 카테고리 필터
     const categoryMatch = selectedCategory === '전체' || news.category === selectedCategory
-    
-    // 검색어 필터
     const searchMatch = searchQuery === '' || 
       news.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       news.summary.toLowerCase().includes(searchQuery.toLowerCase())
@@ -24,24 +45,29 @@ export const SavedNewsScreen = () => {
     return categoryMatch && searchMatch
   })
 
+  // 뉴스 클릭 → NewsArticle로 이동
   const handleNewsPress = (newsId: string) => {
-    console.log('뉴스 클릭:', newsId)
-    // TODO: 뉴스 상세 화면으로 이동
-  };
+    router.push(`/newsarticle/${newsId}`)
+  }
 
-  const handleDelete = (newsId: string) => {
-    // TODO: API 호출해서 삭제
-    setSavedNews(savedNews.filter(news => news.id !== newsId));
-    console.log('삭제:', newsId)
+  // 삭제
+  const handleDelete = async (newsId: string) => {
+    try {
+      // TODO: 실제 API 호출
+      // await newsService.deleteSavedNews(newsId)
+      
+      setSavedNews(savedNews.filter(news => news.id !== newsId));
+      console.log('삭제 완료:', newsId)
+      
+    } catch (error) {
+      console.error('삭제 실패:', error)
+    }
   }
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
-      {/* ========== 헤더 영역 (나중에 공용 컴포넌트로 교체) ========== */}
-      <View className="bg-white pb-4">
-        <Text className="text-center text-2xl font-bold mt-4">HEARDAY</Text>
-        <View className="h-1 bg-gradient-to-r from-green-400 to-yellow-400 mt-2" />
-      </View>
+      {/* TopBar 사용 */}
+      <TopBar showBackButton={false} />
 
       {/* 검색창 */}
       <SavedNewsSearchBar
@@ -50,13 +76,11 @@ export const SavedNewsScreen = () => {
       />
 
       {/* 카테고리 칩 그룹 */}
-      <View className="mb-4">
-        <CategoryChipGroup
-          categories={['전체', '경제', '기술', '환경', '사회']}
-          selectedCategory={selectedCategory}
-          onSelectCategory={setSelectedCategory}
-        />
-      </View>
+      <CategoryChipGroup
+        categories={['전체', '경제', '기술', '환경', '사회']}
+        selectedCategory={selectedCategory}
+        onSelectCategory={setSelectedCategory}
+      />
 
       {/* 뉴스 리스트 */}
       <SavedNewsList
@@ -64,11 +88,6 @@ export const SavedNewsScreen = () => {
         onNewsPress={handleNewsPress}
         onDelete={handleDelete}
       />
-
-      {/* ========== 하단 네비게이션 (나중에 공용 컴포넌트로 교체) ========== */}
-      {/* 
-        <BottomNavigation currentTab="saved" />
-      */}
     </SafeAreaView>
   )
 }

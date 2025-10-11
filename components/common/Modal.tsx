@@ -44,6 +44,7 @@ export const Modal = ({
           ): null }
           
           {/* 확인 버튼 */}
+          {confirmText && confirmText.length>0 && ( //확인 버튼 수정 
           <TouchableOpacity
             className="py-3 rounded-xl"
             style={{ backgroundColor: '#006716' }}
@@ -51,9 +52,10 @@ export const Modal = ({
             activeOpacity={0.8}
           >
             <Text className="text-center text-white font-semibold">
-              확인
+              {confirmText}
             </Text>
           </TouchableOpacity>
+          )}
         </Pressable>
       </Pressable>
     </RNModal>

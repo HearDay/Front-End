@@ -1,12 +1,12 @@
-import { ScrollView, Text, View } from 'react-native';
-import { SavedNewsListProps } from '../../../types/screens';
-import { SavedNewsCard } from './SavedNewsCard';
+import { ScrollView, Text, View } from 'react-native'
+import { SavedNewsListProps } from '../../../types/screens'
+import { SavedNewsCard } from './SavedNewsCard'
 
-export const SavedNewsList = ({
+export function SavedNewsList({
   newsList,
   onNewsPress,
   onDelete,
-}: SavedNewsListProps) => {
+}: SavedNewsListProps) {
   if (newsList.length === 0) {
     return (
       <View className="flex-1 justify-center items-center">

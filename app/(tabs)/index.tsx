@@ -1,10 +1,5 @@
-import { NewsTest } from '@/components/screens/NewsPlayer/NewsTest';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { DiscussionTest } from '@/components/screens/Discussion';
 
 export default function Index() {
-  return (
-    <SafeAreaView>
-<NewsTest newsId="test-id-123" />
-    </SafeAreaView>
-  );
+  return <DiscussionTest />;
 }

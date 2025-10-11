@@ -28,7 +28,7 @@ export default function TabLayout() {
           let iconPath;
 
           switch (route.name) {
-            case "VocaPage":
+            case "wordbook":
               iconPath = focused
                 ? require("../../my-expo-app/assets/images/VocaOn.png")
                 : require("../../my-expo-app/assets/images/VocaOff.png");
@@ -43,7 +43,7 @@ export default function TabLayout() {
                 ? require("../../my-expo-app/assets/images/HomeOn.png")
                 : require("../../my-expo-app/assets/images/HomeOff.png");
               break;
-            case "StorePage":
+            case "savednews":
               iconPath = focused
                 ? require("../../my-expo-app/assets/images/StoreOn.png")
                 : require("../../my-expo-app/assets/images/StoreOff.png");
@@ -68,10 +68,10 @@ export default function TabLayout() {
         },
       })}
     >
-      <Tabs.Screen name="VocaPage" options={{ title: "단어장" }} />
+      <Tabs.Screen name="wordbook" options={{ title: "단어장" }} />
       <Tabs.Screen name="AiPage" options={{ title: "AI와 토론" }} />
       <Tabs.Screen name="index" options={{ title: "홈" }} />
-      <Tabs.Screen name="StorePage" options={{ title: "저장" }} />
+      <Tabs.Screen name="savednews" options={{ title: "저장" }} />
       <Tabs.Screen name="ProfilePage" options={{ title: "프로필" }} />
     </Tabs>
   );
