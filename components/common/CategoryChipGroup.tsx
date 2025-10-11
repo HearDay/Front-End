@@ -1,7 +1,7 @@
-import React from 'react'
+import React from 'react';
 import { View } from 'react-native';
-import { CategoryChip } from './CategoryChip';
 import { CategoryChipGroupProps } from '../../types/components';
+import { CategoryChip } from './CategoryChip';
 
 export const CategoryChipGroup = ({
   categories,

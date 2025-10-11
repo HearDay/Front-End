@@ -20,48 +20,54 @@ const NewsCard = ({
 
   return (
     <View
-      className="flex-row items-center w-[350px] h-[106px] px-4 py-3 mb-4 rounded-xl shadow-sm self-center overflow-hidden"
       style={{
-        backgroundColor,
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.08,
-        shadowRadius: 3,
-        elevation: 1,
+        shadowOffset: { width: 2, height: 2 },
+        shadowOpacity: 0.15,
+        shadowRadius: 6,
+        elevation: 4,
+        borderRadius: 16, 
       }}
+      className="self-center mb-5"
     >
-
       <View
-        className="mr-4 rounded-md overflow-hidden"
+        className="flex-row items-center w-[350px] h-[106px] px-4 py-3 rounded-2xl bg-white overflow-hidden"
         style={{
-          width: 148,
-          aspectRatio: 148 / 83,
+          backgroundColor,
         }}
       >
-        <Image
-          source={image}
-          resizeMode="cover" 
+        <View
+          className="mr-4 rounded-md overflow-hidden"
           style={{
-            width: "100%",
-            height: "100%",
-            borderRadius: 8,
+            width: 148,
+            aspectRatio: 148 / 83,
           }}
-        />
-      </View>
+        >
+          <Image
+            source={image}
+            resizeMode="cover"
+            style={{
+              width: "100%",
+              height: "100%",
+              borderRadius: 8,
+            }}
+          />
+        </View>
 
-      <View className="flex-1 justify-center">
-        <Text
-          className="text-[15px] font-extrabold text-black mb-[3px]"
-          numberOfLines={2}
-        >
-          {title}
-        </Text>
-        <Text
-          className="text-[13px] text-gray-700 leading-snug"
-          numberOfLines={2}
-        >
-          {description}
-        </Text>
+        <View className="flex-1 justify-center">
+          <Text
+            className="text-[15px] font-extrabold text-black mb-[3px]"
+            numberOfLines={2}
+          >
+            {title}
+          </Text>
+          <Text
+            className="text-[13px] text-[#4B5563] leading-snug"
+            numberOfLines={2}
+          >
+            {description}
+          </Text>
+        </View>
       </View>
     </View>
   );
