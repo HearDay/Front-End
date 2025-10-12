@@ -1,19 +1,28 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React from "react";
-import { Image, TouchableOpacity, View } from "react-native";
+import {
+  Dimensions,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 interface TopBarProps {
-  showBackButton?: boolean; // 백버튼 유무
+  showBackButton?: boolean;
 }
+
+const { width } = Dimensions.get("window"); // 전체 화면 너비
 
 const TopBar = ({ showBackButton = false }: TopBarProps) => {
   const router = useRouter();
 
   return (
-    <View className="w-full pt-5 pb-2 bg-transparent">
-      <View className="flex-row items-center justify-center relative px-4">
-        {/* 백버튼(조건부 렌더링) */}
+    <SafeAreaView style={styles.safeArea}>
+      <View className="w-full items-center justify-center pb-2 relative bg-transparent">
+
         {showBackButton && (
           <TouchableOpacity
             onPress={() => router.back()}
@@ -21,7 +30,7 @@ const TopBar = ({ showBackButton = false }: TopBarProps) => {
           >
             <Image
               source={require("../../my-expo-app/assets/images/BackButton.png")}
-              className="w-[12px] h-[20px]"
+              className="w-[12px] h-[18px] mt-3"
               resizeMode="contain"
             />
           </TouchableOpacity>
@@ -32,16 +41,30 @@ const TopBar = ({ showBackButton = false }: TopBarProps) => {
           className="w-[130px] h-[45px]"
           resizeMode="contain"
         />
-      </View>
 
-      <LinearGradient
-        colors={["#184B1B", "#89B93F", "#F5E14E"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-        className="w-full h-[3px] mt-4"
-      />
-    </View>
+        <LinearGradient
+          colors={["#184B1B", "#89B93F", "#F5E14E"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={[styles.gradientLine, { width }]}
+        />
+      </View>
+    </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  safeArea: {
+    backgroundColor: "transparent", 
+  },
+  gradientLine: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 3, 
+    zIndex: 0,
+  },
+});
 
 export default TopBar;

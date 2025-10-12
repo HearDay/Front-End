@@ -45,7 +45,6 @@ const LoginPage = () => {
         className="items-center justify-center"
       >
         <SafeAreaView className="flex-1 w-full items-center justify-center">
-          {/* 로고 */}
           <View className="items-center mb-5 mt-3">
             <Image
               source={require("../../my-expo-app/assets/images/HEARDAY.png")}
@@ -54,7 +53,6 @@ const LoginPage = () => {
             />
           </View>
 
-          {/* 나무 이미지 */}
           <View className="items-center mb-3">
             <Image
               source={require("../../my-expo-app/assets/images/Tree.png")}
@@ -63,7 +61,6 @@ const LoginPage = () => {
             />
           </View>
 
-          {/* 입력창 */}
           <View className="gap-3 mb-3">
             <InputBox
               placeholder="아이디를 입력해 주세요"
@@ -79,13 +76,11 @@ const LoginPage = () => {
             />
           </View>
 
-          {/* 버튼 영역 */}
           <View className="gap-3">
             <PrimaryButton title="로그인" variant="white" onPress={handleLogin} />
             <PrimaryButton title="카카오로 시작하기" variant="kakao" onPress={handleKakaoStart} /> 
           </View>
 
-          {/* 하단 링크 */}
           <View className="flex-row items-center gap-2 mt-12">
             <TouchableOpacity onPress={() => router.push("/FindIdPage")}>
               <Text className="text-[#006716] text-[13px]">아이디 찾기</Text>
@@ -109,7 +104,6 @@ const LoginPage = () => {
         />
       
 
-        {/* 카카오 약관 동의 모달 */}
         <KakaoAgreement
           visible={isKakaoModalVisible}
           onClose={() => setIsKakaoModalVisible(false)}

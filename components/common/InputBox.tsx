@@ -2,7 +2,7 @@ import { Eye, EyeOff } from "lucide-react-native";
 import React, { useState } from "react";
 import { TextInput, TouchableOpacity, View } from "react-native";
 
-type InputVariant = "transparent" | "default" | "password" | "password_transparent";
+type InputVariant = "transparent" | "default" | "password";
 
 interface InputBoxProps {
   placeholder: string;
@@ -36,6 +36,7 @@ const InputBox = ({
   return (
     <View className={`${baseStyle} ${getVariantStyle()}`}>
       <TextInput
+        textAlignVertical="center"
         placeholder={placeholder}
         placeholderTextColor={variant === "transparent" ? "#FFFFFF" : "#8AA989"}
         value={value}
@@ -43,7 +44,7 @@ const InputBox = ({
         secureTextEntry={
           variant === "password" || placeholder.includes("비밀번호")
         } // 비밀번호 입력창일 때 자동으로 *** 처리!
-        className={`flex-1 text-[16.5px] font-normal ${
+        className={`flex-1 text-lg font-normal ${
           variant === "transparent" ? "text-white" : "text-[#1F2D1F]"
         }`}
       />
