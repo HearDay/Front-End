@@ -48,7 +48,7 @@ export default function TabLayout() {
                 ? require("../../my-expo-app/assets/images/StoreOn.png")
                 : require("../../my-expo-app/assets/images/StoreOff.png");
               break;
-            case "ProfilePage":
+            case "LoginPage":
               iconPath = focused
                 ? require("../../my-expo-app/assets/images/ProfileOn.png")
                 : require("../../my-expo-app/assets/images/ProfileOff.png");
@@ -72,7 +72,7 @@ export default function TabLayout() {
       <Tabs.Screen name="AiPage" options={{ title: "AI와 토론" }} />
       <Tabs.Screen name="index" options={{ title: "홈" }} />
       <Tabs.Screen name="StorePage" options={{ title: "저장" }} />
-      <Tabs.Screen name="ProfilePage" options={{ title: "프로필" }} />
+      <Tabs.Screen name="LoginPage" options={{ title: "프로필" }} />
     </Tabs>
   );
 }
