@@ -48,7 +48,7 @@ export default function TabLayout() {
                 ? require("../../my-expo-app/assets/images/StoreOn.png")
                 : require("../../my-expo-app/assets/images/StoreOff.png");
               break;
-            case "ProfilePage":
+            case "LoginPage":
               iconPath = focused
                 ? require("../../my-expo-app/assets/images/ProfileOn.png")
                 : require("../../my-expo-app/assets/images/ProfileOff.png");

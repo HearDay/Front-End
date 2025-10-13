@@ -1,14 +1,16 @@
 import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 import React from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 import Animated, {
-    interpolate,
-    useAnimatedStyle,
-    withTiming,
+  interpolate,
+  useAnimatedStyle,
+  withTiming,
 } from "react-native-reanimated";
 
 const HeroSection = ({ offset }: { offset: any }) => {
-  const userLevel: number = 6; // 더미 데이터
+  const router = useRouter(); 
+  const userLevel: number = 5; // 더미 데이터
 
   // 레벨별 이미지 선택
   const treeImage = (() => {
@@ -61,7 +63,7 @@ const HeroSection = ({ offset }: { offset: any }) => {
     };
   });
 
-  // 나무 + Lv 문구 애니메이션 (위로 슬라이드 + 사라짐)
+  // 나무 + Lv 문구 애니메이션
   const animatedTreeStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: withTiming(offset.value * -250) }],
     opacity: withTiming(1 - offset.value),
@@ -93,8 +95,10 @@ const HeroSection = ({ offset }: { offset: any }) => {
             source={require("../../../my-expo-app/assets/images/HEARDAY.png")}
           />
 
-          {/* 돋보기 아이콘 전환! yellow -> green */}
-          <TouchableOpacity className="w-[24px] h-[24px] mt-4 relative">
+          <TouchableOpacity
+            className="w-[24px] h-[24px] mt-4 relative"
+            onPress={() => router.push("/SearchNewsPage")}
+          >
             <Animated.Image
               source={require("../../../my-expo-app/assets/images/Search1.png")}
               style={[{ width: 24, height: 24, resizeMode: "contain" }, search1Style]}
