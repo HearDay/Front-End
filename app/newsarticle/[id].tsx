@@ -1,8 +1,15 @@
-import { NewsArticleScreen } from '@/components/screens/NewsArticle'
-import { useLocalSearchParams } from 'expo-router'
+import { NewsArticleTest } from '@/components/screens/NewsArticle'
+import { Stack, useLocalSearchParams } from 'expo-router'
 
 export default function NewsArticlePage() {
   const { id } = useLocalSearchParams()
   
-  return <NewsArticleScreen newsId={id as string} />
+  console.log('NewsArticlePage 렌더링, id:', id) // ✅ 디버깅
+  
+  return (
+    <>
+      <Stack.Screen options={{ headerShown: false }} />
+      <NewsArticleTest newsId={id as string} />
+    </>
+  )
 }

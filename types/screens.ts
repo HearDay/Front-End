@@ -49,10 +49,12 @@ export interface NewsPlayerHeaderProps {
 
 export interface NewsImagePlaceholderProps {
   imageUrl: string
+  onPress?: () => void
 }
 
 export interface LyricsDisplayProps {
   currentLines: string[]  // 현재 보여줄 3줄
+  onPress?: () => void
 }
 
 export interface AudioControlsProps {
@@ -75,7 +77,9 @@ export interface BottomActionsProps {
 export interface SavedWord {
   id: string
   word: string
-  savedDate: string  // YYYY-MM-DD
+//  savedDate: string  // YYYY-MM-DD
+  definition?: string //추가: 단어 뜻 
+  savedAt: string
 }
 
 export interface WordBookCalendarItem {
@@ -132,6 +136,7 @@ export interface DictionarySearchBarProps {
   visible: boolean
   onClose: () => void
   onSearch: (word: string) => void
+  onOpen?: () => void
 }
 
 export interface DictionaryModalProps {

@@ -1,11 +1,14 @@
-import { Text, TextInput, View } from 'react-native';
+import { memo } from 'react'; // 추가: 성능 최적화
+import { Text, TextInput, View } from 'react-native'
 
 interface SavedNewsSearchBarProps {
   value: string
-  onChangeText: (text: string) => void;
+  onChangeText: (text: string) => void
 }
 
-export function SavedNewsSearchBar({
+// 개선: memo로 컴포넌트 감싸기
+// 이유: value와 onChangeText가 변하지 않으면 리렌더링 스킵
+export const SavedNewsSearchBar = memo(function SavedNewsSearchBar({
   value,
   onChangeText,
 }: SavedNewsSearchBarProps) {
@@ -18,7 +21,9 @@ export function SavedNewsSearchBar({
         value={value}
         onChangeText={onChangeText}
         placeholderTextColor="#9CA3AF"
+        returnKeyType="search" // 추가: 키보드 "검색" 버튼
+        // 이유: 검색 의도 명확히
       />
     </View>
   )
-}
+})

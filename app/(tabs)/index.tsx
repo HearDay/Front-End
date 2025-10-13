@@ -10,10 +10,8 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-const HomePage = () => {
-  const userName = "지니"; // 더미 사용자 이름
-
-  // 카테고리 리스트
+export default function Index() {  // ← function Index로 변경
+  const userName = "지니";
   const categories = [
     "경제",
     "방송 / 연예",
@@ -26,16 +24,16 @@ const HomePage = () => {
   ];
 
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const offset = useSharedValue(0); // 애니메이션 상태 (0: 기본, 1: 전환됨)
+  const offset = useSharedValue(0);
 
   const handleSelectCategory = (category: string) => {
     setSelectedCategory(category);
-    offset.value = withTiming(1, { duration: 600 }); // 슬라이드 업
+    offset.value = withTiming(1, { duration: 600 });
   };
 
   const handleBackToHome = () => {
     setSelectedCategory(null);
-    offset.value = withTiming(0, { duration: 600 }); // 다시 내려옴
+    offset.value = withTiming(0, { duration: 600 });
   };
 
   const listStyle = useAnimatedStyle(() => ({
@@ -45,7 +43,6 @@ const HomePage = () => {
 
   return (
     <View className="flex-1 bg-white">
-      {/* 상단 HeroSection (로고는 고정, 나무는 애니메이션) */}
       <HeroSection offset={offset} />
 
       {selectedCategory ? (
@@ -74,7 +71,6 @@ const HomePage = () => {
         </Animated.View>
       ) : (
         <>
-
           <View className="px-6 mt-4">
             <Text className="text-[16px] text-right font-extrabold text-[#002C14] mt-2 mr-2">
               {userName}님이 좋아할 만한 오늘의 뉴스
@@ -98,6 +94,4 @@ const HomePage = () => {
       )}
     </View>
   );
-};
-
-export default HomePage;
+}

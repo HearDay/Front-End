@@ -1,12 +1,12 @@
-import { useRouter } from 'expo-router';
-import { Modal, Pressable, Text, TouchableOpacity, View } from 'react-native';
+import { useRouter } from 'expo-router'
+import { Modal, Pressable, Text, TouchableOpacity, View } from 'react-native'
 
 interface DictionaryModalTestProps {
-  visible: boolean;
-  word: string;
-  isSaved: boolean;
-  onClose: () => void;
-  onSave: () => void;
+  visible: boolean
+  word: string
+  isSaved: boolean
+  onClose: () => void
+  onSave: () => void
 }
 
 export function DictionaryModalTest({
@@ -16,9 +16,8 @@ export function DictionaryModalTest({
   onClose,
   onSave,
 }: DictionaryModalTestProps) {
-  const router = useRouter();
+  const router = useRouter()
 
-  // ✅ 더미 데이터
   const dummyDefinitions: Record<string, string[]> = {
     '흥행': [
       '1. 영리를 목적으로 연극, 영화, 서커스 따위를 요금을 받고 대중에게 보여 줌.',
@@ -32,16 +31,16 @@ export function DictionaryModalTest({
       '1. 어떤 사실을 적어서 남김.',
       '2. 운동 경기 따위에서 세운 성적.',
     ],
-  };
+  }
 
-  const definitions = dummyDefinitions[word] || ['단어 뜻을 찾을 수 없습니다.'];
+  const definitions = dummyDefinitions[word] || ['단어 뜻을 찾을 수 없습니다.']
 
-  const handleSaveAndNavigate = async () => {
-    await onSave();
-    setTimeout(() => {
-      router.push('/(tabs)/wordbook');
-    }, 1000);
-  };
+  // ✅ 수정: 단어장 이동 제거, 저장만 하고 모달 닫기
+  const handleSave = async () => {
+    await onSave()
+    // setTimeout 제거 - 바로 모달 닫기
+    onClose()
+  }
 
   return (
     <Modal
@@ -59,10 +58,8 @@ export function DictionaryModalTest({
           className="bg-white rounded-3xl p-6 mx-8 w-full max-w-md"
           onPress={(e) => e.stopPropagation()}
         >
-          {/* 단어 */}
           <Text className="text-2xl font-bold text-center mb-4">{word}</Text>
 
-          {/* 뜻 (더미 데이터) */}
           <View className="bg-blue-50 rounded-2xl p-4 mb-6">
             {definitions.map((def, index) => (
               <Text key={index} className="text-base leading-6 mb-2">
@@ -71,10 +68,10 @@ export function DictionaryModalTest({
             ))}
           </View>
 
-          {/* 저장 버튼 */}
           <TouchableOpacity
             className={`py-4 rounded-xl ${isSaved ? 'bg-[#A8E6B8]' : 'bg-[#006716]'}`}
-            onPress={isSaved ? onClose : handleSaveAndNavigate}
+            onPress={isSaved ? onClose : handleSave}
+            activeOpacity={0.7}
           >
             <Text className="text-center text-white font-semibold">
               {isSaved ? "단어장에 성공적으로 저장했어요!" : "단어장에 넣기"}
@@ -83,5 +80,5 @@ export function DictionaryModalTest({
         </Pressable>
       </Pressable>
     </Modal>
-  );
+  )
 }

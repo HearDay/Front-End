@@ -1,7 +1,10 @@
+import { useState } from 'react'
 import { Image, Text, TouchableOpacity, View } from 'react-native'
 import { DiscussionNewsCardProps } from '../../../types/screens'
 
 export function DiscussionNewsCard({ news, onPress }: DiscussionNewsCardProps) {
+  const [imageError, setImageError] = useState(false)
+  
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -10,11 +13,18 @@ export function DiscussionNewsCard({ news, onPress }: DiscussionNewsCardProps) {
     >
       <View className="flex-row">
         {/* 이미지 */}
-        <Image
-          source={{ uri: news.imageUrl }}
-          className="w-24 h-24"
-          resizeMode="cover"
-        />
+        {imageError ? (
+          <View className="w-24 h-24 bg-gray-200 items-center justify-center">
+            <Text className="text-gray-400">📰</Text>
+          </View>
+        ) : (
+          <Image
+            source={{ uri: news.imageUrl }}
+            className="w-24 h-24"
+            resizeMode="cover"
+            onError={() => setImageError(true)}
+          />
+        )}
 
         {/* 텍스트 */}
         <View className="flex-1 p-3 justify-center">

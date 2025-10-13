@@ -2,17 +2,26 @@ import React from 'react'
 // 우리 컴포넌트 이름과 충돌 방지로 RNModal로 지음
 // Pressable이 TouchableOpacity보다 최신이라고 함
 import { Pressable, Modal as RNModal, Text, TouchableOpacity, View } from 'react-native'
-import { ModalProps } from '../../types/components'
 
-export const Modal = ({
+interface ModalProps {
+  visible: boolean
+  title: string
+  onConfirm: () => void
+  onClose: () => void
+  children?: React.ReactNode
+  confirmText?: string // 선택적으로 변경
+  cancelText?: string
+}
+
+export function Modal({
   visible,
   title,
   onConfirm,
   onClose,
-  confirmText = '확인',
-  confirmDisabled = false,
-  children
-}: ModalProps) => {
+  children,
+  confirmText, // 기본값 제거
+  cancelText = '닫기',
+}: ModalProps) {
   return (
     <RNModal
       visible={visible}
@@ -43,22 +52,24 @@ export const Modal = ({
             <View className='mb-6'>{children}</View>
           ): null }
           
-          {/* 확인 버튼 */}
-          {confirmText && confirmText.length>0 && ( //확인 버튼 수정 
-          <TouchableOpacity
-            className="py-3 rounded-xl"
-            style={{ backgroundColor: '#006716' }}
-            onPress={onConfirm}
-            activeOpacity={0.8}
-          >
-            <Text className="text-center text-white font-semibold">
-              {confirmText}
-            </Text>
-          </TouchableOpacity>
-          )}
+         {/* 수정: 버튼 영역 */}
+          <View className="flex-row gap-3">
+            {/* 확인 버튼 - confirmText가 있을 때만 표시 */}
+            {confirmText && confirmText.length > 0 && (
+              <TouchableOpacity
+                onPress={onConfirm}
+                className="flex-1 py-3 rounded-xl"
+                style={{ backgroundColor: '#006716' }}
+                activeOpacity={0.7}
+              >
+                <Text className="text-center text-white font-semibold">
+                  {confirmText}
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
         </Pressable>
       </Pressable>
     </RNModal>
   )
 }
-  

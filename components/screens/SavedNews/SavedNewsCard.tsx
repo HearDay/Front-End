@@ -1,11 +1,16 @@
-import { Image, Text, TouchableOpacity, View } from 'react-native';
-import { SavedNewsCardProps } from '../../../types/screens';
+import { useState } from 'react'; // 추가: 이미지 에러 처리
+import { Image, Text, TouchableOpacity, View } from 'react-native'
+import { SavedNewsCardProps } from '../../../types/screens'
 
 export function SavedNewsCard({
   news,
   onPress,
   onDelete
 }: SavedNewsCardProps) {
+  // 추가: 이미지 로딩 실패 상태
+  // 이유: 이미지 URL이 깨졌을 때 대체 UI 표시
+  const [imageError, setImageError] = useState(false)
+
   return (
     <View className="bg-white rounded-2xl mb-3 shadow-sm overflow-hidden">
       <TouchableOpacity
@@ -13,11 +18,19 @@ export function SavedNewsCard({
         onPress={onPress}
         activeOpacity={0.7}
       >
-        {/* 이미지 */}
-        <Image
-          source={{ uri: news.imageUrl }}
-          className="w-24 h-24 rounded-lg"
-        />
+        {/* 개선: 이미지 에러 처리 추가 */}
+        {/* 이유: 네트워크 문제나 잘못된 URL로 이미지 로드 실패 시 대체 UI */}
+        {imageError ? (
+          <View className="w-24 h-24 rounded-lg bg-gray-200 items-center justify-center">
+            <Text className="text-3xl">이미지 로딩 실패</Text>
+          </View>
+        ) : (
+          <Image
+            source={{ uri: news.imageUrl }}
+            className="w-24 h-24 rounded-lg"
+            onError={() => setImageError(true)} // 이미지 로드 실패 시 대체 UI 표시
+          />
+        )}
 
         {/* 내용 */}
         <View className="flex-1 ml-4">
@@ -48,9 +61,11 @@ export function SavedNewsCard({
         <TouchableOpacity
           className="w-8 h-8 items-center justify-center"
           onPress={(e) => {
-            e.stopPropagation(); // 부모 onPress 방지
-            onDelete(news.id);
+            e.stopPropagation() // 부모 onPress 방지
+            onDelete(news.id)
           }}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} // 추가: 터치 영역 확대
+          // 이유: 작은 아이콘도 쉽게 클릭할 수 있도록
         >
           <Text className="text-xl text-gray-400">🗑️</Text>
         </TouchableOpacity>

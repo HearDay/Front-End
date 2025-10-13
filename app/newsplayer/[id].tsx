@@ -1,8 +1,13 @@
-import { NewsPlayerScreen } from '@/components/screens/NewsPlayer'
-import { useLocalSearchParams } from 'expo-router'
+import { NewsTest } from '@/components/screens/NewsPlayer'
+import { Stack, useLocalSearchParams } from 'expo-router'
 
 export default function NewsPlayerPage() {
   const { id } = useLocalSearchParams()
   
-  return <NewsPlayerScreen newsId={id as string} />
+  return (
+    <>
+      <Stack.Screen options={{ headerShown: false }} />
+      <NewsTest newsId={id as string} />
+    </>
+  )
 }

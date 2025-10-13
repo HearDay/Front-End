@@ -1,24 +1,33 @@
 import NewsCard from "@/components/common/NewsCard";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-    Dimensions,
-    NativeScrollEvent,
-    NativeSyntheticEvent,
-    ScrollView,
-    Text,
-    View,
+  Dimensions,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { newsDummy } from "./NewsCardDummy";
+
 
 const { width } = Dimensions.get("window");
 
 const NewsCardSlider = () => {
+  const router = useRouter();
   const [activeIndex, setActiveIndex] = useState(0);
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const offsetX = event.nativeEvent.contentOffset.x;
     const index = Math.round(offsetX / width);
     setActiveIndex(index);
+  };
+
+
+  const handleNewsPress = (newsId: string) => {
+    router.push(`/newsplayer/${newsId}`);
   };
 
   return (
@@ -32,12 +41,17 @@ const NewsCardSlider = () => {
       >
         {newsDummy.map((item, index) => (
           <View key={index} style={{ width }}>
+            <TouchableOpacity
+              onPress={() => handleNewsPress(item.id)}
+              activeOpacity={0.8}
+            >
             <NewsCard
               title={item.title}
               description={item.description}
               image={item.image}
               background="green"
             />
+            </TouchableOpacity>
           </View>
         ))}
       </ScrollView>

@@ -61,14 +61,20 @@ export function DiscussionNewsList({
 
       {/* 뉴스 리스트 */}
       <ScrollView className="flex-1">
-        {news.map((item) => (
+        {news.length === 0 ? (
+        <View className="flex-1 items-center justify-center py-20">
+        <Text className="text-gray-400 text-base">본 뉴스가 없습니다</Text>
+        </View>
+        ) : (
+        news.map((item) => (
           <DiscussionNewsCard
             key={item.id}
             news={item}
             onPress={() => onNewsPress(item.id)}
           />
-        ))}
-      </ScrollView>
+        ))
+        )}
+        </ScrollView>
     </View>
-  )
+    )
 }
