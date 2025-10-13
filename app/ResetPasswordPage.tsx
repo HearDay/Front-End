@@ -54,7 +54,7 @@ const ResetPasswordPage = () => {
 
       <View className="flex-[0.8] items-center justify-center">
         <Text
-          className="text-2xl font-bold mb-8 text-[#002C09]"
+          className="text-2xl font-bold mb-6 text-[#002C09]"
         >
           비밀번호 변경하기
         </Text>

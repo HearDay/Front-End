@@ -31,10 +31,9 @@ const FindIdPage = () => {
 
       <View className="flex-[0.75] items-center justify-center">
         <Text
-          className="text-[20px] font-semibold mb-10"
-          style={{ color: "#002C09" }}
+          className="text-2xl font-bold text-[#002C09] mb-10"
         >
-          아이디 찾기
+          비밀번호 변경하기
         </Text>
         <EmailInputWithSelect
           emailId={emailId}
