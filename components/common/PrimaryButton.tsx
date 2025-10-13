@@ -42,7 +42,7 @@ const PrimaryButton = ({ title, variant = "primary", onPress }: PrimaryButtonPro
           resizeMode="contain"
         />
       )}
-      <Text className={`${text} text-[16px] font-semibold`}>{title}</Text>
+      <Text className={`${text} text-[18px] font-medium`}>{title}</Text>
     </TouchableOpacity>
   );
 };

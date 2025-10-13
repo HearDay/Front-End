@@ -1,7 +1,5 @@
-import clsx from "clsx";
-import { Check } from "lucide-react-native";
 import React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Image, Text, TouchableOpacity, View } from "react-native";
 
 interface TermsState {
   service: boolean;
@@ -31,35 +29,35 @@ const TermsAgreement = ({ value, onChange }: TermsAgreementProps) => {
   };
 
   return (
-    <View className="w-[350px] mx-auto bg-[#FFFFFF] border border-[#9CB59F] rounded-2xl p-4 mb-6">
+    <View className="w-[350px] mx-auto bg-white border border-[#9CB59F] rounded-2xl p-5 mb-6">
       {/* 전체 동의하기 */}
       <TouchableOpacity
         onPress={handleAllChange}
-        className="flex-row items-start mb-3"
+        className="flex-row items-start mb-4"
         activeOpacity={0.8}
       >
-        <View
-          className={clsx(
-            "w-5 h-5 mr-3 rounded-[4px] border border-[#9CB59F] items-center justify-center",
-            allChecked && "bg-[#1B8131] border-[#1B8131]"
-          )}
-        >
-          {allChecked && <Check size={12} color="#fff" strokeWidth={3} />}
-        </View>
-
+        <Image
+          source={
+            allChecked
+              ? require("../../../my-expo-app/assets/images/GreenCheckBox.png")
+              : require("../../../my-expo-app/assets/images/GreenBox.png")
+          }
+          className="w-[21px] h-[21px] mr-3 mt-1"
+          resizeMode="contain"
+        />
         <View>
-          <Text className="text-base font-medium text-black">전체 동의하기</Text>
-          <Text className="text-[#B7B7B7] font-medium text-sm mt-1 leading-4">
-            전체 동의는 필수 약관에 대한 동의를 포함하고{"\n"}
-            있으며, 약관에 대한 동의를 거부할 경우 서비스를{"\n"}
-            이용할 수 없습니다.
+          <Text className="text-lg font-medium text-[#111111]">전체 동의하기</Text>
+          <Text className="text-[#B7B7B7] text-sm font-normal mt-1 leading-5">
+            전체 동의는 필수 약관에 대한 동의를 포함하고 있으며,
+            {"\n"}필수 약관에 대한 동의를 거부할 경우 서비스를 이용할 수{"\n"}없습니다.
           </Text>
         </View>
       </TouchableOpacity>
 
-      <View className="h-[1px] bg-[#9CB59F] my-3" />
+      <View className="h-[1px] bg-[#9CB59F] mb-4" />
 
-      <View className="flex-col gap-3">
+      {/* 개별 동의 항목 */}
+      <View className="flex-col gap-4">
         {[
           { key: "service", label: "[필수] 이용약관" },
           { key: "privacy", label: "[필수] 개인정보 보호 정책" },
@@ -74,19 +72,21 @@ const TermsAgreement = ({ value, onChange }: TermsAgreementProps) => {
               activeOpacity={0.8}
             >
               <View className="flex-row items-center">
-                <View
-                  className={clsx(
-                    "w-4 h-4 mr-2 rounded-[3px] border border-[#9CB59F] items-center justify-center",
-                    checked && "bg-[#1B8131] border-[#1B8131]"
-                  )}
-                >
-                  {checked && <Check size={12} color="#fff" strokeWidth={3} />}
-                </View>
+                {checked ? (
+                  <Image
+                    source={require("../../../my-expo-app/assets/images/GreenCheck.png")}
+                    className="w-[21px] h-[21px] mr-2"
+                    resizeMode="contain"
+                  />
+                ) : (
+                  <Image
+                    source={require("../../../my-expo-app/assets/images/GreenBox.png")}
+                    className="w-[21px] h-[21px] mr-2"
+                    resizeMode="contain"
+                  />
+                )}
                 <Text
-                  className={clsx(
-                    "text-sm",
-                    checked ? "text-[#1B8131]" : "text-[#7E8B7F]"
-                  )}
+                  className="text-sm font-medium text-[#B7B7B7]"
                 >
                   {item.label}
                 </Text>
