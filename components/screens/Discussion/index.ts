@@ -3,6 +3,6 @@ export { DiscussionHeader } from './DiscussionHeader'
 export { DiscussionModal } from './DiscussionModal'
 export { DiscussionNewsCard } from './DiscussionNewsCard'
 export { DiscussionNewsList } from './DiscussionNewsList'
+export { DiscussionRecordCard } from './DiscussionRecordCard'
+export { DiscussionRecordList } from './DiscussionRecordList'
 export { DiscussionScreen } from './DiscussionScreen'
-export { DiscussionTest } from './DiscussionTest'
-

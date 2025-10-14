@@ -1,12 +1,13 @@
-import { CategoryChipGroup } from '@/components/common'
-import TopBar from '@/components/common/TopBar'
-import { useRouter } from 'expo-router'
+import { CategoryChipGroup } from '@/components/common';
+import TopBar from '@/components/common/TopBar';
+import { newsService } from '@/services';
+import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react'; // 개선: useCallback, useMemo 추가
-import { ActivityIndicator, Text, TouchableOpacity } from 'react-native'; // 추가: ActivityIndicator
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { SavedNewsItem } from '../../../types/screens'
-import { SavedNewsList } from './SavedNewsList'
-import { SavedNewsSearchBar } from './SavedNewsSearchBar'
+import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native'; // 추가: ActivityIndicator
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { SavedNewsItem } from '../../../types/screens';
+import { SavedNewsList } from './SavedNewsList';
+import { SavedNewsSearchBar } from './SavedNewsSearchBar';
 
 export function SavedNewsScreen() {
   const router = useRouter()
@@ -25,9 +26,8 @@ export function SavedNewsScreen() {
       setLoading(true)
       setError(null) // 에러 초기화
       
-      // TODO: 실제 API 호출
-      // const response = await newsService.getSavedNews()
-      // setSavedNews(response)
+      const response = await newsService.getSavedNews()
+      setSavedNews(response)
       
       console.log('저장된 뉴스 API 호출')
       
@@ -60,15 +60,14 @@ export function SavedNewsScreen() {
   // 개선: useCallback으로 이벤트 핸들러 
   // 이유: SavedNewsList에 props로 전달되므로 불필요한 리렌더링 방지
   const handleNewsPress = useCallback((newsId: string) => {
-    router.push(`/newsarticle/${newsId}`)
+    router.push(`/newsplayer/${newsId}`)
   }, [router])
 
   // 개선: useCallback으로 삭제 핸들러 
   // 이유: SavedNewsList에 props로 전달
   const handleDelete = useCallback(async (newsId: string) => {
     try {
-      // TODO: 실제 API 호출
-      // await newsService.deleteSavedNews(newsId)
+      await newsService.deleteSavedNews(newsId)
       
       setSavedNews(prev => prev.filter(news => news.id !== newsId)) // 함수형 업데이트
       // 이유: 최신 state 값 보장
@@ -109,7 +108,9 @@ export function SavedNewsScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
-      <TopBar showBackButton={false} />
+      <View className="mb-[-8px]">
+        <TopBar showBackButton={false} />
+      </View>
 
       {/* 검색창 */}
       <SavedNewsSearchBar

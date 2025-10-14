@@ -1,5 +1,10 @@
-import { WordBookScreen } from '@/components/screens/WordBook'
+import { WordBookScreen } from '@/components/screens/WordBook/WordBookScreen'
+import { Stack } from 'expo-router'
 
 export default function WordBookPage() {
-  return <WordBookScreen />
-}
+  return (
+  <>
+  <Stack.Screen options={{ headerShown: false }} />
+  <WordBookScreen />
+  </>
+)}

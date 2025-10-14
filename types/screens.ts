@@ -126,8 +126,10 @@ export interface NewsArticleImageProps {
 
 export interface NewsArticleContentProps {
   content: string
-  highlightWord?: string // 검색한 단어 하이라이트
+  highlightWord?: string
   onWordPress: (word: string) => void
+  highlightMatches?: {start: number, end: number}[]
+  currentHighlightIndex?: number
 }
 
 // ========== 단어 사전 관련 ==========
@@ -137,14 +139,18 @@ export interface DictionarySearchBarProps {
   onClose: () => void
   onSearch: (word: string) => void
   onOpen?: () => void
+  matchCount?: number
+  currentIndex?: number
+  onPrev?: () => void
+  onNext?: () => void
 }
 
 export interface DictionaryModalProps {
   visible: boolean
   word: string
-  isSaved: boolean
+  saveState?: 'IDLE' | 'SAVING' | 'SAVED' | 'ALREADY_EXISTS'
   onClose: () => void
-  onSave: () => void
+  onSave: (definition: string) => void
 }
 
 export interface WordDefinition {
@@ -165,8 +171,9 @@ export interface DiscussionNewsItem {
 }
 
 export interface DiscussionActionButtonsProps {
-  onDiscussionPress: () => void
-  onRecordPress: () => void
+  activeButton: 'discussion' | 'record';
+  onDiscussionPress: () => void;
+  onRecordPress: () => void;
 }
 
 export interface DiscussionNewsListProps {
@@ -186,4 +193,12 @@ export interface DiscussionModalProps {
   newsId: string | null
   onClose: () => void
   onStartDiscussion: (type: 'voice' | 'chat', newsId: string) => void
+}
+
+// ========== 토론 기록 관련 ==========
+
+export interface DiscussionRecordItem {
+  id: string;
+  title: string;
+  discussedAt: string; // YYYY-MM-DD
 }

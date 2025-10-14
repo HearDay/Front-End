@@ -2,9 +2,10 @@ import { Modal } from '@/components/common';
 import { Audio } from 'expo-av';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react'; // 개선: useCallback 추가
+import { useCallback, useEffect, useRef, useState } from 'react'; // 개선: useCallback 추가
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native'; // 추가: ActivityIndicator
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { newsService } from '../../../services';
 import { NewsPlayerData } from '../../../types/screens';
 import { AudioControls } from './AudioControls';
 import { BottomActions } from './BottomActions';
@@ -32,6 +33,8 @@ export const NewsPlayerScreen = ({ newsId }: NewsPlayerScreenProps) => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // 오디오 객체 ref
+  const soundRef = useRef<Audio.Sound | null>(null)
   // 개선: useCallback
   // 이유: useEffect 의존성 배열에 안전하게 사용
   const fetchNewsData = useCallback(async () => {
@@ -39,9 +42,8 @@ export const NewsPlayerScreen = ({ newsId }: NewsPlayerScreenProps) => {
       setLoading(true)
       setError(null)
       
-      // TODO: 실제 API 호출
-      // const response = await newsService.getNewsDetail(newsId)
-      // setNewsData(response)
+      const response = await newsService.getNewsDetail(newsId)
+      setNewsData(response)
       
       console.log('뉴스 데이터 로드:', newsId)
       
@@ -58,15 +60,53 @@ export const NewsPlayerScreen = ({ newsId }: NewsPlayerScreenProps) => {
     fetchNewsData()
   }, [fetchNewsData])
 
+
+
   // 3줄씩 표시 (오디오 진행에 따라)
   useEffect(() => {
     if (!newsData) return
 
-    // TODO: 오디오 재생 위치에 따라 currentLines 업데이트
     const allLines = newsData.fullText.split('\n')
     const displayLines = allLines.slice(currentLineIndex, currentLineIndex + 3)
     setCurrentLines(displayLines)
   }, [newsData, currentLineIndex])
+
+    // 오디오 로드
+    const loadAudio = useCallback(async () => {
+    if (!newsData?.audioUrl) return
+
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: newsData.audioUrl },
+        { shouldPlay: true }
+      )
+      soundRef.current = sound
+
+      // 재생 상태 업데이트 리스너
+      sound.setOnPlaybackStatusUpdate((status) => {
+        if (status.isLoaded && status.durationMillis) {
+          setIsPlaying(status.isPlaying);
+
+          const totalLines = newsData.fullText.split('\n').length;
+          const progress = status.positionMillis / status.durationMillis;
+          const lineIndex = Math.floor(progress * totalLines);
+          
+          // 불필요한 리렌더링 방지를 위해 lineIndex가 변경될 때만 상태 업데이트
+          if (lineIndex !== currentLineIndex) {
+            setCurrentLineIndex(lineIndex);
+          }
+        }
+      })
+    } catch (err) {
+      console.error('오디오 로드 실패:', err)
+    }
+  }, [newsData?.audioUrl])
+
+  useEffect(() => {
+    if (newsData) {
+      loadAudio()
+    }
+  }, [newsData, loadAudio])
 
   // 개선: useCallback으로 이벤트 핸들러 
   // 이유: 자식 컴포넌트에 props로 전달되므로 불필요한 리렌더링 방지
@@ -74,16 +114,26 @@ export const NewsPlayerScreen = ({ newsId }: NewsPlayerScreenProps) => {
     router.back() // 개선: router.back() 사용
   }, [router])
 
-  const handlePlay = useCallback(() => {
-    setIsPlaying(true)
-    // TODO: 오디오 재생 시작
-    console.log('재생 시작:', newsData?.audioUrl)
-  }, [newsData?.audioUrl])
+  const handlePlay = useCallback(async () => {
+    console.log('play pressed');
+    if (!soundRef.current) return
+    try {
+      await soundRef.current.playAsync()
+      setIsPlaying(true)
+    } catch (err) {
+      console.error('재생 실패:', err)
+    }
+  }, [])
 
-  const handlePause = useCallback(() => {
-    setIsPlaying(false)
-    // TODO: 오디오 일시정지
-    console.log('일시정지')
+  const handlePause = useCallback(async () => {
+    console.log('pause pressed');
+    if (!soundRef.current) return
+    try {
+      await soundRef.current.pauseAsync()
+      setIsPlaying(false)
+    } catch (err) {
+      console.error('일시정지 실패:', err)
+    }
   }, [])
 
   const handleNext = useCallback(() => {
@@ -122,7 +172,8 @@ export const NewsPlayerScreen = ({ newsId }: NewsPlayerScreenProps) => {
         console.log('차량 모드 OFF')
       }
     } catch (error) {
-      console.error('오디오 모드 설정 실패:', error)
+      console.error('오디오 모드 설정 실패:', error);
+      alert('오디오 모드 설정에 실패했습니다. iOS 시뮬레이터에서는 지원되지 않을 수 있습니다.');
     }
   }, [isCarMode])
 
@@ -140,7 +191,7 @@ export const NewsPlayerScreen = ({ newsId }: NewsPlayerScreenProps) => {
   const handleSave = useCallback(async () => {
     try {
       // TODO: 실제 API 호출
-      // await newsService.saveNews(newsId)
+      await newsService.saveNews(newsId)
       
       console.log('저장 완료:', newsId)
       alert('뉴스가 저장되었습니다!') 
@@ -214,10 +265,10 @@ export const NewsPlayerScreen = ({ newsId }: NewsPlayerScreenProps) => {
         />
 
         {/* 기사 이미지 */}
-        <NewsImagePlaceholder imageUrl={newsData.imageUrl} />
+        <NewsImagePlaceholder imageUrl={newsData.imageUrl} onPress={() => router.push(`/newsarticle/${newsId}`)} />
 
         {/* 가사 (3줄) */}
-        <LyricsDisplay currentLines={currentLines} />
+        <LyricsDisplay currentLines={currentLines} onPress={() => router.push(`/newsarticle/${newsId}`)} />
 
         {/* Spacer */}
         <View className="flex-1" />
@@ -264,11 +315,11 @@ export const NewsPlayerScreen = ({ newsId }: NewsPlayerScreenProps) => {
             </TouchableOpacity>
             
             <TouchableOpacity 
-              className="bg-gray-100 py-4 rounded-2xl" // 개선: 다른 버튼과 구분
+              className="bg-[#DBFDE0] py-4 rounded-2xl"
               onPress={() => setShowDiscussionModal(false)}
               activeOpacity={0.7}
             >
-              <Text className="text-center font-medium text-gray-600">다음에 하기</Text>
+              <Text className="text-center font-medium">다음에 하기</Text>
             </TouchableOpacity>
           </View>
         </Modal>

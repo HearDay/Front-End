@@ -1,6 +1,6 @@
 import { useState } from 'react'; // 추가: 이미지 에러 처리
-import { Image, Text, TouchableOpacity, View } from 'react-native'
-import { SavedNewsCardProps } from '../../../types/screens'
+import { Image, Text, TouchableOpacity, View } from 'react-native';
+import { SavedNewsCardProps } from '../../../types/screens';
 
 export function SavedNewsCard({
   news,
@@ -21,9 +21,7 @@ export function SavedNewsCard({
         {/* 개선: 이미지 에러 처리 추가 */}
         {/* 이유: 네트워크 문제나 잘못된 URL로 이미지 로드 실패 시 대체 UI */}
         {imageError ? (
-          <View className="w-24 h-24 rounded-lg bg-gray-200 items-center justify-center">
-            <Text className="text-3xl">이미지 로딩 실패</Text>
-          </View>
+          <View className="w-24 h-24 rounded-lg bg-gray-200" />
         ) : (
           <Image
             source={{ uri: news.imageUrl }}
@@ -51,24 +49,25 @@ export function SavedNewsCard({
             {news.summary}
           </Text>
 
-          {/* 저장 날짜 */}
-          <Text className="text-xs text-gray-400 mt-2">
-            {news.savedAt}
-          </Text>
-        </View>
+          {/* 하단 정보 (날짜 및 삭제) */}
+          <View className="flex-row justify-between items-center mt-2">
+            {/* 저장 날짜 */}
+            <Text className="text-xs text-gray-400">
+              {news.savedAt}
+            </Text>
 
-        {/* 삭제 버튼 */}
-        <TouchableOpacity
-          className="w-8 h-8 items-center justify-center"
-          onPress={(e) => {
-            e.stopPropagation() // 부모 onPress 방지
-            onDelete(news.id)
-          }}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} // 추가: 터치 영역 확대
-          // 이유: 작은 아이콘도 쉽게 클릭할 수 있도록
-        >
-          <Text className="text-xl text-gray-400">🗑️</Text>
-        </TouchableOpacity>
+            {/* 삭제 텍스트 버튼 */}
+            <TouchableOpacity
+              onPress={(e) => {
+                e.stopPropagation();
+                onDelete(news.id);
+              }}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <Text className="text-xs text-gray-400 font-semibold">삭제</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </TouchableOpacity>
     </View>
   )

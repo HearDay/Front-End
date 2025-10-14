@@ -41,7 +41,7 @@ export const WordBookCalendar = ({
   // 이유: 가독성 향상, 유지보수 용이
   const getUnderlineColor = (count: number) => {
     if (count === 0) return null
-    if (count <= 3) return COLOR_MAP.light
+    if (count < 3) return COLOR_MAP.light
     if (count <= 7) return COLOR_MAP.medium
     return COLOR_MAP.dark
   }

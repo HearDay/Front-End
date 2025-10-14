@@ -1,13 +1,14 @@
-import { Modal } from '@/components/common'
-import TopBar from '@/components/common/TopBar'; // 추가: 공통 TopBar 사용
-import { addMonths, subMonths } from 'date-fns'
+import { Modal } from '@/components/common';
+import TopBar from '@/components/common/TopBar';
+import { wordbookService } from '@/services';
+import { addMonths, subMonths } from 'date-fns';
 import { useCallback, useEffect, useState } from 'react'; // 개선: useCallback 추가
 import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native'; // 추가: ActivityIndicator, ScrollView
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { SavedWord, WordBookCalendarItem } from '../../../types/screens'
-import { WordBookCalendar } from './WordBookCalendar'
-import { WordBookChipList } from './WordBookChipList'
-import { WordBookDateDisplay } from './WordBookDateDisplay'
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { SavedWord, WordBookCalendarItem } from '../../../types/screens';
+import { WordBookCalendar } from './WordBookCalendar';
+import { WordBookChipList } from './WordBookChipList';
+import { WordBookDateDisplay } from './WordBookDateDisplay';
 
 export const WordBookScreen = () => {
   const [currentDate, setCurrentDate] = useState(new Date())
@@ -29,9 +30,8 @@ export const WordBookScreen = () => {
       setLoading(true)
       setError(null)
       
-      // TODO: 실제 API 호출
-      // const response = await wordBookService.getCalendar(currentDate)
-      // setCalendarData(response)
+      const response = await wordbookService.getCalendar(currentDate)
+      setCalendarData(response)
       
       console.log('캘린더 데이터 로드:', currentDate)
       
@@ -47,9 +47,8 @@ export const WordBookScreen = () => {
   // 이유: 의존성이 없으므로 컴포넌트 생명주기 동안 같은 함수 재사용
   const fetchWordsByDate = useCallback(async (date: Date) => {
     try {
-      // TODO: 실제 API 호출
-      // const response = await wordBookService.getWordsByDate(date)
-      // setTodayWords(response)
+      const response = await wordbookService.getWordsByDate(date)
+      setTodayWords(response)
       
       console.log('단어 로드:', date)
       
@@ -87,6 +86,25 @@ export const WordBookScreen = () => {
     setCurrentDate(prev => addMonths(prev, 1))
   }, [])
 
+  const handleDeleteWord = useCallback(async () => {
+    if (!selectedWord) return
+
+    try {
+      await wordbookService.deleteWord(selectedWord.id)
+      
+      setTodayWords(prev => prev.filter(w => w.id !== selectedWord.id))
+      setShowModal(false)
+      setSelectedWord(null)
+      
+      // 캘린더 데이터도 새로고침
+      fetchCalendarData()
+      
+    } catch (error) {
+      console.error('단어 삭제 실패:', error)
+      alert('단어 삭제에 실패했습니다.')
+    }
+  }, [selectedWord, fetchCalendarData])
+
   // 추가: 로딩 상태 UI
   // 이유: 사용자에게 데이터를 불러오는 중임을 알림
   if (loading) {
@@ -116,10 +134,13 @@ export const WordBookScreen = () => {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      {/* 추가: TopBar 컴포넌트 */}
-      {/* 이유: 일관된 상단바 UI 제공 */}
+    <SafeAreaView 
+    className="flex-1 bg-white"
+    edges={['top']}  // top에만 safe area 적용
+  >
+    <View style={{ marginTop: -8 }}>
       <TopBar showBackButton={false} />
+    </View>
 
       {/* 추가: ScrollView로 감싸기 */}
       {/* 이유: 화면이 작을 때 스크롤 가능하도록 */}
@@ -156,10 +177,17 @@ export const WordBookScreen = () => {
           onConfirm={() => setShowModal(false)}
           onClose={() => setShowModal(false)}
         >
-          <View className="bg-green-50 rounded-2xl p-4">
-            {/* TODO: API에서 단어 뜻 가져오기 */}
-            <Text className="text-base">단어 뜻이 여기 표시됩니다.</Text>
+          <View className="bg-green-50 rounded-2xl p-4 mb-4">
+            <Text className="text-base">{selectedWord.definition || '단어 뜻이 없습니다.'}</Text>
           </View>
+
+          <TouchableOpacity
+            onPress={() => setShowModal(false)}
+            className="bg-[#006716] py-3 rounded-xl"
+            activeOpacity={0.7}
+          >
+            <Text className="text-white text-center font-semibold">닫기</Text>
+          </TouchableOpacity>
         </Modal>
       )}
     </SafeAreaView>

@@ -1,5 +1,10 @@
-import { DiscussionTest } from '@/components/screens/Discussion'
+import { DiscussionScreen } from '@/components/screens/Discussion/DiscussionScreen'
+import { Stack } from 'expo-router'
 
 export default function AiPage() {
-  return <DiscussionTest />
-}
+  return (
+  <>
+  <Stack.Screen options={{ headerShown: false }} />
+  <DiscussionScreen />
+  </>
+)}
