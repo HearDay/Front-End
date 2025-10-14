@@ -50,6 +50,7 @@ const FindIdPage = () => {
       <Modal
         visible={modalVisible}
         title="비밀번호가 성공적으로 변경되었습니다."
+        confirmText="확인"
         onConfirm={handleModalConfirm}
         onClose={() => setModalVisible(false)}
       />

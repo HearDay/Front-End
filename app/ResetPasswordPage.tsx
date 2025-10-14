@@ -37,7 +37,7 @@ const ResetPasswordPage = () => {
     setModalVisible(true);
   };
 
-  // ✅ 모달 확인 버튼 클릭 시
+  // 모달 확인 버튼 클릭 시
   const handleModalConfirm = () => {
     setModalVisible(false);
 
@@ -87,6 +87,7 @@ const ResetPasswordPage = () => {
       <Modal
         visible={modalVisible}
         title={modalMessage}
+        confirmText="확인"
         onConfirm={handleModalConfirm}
         onClose={() => setModalVisible(false)}
       />

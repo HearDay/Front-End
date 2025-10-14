@@ -47,6 +47,7 @@ const FindIdPage = () => {
       <Modal
         visible={modalVisible}
         title="이메일에서 인증을 완료해주세요."
+        confirmText="확인"
         onConfirm={handleModalConfirm}
         onClose={() => setModalVisible(false)}
       />

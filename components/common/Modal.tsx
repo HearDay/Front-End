@@ -37,13 +37,13 @@ export function Modal({
       >
         <Pressable 
           className="bg-white rounded-3xl p-6 w-full"
-          style={{ maxWidth: 384 }}
+          style={{ maxWidth: 350 }}
           //모달 내부 클릭해도 닫히지 않게
           //이벤트 전파 중단 넣어서 부모의 onPress 실행 안 됨
           onPress={(e) => e.stopPropagation()}
         >
           {/* 제목 */}
-          <Text className="text-center text-base text-gray-800 mb-6">
+          <Text className="text-center text-lg text-gray-800 mb-6">
             {title}
           </Text>
 
@@ -58,11 +58,11 @@ export function Modal({
             {confirmText && confirmText.length > 0 && (
               <TouchableOpacity
                 onPress={onConfirm}
-                className="flex-1 py-3 rounded-xl"
+                className="min-w-[130px] h-[40px] mx-auto flext items-center justify-center rounded-xl"
                 style={{ backgroundColor: '#006716' }}
                 activeOpacity={0.7}
               >
-                <Text className="text-center text-white font-semibold">
+                <Text className="text-center text-lg text-white font-semibold">
                   {confirmText}
                 </Text>
               </TouchableOpacity>
