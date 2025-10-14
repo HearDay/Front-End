@@ -1,4 +1,3 @@
-import { View } from 'lucide-react-native'
 import { useEffect, useRef, useState } from 'react'
 import { Animated, Dimensions, Text, TextInput, TouchableOpacity } from 'react-native'
 import { DictionarySearchBarProps } from '../../../types/screens'
@@ -55,18 +54,13 @@ export function DictionarySearchBar({
   }
 
   return (
-    //수정: 키보드 위에 위치하도록 bottom-8 -> bottom-20
-    <View
-        style={{
-            position: 'absolute',
-            bottom: 80, //키보드 위 여유 공간
-            right: 24,
-        }}
-    >
     <Animated.View
       style={{ 
         width: widthAnim,
         backgroundColor: visible ? '#E8F5E9' : '#ffffff',
+        position: 'absolute',
+        bottom: 32,
+        right: 24,
       }}
       className="absolute bottom-8 right-6 h-14 rounded-full shadow-lg flex-row items-center overflow-hidden"
     >
@@ -101,6 +95,5 @@ export function DictionarySearchBar({
         </TouchableOpacity>
       )}
     </Animated.View>
-    </View>
   )
 }

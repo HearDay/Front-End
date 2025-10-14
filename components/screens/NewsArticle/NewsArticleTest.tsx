@@ -28,11 +28,8 @@ export function NewsArticleTest({ newsId }: NewsArticleTestProps) {
     title: '오픈AI "내년 개인정보 필터" 오픈소스로 공개',
     imageUrl: 'https://via.placeholder.com/400x300',
     content: `일본 애니메이션 〈귀멸의 칼날〉이 북미 박스오피스에서 역대급 성적을 거뒀습니다.
-
 극장판(無限列車)는 박스오피스 집계 사이트 박스오피스 모조에 따르면, 
-
 북미에서 개봉 첫 주말 3300만 달러(약 460억 원)를 벌어들이며 박스오피스 1위에 올랐습니다.
-
 같은 주말에 북미에서 개봉한 외화 중 가장 높은 흥행 성적을 기록했다고 밝혔습니다.`,
   }
 
