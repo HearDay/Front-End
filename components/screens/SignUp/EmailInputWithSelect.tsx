@@ -1,12 +1,12 @@
 import InputBox from "@/components/common/InputBox";
 import React, { useState } from "react";
 import {
-    FlatList,
-    Image,
-    Modal,
-    Text,
-    TouchableOpacity,
-    View,
+  FlatList,
+  Image,
+  Modal,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 interface EmailInputWithSelectProps {
@@ -16,6 +16,7 @@ interface EmailInputWithSelectProps {
   onChangeEmailDomain: (domain: string) => void;
   onPressVerify: () => void;
   disabled?: boolean;
+  buttonType?: "verify" | "confirm"; 
 }
 
 const EmailInputWithSelect = ({
@@ -25,9 +26,13 @@ const EmailInputWithSelect = ({
   onChangeEmailDomain,
   onPressVerify,
   disabled = false,
+  buttonType = "verify", // 기본값은 본인인증
 }: EmailInputWithSelectProps) => {
-  const domains = [" @gmail.com", " @naver.com", " @daum.net"];
+  const domains = ["@gmail.com", "@naver.com", "@daum.net"];
   const [isDropdownVisible, setDropdownVisible] = useState(false);
+
+  // 버튼 텍스트 결정
+  const buttonText = buttonType === "verify" ? "본인인증" : "확인";
 
   return (
     <View className="flex-row items-center w-[350px] mx-auto mb-3 gap-2">
@@ -59,11 +64,12 @@ const EmailInputWithSelect = ({
 
         <Image
           source={require("../../../my-expo-app/assets/images/Down.png")}
-          style={{ width: 24, height: 24}} 
+          style={{ width: 20, height: 20 }}
           resizeMode="contain"
         />
       </TouchableOpacity>
 
+      {/* 버튼 텍스트가 유니온 타입에 따라 변경 */}
       <TouchableOpacity
         onPress={onPressVerify}
         activeOpacity={0.8}
@@ -72,9 +78,12 @@ const EmailInputWithSelect = ({
           disabled ? "opacity-50" : ""
         }`}
       >
-        <Text className="text-lg font-semibold text-[#1B8131]">본인인증</Text>
+        <Text className="text-lg font-semibold text-[#1B8131]">
+          {buttonText}
+        </Text>
       </TouchableOpacity>
 
+      {/* 도메인 드롭다운 모달 */}
       <Modal
         transparent
         visible={isDropdownVisible}

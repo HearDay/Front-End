@@ -12,16 +12,14 @@ const FindIdPage = () => {
   const [emailDomain, setEmailDomain] = useState("@gmail.com");
   const [modalVisible, setModalVisible] = useState(false);
 
-  // 본인인증 버튼 클릭 시 모달 표시
   const handleVerify = () => {
     if (!emailId) return;
     setModalVisible(true);
   };
 
-  // 모달 내 확인 버튼 클릭 시 로그인 페이지 이동
   const handleModalConfirm = () => {
     setModalVisible(false);
-    router.replace("/LoginPage");
+    router.replace("/ResetPasswordPage");
   };
 
   return (
@@ -33,9 +31,9 @@ const FindIdPage = () => {
 
       <View className="flex-[0.75] items-center justify-center">
         <Text
-          className="text-2xl font-bold mb-10 text-[#002C09]"
+          className="text-2xl font-bold text-[#002C09] mb-10"
         >
-          아이디 찾기
+          비밀번호 변경하기
         </Text>
         <EmailInputWithSelect
           emailId={emailId}
@@ -43,13 +41,12 @@ const FindIdPage = () => {
           emailDomain={emailDomain}
           onChangeEmailDomain={setEmailDomain}
           onPressVerify={handleVerify}
-          buttonType="confirm"
         />
       </View>
-      
+
       <Modal
         visible={modalVisible}
-        title="비밀번호가 성공적으로 변경되었습니다."
+        title="이메일에서 인증을 완료해주세요."
         onConfirm={handleModalConfirm}
         onClose={() => setModalVisible(false)}
       />
