@@ -1,14 +1,8 @@
-import { useRouter } from 'expo-router'
-import { useCallback, useEffect, useState } from 'react'
+import { dictionaryService } from '@/services'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ActivityIndicator, Modal, Pressable, Text, TouchableOpacity, View } from 'react-native'
+import { DictionaryModalProps } from '../../../types/screens'
 
-interface DictionaryModalProps {
-  visible: boolean
-  word: string
-  isSaved: boolean
-  onClose: () => void
-  onSave: () => void
-}
 
 interface WordDefinition {
   word: string
@@ -18,27 +12,21 @@ interface WordDefinition {
 export function DictionaryModal({
   visible,
   word,
-  isSaved,
+  saveState = 'IDLE',
   onClose,
   onSave,
 }: DictionaryModalProps) {
-  const router = useRouter()
   const [definition, setDefinition] = useState<WordDefinition | null>(null)
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null) 
+  const [error, setError] = useState<string | null>(null)
 
-  // useCallback으로 최적화
   const fetchDefinition = useCallback(async () => {
+    if (!word) return;
     try {
       setLoading(true)
       setError(null)
-      
-      // TODO: 실제 API 호출
-      // const response = await dictionaryService.getDefinition(word)
-      // setDefinition(response)
-      
-      console.log('단어 뜻 API 호출:', word)
-      
+      const response = await dictionaryService.getDefinition(word)
+      setDefinition(response)
     } catch (err) {
       setError('단어 뜻을 불러올 수 없습니다.')
       console.error('단어 뜻 로드 실패:', err)
@@ -48,24 +36,30 @@ export function DictionaryModal({
   }, [word])
 
   useEffect(() => {
-    if (visible && word) {
+    if (visible) {
       fetchDefinition()
     }
-  }, [visible, word, fetchDefinition])
+  }, [visible, fetchDefinition])
 
-  const handleSaveAndNavigate = useCallback(async () => {
-    await onSave()
-    setTimeout(() => {
-      router.push('/(tabs)/wordbook')
-    }, 1000)
-  }, [onSave, router])
+  const handleSave = () => {
+    if (definition) {
+      onSave(definition.definitions.join('\n'));
+    }
+  }
 
-  // 상수 분리
-  const buttonText = isSaved 
-    ? "단어장에 성공적으로 저장했어요!" 
-    : "단어장에 넣기"
-  
-  const buttonStyle = isSaved ? 'bg-[#A8E6B8]' : 'bg-[#006716]'
+  const { buttonText, buttonStyle, disabled } = useMemo(() => {
+    switch (saveState) {
+      case 'SAVING':
+        return { buttonText: '저장 중...', buttonStyle: 'bg-gray-400', disabled: true };
+      case 'SAVED':
+        return { buttonText: '단어장에 성공적으로 저장했어요!', buttonStyle: 'bg-[#A8E6B8]', disabled: true };
+      case 'ALREADY_EXISTS':
+        return { buttonText: '오늘 이미 같은 단어를 저장했어요!', buttonStyle: 'bg-[#A8E6B8]', disabled: true };
+      case 'IDLE':
+      default:
+        return { buttonText: '단어장에 넣기', buttonStyle: 'bg-[#006716]', disabled: loading || !definition };
+    }
+  }, [saveState, loading, definition]);
 
   return (
     <Modal
@@ -85,7 +79,7 @@ export function DictionaryModal({
         >
           <Text className="text-2xl font-bold text-center mb-4">{word}</Text>
 
-          <View className="bg-blue-50 rounded-2xl p-4 mb-6 min-h-32">
+          <View className="bg-blue-50 rounded-2xl p-4 mb-6 min-h-32 justify-center">
             {loading ? (
               <ActivityIndicator size="large" color="#006716" />
             ) : error ? (
@@ -105,8 +99,8 @@ export function DictionaryModal({
 
           <TouchableOpacity
             className={`py-4 rounded-xl ${buttonStyle}`}
-            onPress={isSaved ? onClose : handleSaveAndNavigate}
-            disabled={loading} // 로딩 중 비활성화
+            onPress={handleSave}
+            disabled={disabled}
           >
             <Text className="text-center text-white font-semibold">
               {buttonText}

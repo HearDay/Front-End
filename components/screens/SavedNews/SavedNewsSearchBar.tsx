@@ -1,5 +1,5 @@
 import { memo } from 'react'; // 추가: 성능 최적화
-import { Text, TextInput, View } from 'react-native'
+import { Text, TextInput, View } from 'react-native';
 
 interface SavedNewsSearchBarProps {
   value: string

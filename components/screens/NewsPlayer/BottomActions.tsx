@@ -1,5 +1,5 @@
 import { memo } from 'react'; // 추가: 성능 최적화
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Image, TouchableOpacity, View } from 'react-native';
 import { BottomActionsProps } from '../../../types/screens';
 
 // 개선: memo로 컴포넌트 감싸기
@@ -18,7 +18,7 @@ export const BottomActions = memo(function BottomActions({
         className={`items-center p-3 rounded-2xl ${isCarMode ? 'bg-green-100' : ''}`}
         activeOpacity={0.7} 
       >
-        <Text className="text-4xl">🚗</Text>
+        <Image source={require('../../../my-expo-app/assets/images/car.png')} className="w-11 h-11" />
       </TouchableOpacity>
 
       {/* 토론 */}
@@ -27,7 +27,7 @@ export const BottomActions = memo(function BottomActions({
         className="items-center p-3"
         activeOpacity={0.7}
       >
-        <Text className="text-4xl">💬</Text>
+        <Image source={require('../../../my-expo-app/assets/images/talk.png')} className="w-12 h-12" />
       </TouchableOpacity>
 
       {/* 저장 */}
@@ -36,7 +36,7 @@ export const BottomActions = memo(function BottomActions({
         className="items-center p-3"
         activeOpacity={0.7}
       >
-        <Text className="text-4xl">📥</Text>
+        <Image source={require('../../../my-expo-app/assets/images/store.png')} className="w-9 h-9" />
       </TouchableOpacity>
     </View>
   )
