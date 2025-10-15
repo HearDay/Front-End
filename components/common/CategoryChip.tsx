@@ -18,8 +18,8 @@ export const CategoryChip = ({
   >
     <Text
       className={clsx(
-        'text-sm text-center',
-        isSelected ? 'text-gray-800 font-semibold' : 'text-gray-600'
+        'text-sm text-center font-medium',
+        isSelected ? 'text-gray-800' : 'text-gray-600'
       )}
     >
       {label}
