@@ -1,21 +1,64 @@
-import { ScrollView, Text, View } from 'react-native';
-import { DiscussionRecordItem } from '../../../types/screens';
+import { useState } from 'react';
+import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { DiscussionRecordListProps } from '../../../types/screens';
 import { DiscussionRecordCard } from './DiscussionRecordCard';
 
-interface DiscussionRecordListProps {
-  records: DiscussionRecordItem[];
-}
+export function DiscussionRecordList({
+  records,
+  sortBy,
+  onSortChange,
+  onRecordPress,
+}: DiscussionRecordListProps) {
+  const [showDropdown, setShowDropdown] = useState(false);
 
-export function DiscussionRecordList({ records }: DiscussionRecordListProps) {
+  const sortOptions = [
+    { value: 'latest', label: '최신순' },
+    { value: 'oldest', label: '날짜순' },
+  ] as const;
+
+  const currentLabel = sortOptions.find(opt => opt.value === sortBy)?.label || '최신순';
+
   return (
     <View className="flex-1">
       {/* 헤더 */}
       <View className="px-4 pb-3">
         <View className="flex-row justify-between items-center mb-2">
           <Text className="text-lg font-semibold">토론 기록</Text>
-          {/* 정렬 토글 (UI만) */}
-          <Text className="text-sm text-[#00801A]">최신순 ▼</Text>
+
+          {/* 정렬 드롭다운 */}
+          <View>
+            <TouchableOpacity
+              onPress={() => setShowDropdown(!showDropdown)}
+              className="flex-row items-center"
+            >
+              <Text className="text-sm text-[#00801A] mr-1">{currentLabel}</Text>
+              <Text className="text-[#00801A]">{showDropdown ? '▲' : '▼'}</Text>
+            </TouchableOpacity>
+
+            {/* 드롭다운 메뉴 */}
+            {showDropdown && (
+              <View className="absolute top-8 right-0 bg-white rounded-lg shadow-lg py-2 w-24 z-10">
+                {sortOptions.map((option) => (
+                  <TouchableOpacity
+                    key={option.value}
+                    onPress={() => {
+                      onSortChange(option.value);
+                      setShowDropdown(false);
+                    }}
+                    className="py-2 px-4"
+                  >
+                    <Text className={`text-sm ${
+                      sortBy === option.value ? 'text-[#00801A] font-bold' : 'text-gray-700'
+                    }`}>
+                      {option.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+          </View>
         </View>
+        
         {/* 초록색 언더라인 */}
         <View className="h-px bg-[#00801A]" />
       </View>
@@ -31,7 +74,7 @@ export function DiscussionRecordList({ records }: DiscussionRecordListProps) {
             <DiscussionRecordCard
               key={item.id}
               record={item}
-              onPress={() => console.log('Record pressed:', item.id)} // TODO: 기록 상세 화면으로 이동
+              onPress={() => onRecordPress(item.id)}
             />
           ))
         )}

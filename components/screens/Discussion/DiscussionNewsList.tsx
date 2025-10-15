@@ -13,8 +13,7 @@ export function DiscussionNewsList({
 
   const sortOptions = [
     { value: 'latest', label: '최신순' },
-    { value: 'popular', label: '인기순' },
-    { value: 'views', label: '조회순' },
+    { value: 'oldest', label: '날짜순' },
   ] as const
 
   const currentLabel = sortOptions.find(opt => opt.value === sortBy)?.label || '최신순'

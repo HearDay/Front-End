@@ -63,13 +63,23 @@ const USE_DUMMY_DATA = true
 
 export const discussionService = {
   // 토론 기록 가져오기 함수 추가
-  async getDiscussionRecords(): Promise<DiscussionRecordItem[]> {
+  async getDiscussionRecords(sortBy: 'latest' | 'oldest'): Promise<DiscussionRecordItem[]> {
     if (USE_DUMMY_DATA) {
+      // 더미 데이터 정렬
+      const sortedRecords = [...DUMMY_RECORDS].sort((a, b) => {
+        if (sortBy === 'latest') {
+          return new Date(b.discussedAt).getTime() - new Date(a.discussedAt).getTime();
+        } else {
+          return new Date(a.discussedAt).getTime() - new Date(b.discussedAt).getTime();
+        }
+      });
       return new Promise((resolve) => {
-        setTimeout(() => resolve(DUMMY_RECORDS), 500);
+        setTimeout(() => resolve(sortedRecords), 500);
       });
     }
-    const response = await apiClient.get(ENDPOINTS.DISCUSSION.RECORDS);
+    const response = await apiClient.get(ENDPOINTS.DISCUSSION.RECORDS, {
+      params: { sort: sortBy }
+    });
     return response.data;
   },
 
