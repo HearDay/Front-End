@@ -2,14 +2,13 @@ import TopBar from '@/components/common/TopBar'
 import { discussionService, newsService } from '@/services'
 import { useRouter } from 'expo-router'
 import { useCallback, useEffect, useState } from 'react'
-import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { DiscussionNewsItem, DiscussionRecordItem } from '../../../types/screens'
 import { DiscussionActionButtons } from './DiscussionActionButtons'
 import { DiscussionHeader } from './DiscussionHeader'
 import { DiscussionModal } from './DiscussionModal'
 import { DiscussionNewsList } from './DiscussionNewsList'
-import { DiscussionRecordCard } from './DiscussionRecordCard'
 import { DiscussionRecordList } from './DiscussionRecordList'
 
 export function DiscussionScreen() {
@@ -18,10 +17,11 @@ export function DiscussionScreen() {
   
   // '토론하기' 탭 상태
   const [viewedNews, setViewedNews] = useState<DiscussionNewsItem[]>([])
-  const [sortBy, setSortBy] = useState<'latest' | 'popular' | 'views'>('latest')
+  const [sortBy, setSortBy] = useState<'latest' | 'oldest'>('latest')
   
   // '기록보기' 탭 상태
   const [discussionRecords, setDiscussionRecords] = useState<DiscussionRecordItem[]>([])
+  const [recordSortBy, setRecordSortBy] = useState<'latest' | 'oldest'>('latest') // 기록보기 정렬 상태 추가
 
   // 공통 상태
   const [showModal, setShowModal] = useState(false)
@@ -49,7 +49,7 @@ export function DiscussionScreen() {
     try {
       setLoading(true)
       setError(null)
-      const response = await discussionService.getDiscussionRecords()
+      const response = await discussionService.getDiscussionRecords(recordSortBy) // 정렬 상태 전달
       setDiscussionRecords(response)
     } catch (err) {
       setError('토론 기록을 불러올 수 없습니다.')
@@ -57,7 +57,7 @@ export function DiscussionScreen() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [recordSortBy]) // 의존성 배열에 recordSortBy 추가
 
   // '토론하기' 탭 데이터 로드
   useEffect(() => {
@@ -71,7 +71,7 @@ export function DiscussionScreen() {
     if (activeButton === 'record') {
       fetchDiscussionRecords();
     }
-  }, [activeButton, fetchDiscussionRecords]);
+  }, [activeButton, recordSortBy, fetchDiscussionRecords]); // 의존성 배열 수정
 
 
   const handleDiscussionPress = () => {
@@ -147,7 +147,12 @@ export function DiscussionScreen() {
           onNewsPress={handleNewsPress}
         />
       ) : (
-        <DiscussionRecordList records={discussionRecords} />
+        <DiscussionRecordList 
+          records={discussionRecords}
+          sortBy={recordSortBy}
+          onSortChange={setRecordSortBy}
+          onRecordPress={(recordId) => console.log('Record pressed:', recordId)}
+        />
       )}
 
       <DiscussionModal

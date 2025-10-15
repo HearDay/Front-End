@@ -178,8 +178,8 @@ export interface DiscussionActionButtonsProps {
 
 export interface DiscussionNewsListProps {
   news: DiscussionNewsItem[]
-  sortBy: 'latest' | 'popular' | 'views'
-  onSortChange: (sort: 'latest' | 'popular' | 'views') => void
+  sortBy: 'latest' | 'oldest'
+  onSortChange: (sort: 'latest' | 'oldest') => void
   onNewsPress: (newsId: string) => void
 }
 
@@ -201,4 +201,11 @@ export interface DiscussionRecordItem {
   id: string;
   title: string;
   discussedAt: string; // YYYY-MM-DD
+}
+
+export interface DiscussionRecordListProps {
+  records: DiscussionRecordItem[];
+  sortBy: 'latest' | 'oldest';
+  onSortChange: (sort: 'latest' | 'oldest') => void;
+  onRecordPress: (recordId: string) => void;
 }

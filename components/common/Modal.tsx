@@ -48,12 +48,10 @@ export function Modal({
           </Text>
 
           {/*  children */}
-          {children ? (
-            <View className='mb-6'>{children}</View>
-          ): null }
+          {children}
           
          {/* 수정: 버튼 영역 */}
-          <View className="flex-row gap-3">
+          <View className="flex-row gap-3 mt-6">
             {/* 확인 버튼 - confirmText가 있을 때만 표시 */}
             {confirmText && confirmText.length > 0 && (
               <TouchableOpacity
