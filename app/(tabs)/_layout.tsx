@@ -72,7 +72,7 @@ export default function TabLayout() {
       <Tabs.Screen name="AiPage" options={{ title: "AI와 토론" }} />
       <Tabs.Screen name="index" options={{ title: "홈" }} />
       <Tabs.Screen name="savednews" options={{ title: "저장" }} />
-      <Tabs.Screen name="ProfilePage" options={{ title: "프로필" }} />
+      <Tabs.Screen name="LoginPage" options={{ title: "프로필" }} />
     </Tabs>
   );
 }
