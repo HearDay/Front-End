@@ -86,7 +86,7 @@ const LoginPage = () => {
               <Text className="text-[#006716] text-[13px]">아이디 찾기</Text>
             </TouchableOpacity>
             <Text className="text-[#006716] text-[13px]">|</Text>
-            <TouchableOpacity onPress={() => router.push("/ResetPasswordPage")}>
+            <TouchableOpacity onPress={() => router.push("/CertificationPage")}>
               <Text className="text-[#006716] text-[13px]">비밀번호 변경</Text>
             </TouchableOpacity>
             <Text className="text-[#006716] text-[13px]">|</Text>
@@ -101,6 +101,7 @@ const LoginPage = () => {
           title="존재하지 않는 아이디입니다."
           onConfirm={() => setIsModalVisible(false)}
           onClose={() => setIsModalVisible(false)}
+          confirmText="확인"
         />
       
 
