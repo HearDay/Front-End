@@ -195,9 +195,12 @@ export const NewsPlayerScreen = ({ newsId }: NewsPlayerScreenProps) => {
         <NewsPlayerHeader title={newsData.title} onBack={handleBack} />
         <TouchableOpacity onPress={() => router.push(`/newsarticle/${newsId}`)}>
           <NewsImagePlaceholder imageUrl={newsData.imageUrl} />
-          <LyricsDisplay currentLines={currentLines} />
         </TouchableOpacity>
-        <View className="flex-1" />
+        
+        <View className="flex-1 justify-center">
+          <LyricsDisplay currentLines={currentLines} />
+        </View>
+
         <AudioControls isPlaying={isPlaying} onPlay={handlePlay} onPause={handlePause} onNext={handleNext} onPrev={handlePrev} />
         <BottomActions isCarMode={isCarMode} onCarModeToggle={handleCarModeToggle} onDiscussionPress={handleDiscussion} onSavePress={handleSave} />
         
@@ -225,7 +228,7 @@ export const NewsPlayerScreen = ({ newsId }: NewsPlayerScreenProps) => {
 
         {/* 저장 확인 모달 */}
         <Modal visible={showSaveConfirmModal} title="이 뉴스를 저장하시겠습니까?" onConfirm={handleConfirmSave} onClose={() => setShowSaveConfirmModal(false)}>
-          <View className="flex-row gap-3 mt-6">
+          <View className="flex-row gap-3 mt-6 ">
             <TouchableOpacity className="flex-1 bg-white border border-[#006716] rounded-xl py-3" onPress={() => setShowSaveConfirmModal(false)}>
               <Text className="text-center text-[#006716] font-semibold">취소</Text>
             </TouchableOpacity>

@@ -97,11 +97,13 @@ export function SavedNewsScreen() {
     <SafeAreaView className="flex-1 bg-gray-50" edges={['bottom', 'left', 'right']}>
       <TopBar showBackButton={false} />
 
+      <View className="-mt-8 -mb-2">
       <CategoryChipGroup
         categories={['전체', '경제', '기술', '환경', '사회']}
         selectedCategory={selectedCategory}
         onSelectCategory={setSelectedCategory}
       />
+      </View>
 
       <SavedNewsList
         newsList={filteredNews}

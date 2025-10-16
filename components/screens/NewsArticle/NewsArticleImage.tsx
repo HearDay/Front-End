@@ -8,7 +8,7 @@ export function NewsArticleImage({ imageUrl, onPress }: NewsArticleImageProps) {
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.9}>
-      <View className="h-64 relative">
+      <View className="h-64 relative mx-6 rounded-2xl overflow-hidden">
         {!imageUrl || imageError ? (
           // 텍스트 제거, gradient만 표시
           <LinearGradient
