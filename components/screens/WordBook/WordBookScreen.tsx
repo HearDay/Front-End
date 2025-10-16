@@ -136,11 +136,9 @@ export const WordBookScreen = () => {
   return (
     <SafeAreaView 
     className="flex-1 bg-white"
-    edges={['top']}  // top에만 safe area 적용
+    edges={['bottom', 'left', 'right']}
   >
-    <View style={{ marginTop: -8 }}>
-      <TopBar showBackButton={false} />
-    </View>
+    <TopBar showBackButton={false} />
 
       {/* 추가: ScrollView로 감싸기 */}
       {/* 이유: 화면이 작을 때 스크롤 가능하도록 */}

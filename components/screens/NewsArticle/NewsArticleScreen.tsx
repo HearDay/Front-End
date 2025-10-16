@@ -165,7 +165,7 @@ export function NewsArticleScreen({ newsId }: NewsArticleScreenProps) {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView className="flex-1 bg-white" edges={['bottom', 'left', 'right']}>
       <TopBar showBackButton={true} />
 
       <ScrollView ref={scrollRef} className="flex-1">

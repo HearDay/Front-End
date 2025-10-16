@@ -1,7 +1,7 @@
 import { memo } from 'react'; // 추가: 성능 최적화
-import { ScrollView, Text, View } from 'react-native';
-import { SavedNewsListProps } from '../../../types/screens';
-import { SavedNewsCard } from './SavedNewsCard';
+import { ScrollView, Text, View } from 'react-native'
+import { SavedNewsListProps } from '../../../types/screens'
+import { SavedNewsCard } from './SavedNewsCard'
 
 // 개선: memo로 컴포넌트 감싸기
 // 이유: newsList, onNewsPress, onDelete가 변하지 않으면 리렌더링 스킵
