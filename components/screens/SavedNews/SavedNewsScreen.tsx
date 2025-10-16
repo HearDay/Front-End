@@ -1,12 +1,12 @@
-import { CategoryChipGroup, Modal } from '@/components/common';
-import TopBar from '@/components/common/TopBar';
-import { newsService } from '@/services';
-import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { SavedNewsItem } from '../../../types/screens';
-import { SavedNewsList } from './SavedNewsList';
+import { CategoryChipGroup, Modal } from '@/components/common'
+import TopBar from '@/components/common/TopBar'
+import { newsService } from '@/services'
+import { useRouter } from 'expo-router'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { SavedNewsItem } from '../../../types/screens'
+import { SavedNewsList } from './SavedNewsList'
 
 export function SavedNewsScreen() {
   const router = useRouter()
@@ -16,8 +16,8 @@ export function SavedNewsScreen() {
   const [error, setError] = useState<string | null>(null)
 
   // 삭제 확인 모달 관련 상태
-  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
-  const [deletingNewsId, setDeletingNewsId] = useState<string | null>(null);
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false)
+  const [deletingNewsId, setDeletingNewsId] = useState<string | null>(null)
 
   const fetchSavedNews = useCallback(async () => {
     try {
@@ -50,24 +50,24 @@ export function SavedNewsScreen() {
 
   // 삭제 버튼 클릭 시 모달을 띄우는 함수
   const handleDeletePress = useCallback((newsId: string) => {
-    setDeletingNewsId(newsId);
-    setShowDeleteConfirmModal(true);
-  }, []);
+    setDeletingNewsId(newsId)
+    setShowDeleteConfirmModal(true)
+  }, [])
 
   // 모달에서 '확인'을 눌렀을 때 실제 삭제를 실행하는 함수
   const handleConfirmDelete = useCallback(async () => {
-    if (!deletingNewsId) return;
+    if (!deletingNewsId) return
     try {
-      await newsService.deleteSavedNews(deletingNewsId);
-      setSavedNews(prev => prev.filter(news => news.id !== deletingNewsId));
+      await newsService.deleteSavedNews(deletingNewsId)
+      setSavedNews(prev => prev.filter(news => news.id !== deletingNewsId))
     } catch (error) {
-      console.error('삭제 실패:', error);
-      alert('삭제에 실패했습니다.'); // 실패 시에는 간단히 alert
+      console.error('삭제 실패:', error)
+      alert('삭제에 실패했습니다.') // 실패 시에는 간단히 alert
     } finally {
-      setShowDeleteConfirmModal(false);
-      setDeletingNewsId(null);
+      setShowDeleteConfirmModal(false)
+      setDeletingNewsId(null)
     }
-  }, [deletingNewsId]);
+  }, [deletingNewsId])
 
   if (loading) {
     return (
@@ -94,10 +94,8 @@ export function SavedNewsScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <View style={{ marginTop: -8 }}>
-        <TopBar showBackButton={false} />
-      </View>
+    <SafeAreaView className="flex-1 bg-gray-50" edges={['bottom', 'left', 'right']}>
+      <TopBar showBackButton={false} />
 
       <CategoryChipGroup
         categories={['전체', '경제', '기술', '환경', '사회']}
