@@ -1,22 +1,28 @@
-import { Image, Text, TouchableOpacity, View } from 'react-native';
-import { DiscussionRecordItem } from '../../../types/screens';
+import { useRouter } from "expo-router";
+import { Image, Text, TouchableOpacity, View } from "react-native";
+import { DiscussionRecordItem } from "../../../types/screens";
 
 interface DiscussionRecordCardProps {
   record: DiscussionRecordItem;
-  onPress: () => void;
 }
 
-export function DiscussionRecordCard({ record, onPress }: DiscussionRecordCardProps) {
+export function DiscussionRecordCard({ record }: DiscussionRecordCardProps) {
+  const router = useRouter();
+
+  const handlePress = () => {
+    router.push("/AIChatDebatePage?mode=view");
+  };
+
   return (
     <TouchableOpacity
-      onPress={onPress}
+      onPress={handlePress}
       className="bg-white rounded-2xl mx-4 mb-3 p-4 flex-row items-center shadow-sm"
       activeOpacity={0.7}
     >
       {/* 좌측: 아이콘과 날짜 */}
       <View className="items-center mr-4">
         <Image
-          source={require('../../../my-expo-app/assets/images/history.png')}
+          source={require("../../../my-expo-app/assets/images/history.png")}
           className="w-10 h-10"
           resizeMode="contain"
         />
