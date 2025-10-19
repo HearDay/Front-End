@@ -193,17 +193,27 @@ export const NewsPlayerScreen = ({ newsId }: NewsPlayerScreenProps) => {
     <LinearGradient colors={['#FFFEF0', '#E8F5E9', '#C8E6C9']} style={{ flex: 1 }}>
       <SafeAreaView className="flex-1">
         <NewsPlayerHeader title={newsData.title} onBack={handleBack} />
-        <TouchableOpacity onPress={() => router.push(`/newsarticle/${newsId}`)}>
+        
+        {/* 이미지와 가사를 포함하는 클릭 가능한 컨테이너 */}
+        <TouchableOpacity 
+          className="flex-1"
+          activeOpacity={0.9}
+          onPress={() => router.push(`/newsarticle/${newsId}`)}
+        >
           <NewsImagePlaceholder imageUrl={newsData.imageUrl} />
-          <LyricsDisplay currentLines={currentLines} />
+          
+          {/* 가사를 중앙에 위치시키기 위한 View */}
+          <View className="flex-1 justify-center">
+            <LyricsDisplay currentLines={currentLines} />
+          </View>
         </TouchableOpacity>
-        <View className="flex-1" />
+
         <AudioControls isPlaying={isPlaying} onPlay={handlePlay} onPause={handlePause} onNext={handleNext} onPrev={handlePrev} />
         <BottomActions isCarMode={isCarMode} onCarModeToggle={handleCarModeToggle} onDiscussionPress={handleDiscussion} onSavePress={handleSave} />
         
         {/* 토론 모달 */}
         <Modal visible={showDiscussionModal} title="방금 들은 뉴스로 AI와 토론하시겠어요?" onConfirm={() => {}} onClose={() => setShowDiscussionModal(false)}>
-          <View className="gap-3">
+          <View className="gap-3 mt-6 mb-[-16px]">
             <TouchableOpacity className="bg-[#DBFDE0] py-4 rounded-2xl" onPress={() => handleDiscussionStart('voice')} activeOpacity={0.7}>
               <Text className="text-center font-medium">음성으로 토론하러 가기</Text>
             </TouchableOpacity>
@@ -218,14 +228,16 @@ export const NewsPlayerScreen = ({ newsId }: NewsPlayerScreenProps) => {
 
         {/* 차량 모드 에러 모달 */}
         <Modal visible={showCarModeErrorModal} title="오디오 모드 설정에 실패했습니다. iOS 시뮬레이터에서는 지원되지 않을 수 있습니다." onConfirm={() => setShowCarModeErrorModal(false)} onClose={() => setShowCarModeErrorModal(false)}>
-          <TouchableOpacity className="bg-[#006716] py-3 rounded-xl" onPress={() => setShowCarModeErrorModal(false)}>
-            <Text className="text-white text-center font-semibold">확인</Text>
-          </TouchableOpacity>
+          <View className="mt-6 mb-[-16px]">
+            <TouchableOpacity className="bg-[#006716] py-3 rounded-xl" onPress={() => setShowCarModeErrorModal(false)}>
+              <Text className="text-white text-center font-semibold">확인</Text>
+            </TouchableOpacity>
+          </View>
         </Modal>
 
         {/* 저장 확인 모달 */}
         <Modal visible={showSaveConfirmModal} title="이 뉴스를 저장하시겠습니까?" onConfirm={handleConfirmSave} onClose={() => setShowSaveConfirmModal(false)}>
-          <View className="flex-row gap-3 mt-6">
+          <View className="flex-row gap-3 mt-6 mb-[-16px]">
             <TouchableOpacity className="flex-1 bg-white border border-[#006716] rounded-xl py-3" onPress={() => setShowSaveConfirmModal(false)}>
               <Text className="text-center text-[#006716] font-semibold">취소</Text>
             </TouchableOpacity>
@@ -237,9 +249,11 @@ export const NewsPlayerScreen = ({ newsId }: NewsPlayerScreenProps) => {
 
         {/* 저장 결과 모달 */}
         <Modal visible={showSaveResultModal} title={saveResultMessage} onConfirm={() => setShowSaveResultModal(false)} onClose={() => setShowSaveResultModal(false)}>
-           <TouchableOpacity className="bg-[#006716] py-3 rounded-xl" onPress={() => setShowSaveResultModal(false)}>
-            <Text className="text-white text-center font-semibold">확인</Text>
-          </TouchableOpacity>
+          <View className="mt-6 mb-[-16px]">
+            <TouchableOpacity className="bg-[#006716] py-3 rounded-xl" onPress={() => setShowSaveResultModal(false)}>
+              <Text className="text-white text-center font-semibold">확인</Text>
+            </TouchableOpacity>
+          </View>
         </Modal>
 
       </SafeAreaView>

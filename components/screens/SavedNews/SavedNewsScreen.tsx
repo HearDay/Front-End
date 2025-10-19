@@ -97,11 +97,13 @@ export function SavedNewsScreen() {
     <SafeAreaView className="flex-1 bg-gray-50" edges={['bottom', 'left', 'right']}>
       <TopBar showBackButton={false} />
 
+      <View className="-mt-8 -mb-2">
       <CategoryChipGroup
         categories={['전체', '경제', '기술', '환경', '사회']}
         selectedCategory={selectedCategory}
         onSelectCategory={setSelectedCategory}
       />
+      </View>
 
       <SavedNewsList
         newsList={filteredNews}
@@ -111,30 +113,27 @@ export function SavedNewsScreen() {
 
       {/* 삭제 확인 모달 */}
       <Modal
-      visible={showDeleteConfirmModal}
-      title=""
-      onConfirm={handleConfirmDelete}
-      onClose={() => setShowDeleteConfirmModal(false)}
+        visible={showDeleteConfirmModal}
+       title={`이 뉴스를 삭제하시겠어요?
+저장된 뉴스 목록에서 사라집니다.`}
+        onConfirm={handleConfirmDelete}
+        onClose={() => setShowDeleteConfirmModal(false)}
       >
-    <Text className="text-center text-lg font-seminold mb-6 leading-7">
-    이 뉴스를 삭제하시겠어요?{'\n'}
-    저장된 뉴스 목록에서 사라집니다.
-    </Text>
-        <View className="flex-row gap-3">
-          <TouchableOpacity
-            className="flex-1 bg-white border border-[#006716] rounded-xl py-3"
-            onPress={() => setShowDeleteConfirmModal(false)}
-          >
-            <Text className="text-center text-[#006716] font-semibold">취소</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            className="flex-1 bg-[#006716] rounded-xl py-3"
-            onPress={handleConfirmDelete}
-          >
-            <Text className="text-white text-center font-semibold">확인</Text>
-          </TouchableOpacity>
-        </View>
-      </Modal>
+          <View className="flex-row gap-3 mt-6 mb-[-16px]">
+            <TouchableOpacity
+              className="flex-1 bg-white border border-[#006716] rounded-xl py-3"
+              onPress={() => setShowDeleteConfirmModal(false)}
+            >
+              <Text className="text-center text-[#006716] font-semibold">취소</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              className="flex-1 bg-[#006716] rounded-xl py-3"
+              onPress={handleConfirmDelete}
+            >
+              <Text className="text-white text-center font-semibold">확인</Text>
+            </TouchableOpacity>
+          </View>
+        </Modal>
     </SafeAreaView>
   )
 }
