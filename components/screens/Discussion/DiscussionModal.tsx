@@ -16,7 +16,7 @@ export function DiscussionModal({
       onClose={onClose}
       confirmText=""  
     >
-      <View className="gap-3">
+      <View className="gap-3 mt-6">
         <TouchableOpacity 
           className="bg-[#DBFDE0] py-4 rounded-2xl"
           onPress={() => newsId && onStartDiscussion('voice', newsId)}

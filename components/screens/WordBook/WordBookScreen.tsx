@@ -175,17 +175,19 @@ export const WordBookScreen = () => {
           onConfirm={() => setShowModal(false)}
           onClose={() => setShowModal(false)}
         >
-          <View className="bg-green-50 rounded-2xl p-4 mb-4">
-            <Text className="text-base">{selectedWord.definition || '단어 뜻이 없습니다.'}</Text>
-          </View>
+          <View className="mb-[-16px]">
+            <View className="bg-green-50 rounded-2xl p-4 mb-4">
+              <Text className="text-base">{selectedWord.definition || '단어 뜻이 없습니다.'}</Text>
+            </View>
 
-          <TouchableOpacity
-            onPress={() => setShowModal(false)}
-            className="bg-[#006716] py-3 rounded-xl"
-            activeOpacity={0.7}
-          >
-            <Text className="text-white text-center font-semibold">닫기</Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setShowModal(false)}
+              className="bg-[#006716] py-3 rounded-xl"
+              activeOpacity={0.7}
+            >
+              <Text className="text-white text-center font-semibold">닫기</Text>
+            </TouchableOpacity>
+          </View>
         </Modal>
       )}
     </SafeAreaView>
