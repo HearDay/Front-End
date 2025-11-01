@@ -6,12 +6,12 @@ import InputBoxWithButton from "@/components/screens/SignUp/InputWithButton";
 import TermsAgreement from "@/components/screens/SignUp/TermsAgreement";
 import axiosInstance from "@/services/api/axiosInstance";
 import { signup } from "@/services/api/signup";
-import { Stack, useRouter } from "expo-router"; // ✅ useRouter 추가
+import { Stack, useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Alert, ScrollView, StatusBar, Text, View } from "react-native";
 
 const SignUpPage = () => {
-  const router = useRouter(); // ✅ 라우터 훅 선언
+  const router = useRouter(); // 라우터 훅 선언
 
   const [id, setId] = useState("");
   const [password, setPassword] = useState("");

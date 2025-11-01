@@ -20,7 +20,7 @@ const CertificationPage = () => {
   const handleModalConfirm = () => {
     setModalVisible(false);
 
-    // ✅ 전체 이메일 주소 조합 후 비밀번호 재설정 페이지로 전달
+    // 전체 이메일 주소 조합 후 비밀번호 재설정 페이지로 전달
     const fullEmail = `${emailId}${emailDomain}`;
     router.replace({
       pathname: "/ResetPasswordPage",

@@ -20,7 +20,7 @@ const InputBox = ({
   const [isSecure, setIsSecure] = useState(true);
 
   const baseStyle =
-    "flex-row items-center w-[350px] rounded-[10px] px-6"; // ✅ h-[50px] 제거
+    "flex-row items-center w-[350px] rounded-[10px] px-6"; 
 
   const getVariantStyle = () => {
     switch (variant) {

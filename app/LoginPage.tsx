@@ -8,7 +8,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Stack, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-    Alert,
     Image,
     SafeAreaView,
     StatusBar,
@@ -19,57 +18,55 @@ import {
 
 const LoginPage = () => {
   const router = useRouter();
+
   const [id, setId] = useState("");
   const [password, setPassword] = useState("");
+
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+  const [isSuccess, setIsSuccess] = useState(false);
   const [isKakaoModalVisible, setIsKakaoModalVisible] = useState(false);
 
-  // ✅ 로그인 처리 함수
+  // 로그인 처리 함수
   const handleLogin = async () => {
     if (!id || !password) {
-      return Alert.alert("입력 오류", "아이디와 비밀번호를 모두 입력해주세요.");
+      setModalMessage("아이디와 비밀번호를 모두 입력해주세요.");
+      setIsSuccess(false);
+      setIsModalVisible(true);
+      return;
     }
 
     try {
-      const body = {
-        LoginId: id,
-        password: password,
-      };
+      const res = await login({ LoginId: id, password });
 
-      console.log("로그인 요청 Body:", body);
+      if (res.success && res.data?.accessToken) {
+        await AsyncStorage.setItem("accessToken", res.data.accessToken);
+        setModalMessage("로그인에 성공했습니다!");
+        setIsSuccess(true);
+        setIsModalVisible(true);
 
-      const res = await login(body);
-      console.log("로그인 응답:", res);
-
-      if (res.success) {
-        const token = res.data?.accessToken;
-        console.log("✅ 로그인 성공 - Access Token:", token);
-
-        // 🔐 토큰을 AsyncStorage에 저장
-        await AsyncStorage.setItem("accessToken", token || "");
-
-        // 🔁 로그인 후 홈 화면으로 이동
-        Alert.alert("로그인 성공", res.message, [
-          {
-            text: "확인",
-            onPress: () => router.replace("/(tabs)"),
-          },
-        ]);
       } else {
-        Alert.alert("로그인 실패", res.message || "아이디 또는 비밀번호를 확인해주세요.");
+        setModalMessage(res.message || "존재하지 않는 아이디입니다.");
+        setIsSuccess(false);
+        setIsModalVisible(true);
       }
     } catch (err: any) {
-      console.error("❌ 로그인 오류:", err.response?.data || err.message);
-      Alert.alert(
-        "로그인 실패",
-        err.response?.data?.message || "서버 요청 중 오류가 발생했습니다."
-      );
+      console.error("로그인 오류:", err.response?.data || err.message);
+      setModalMessage("서버 요청 중 오류가 발생했습니다.");
+      setIsSuccess(false);
+      setIsModalVisible(true);
     }
   };
 
-  // ✅ 카카오 로그인 모달
-  const handleKakaoStart = () => {
-    setIsKakaoModalVisible(true);
+
+  const handleModalConfirm = async () => {
+    setIsModalVisible(false);
+    if (isSuccess) {
+      // 토큰 저장이 완료되면 홈으로 이동
+      setTimeout(() => {
+        router.replace("/(tabs)");
+      }, 300); // 살짝 지연시켜 모달 애니메이션 겹침 방지
+    }
   };
 
   return (
@@ -95,7 +92,7 @@ const LoginPage = () => {
             />
           </View>
 
-          {/* 메인 트리 이미지 */}
+          {/* 트리 이미지 */}
           <View className="items-center mb-3">
             <Image
               source={require("../my-expo-app/assets/images/Tree.png")}
@@ -107,7 +104,7 @@ const LoginPage = () => {
           {/* 입력 필드 */}
           <View className="gap-3 mb-3">
             <InputBox
-              placeholder="이메일을 입력해 주세요"
+              placeholder="아이디를 입력해 주세요"
               value={id}
               onChangeText={setId}
               variant="transparent"
@@ -120,13 +117,13 @@ const LoginPage = () => {
             />
           </View>
 
-          {/* 버튼들 */}
+          {/* 버튼 */}
           <View className="gap-3">
             <PrimaryButton title="로그인" variant="white" onPress={handleLogin} />
             <PrimaryButton
               title="카카오로 시작하기"
               variant="kakao"
-              onPress={handleKakaoStart}
+              onPress={() => setIsKakaoModalVisible(true)}
             />
           </View>
 
@@ -142,16 +139,16 @@ const LoginPage = () => {
           </View>
         </SafeAreaView>
 
-        {/* 로그인 실패 모달 */}
+        {/* 결과 모달 */}
         <Modal
           visible={isModalVisible}
-          title="존재하지 않는 아이디입니다."
-          onConfirm={() => setIsModalVisible(false)}
-          onClose={() => setIsModalVisible(false)}
+          title={modalMessage}
           confirmText="확인"
+          onConfirm={handleModalConfirm}
+          onClose={() => setIsModalVisible(false)}
         />
 
-        {/* 카카오 약관 모달 */}
+        {/* ✅ 카카오 약관 모달 */}
         <KakaoAgreement
           visible={isKakaoModalVisible}
           onClose={() => setIsKakaoModalVisible(false)}
