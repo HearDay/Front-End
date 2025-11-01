@@ -1,9 +1,10 @@
-// app/(pages)/SelectCategoryPage.tsx
-
+import axiosInstance from "@/services/api/axiosInstance";
+import { signup } from "@/services/api/signup";
+import { SignUpRequest } from "@/types/auth/signup";
 import { LinearGradient } from "expo-linear-gradient";
-import { Stack, useRouter } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 const categories = [
   "경제",
@@ -20,12 +21,50 @@ const SelectCategoryPage = () => {
   const [selected, setSelected] = useState<string[]>([]);
   const router = useRouter();
 
+  const params = useLocalSearchParams<{
+    loginId: string;
+    password: string;
+    email: string;
+    phone: string;
+  }>();
+
   const toggleSelect = (category: string) => {
     setSelected((prev) =>
       prev.includes(category)
         ? prev.filter((item) => item !== category)
         : [...prev, category]
     );
+  };
+
+  const handleSubmit = async () => {
+    if (selected.length === 0) {
+      return Alert.alert("카테고리를 하나 이상 선택해주세요!");
+    }
+
+    const body: SignUpRequest = {
+      loginId: params.loginId!,
+      password: params.password!,
+      email: params.email!,
+      phone: params.phone!,
+      userCategory: selected,
+    };
+
+    console.log("요청 URL:", axiosInstance.defaults.baseURL + "/api/users");
+    console.log("요청 Body:", body);
+
+    try {
+      const res = await signup(body);
+
+      if (res.success) {
+        Alert.alert("회원가입 완료!", "로그인 페이지로 이동합니다.");
+        router.replace("/LoginPage");
+      } else {
+        Alert.alert("회원가입 실패", res.errorCode || "오류가 발생했습니다.");
+      }
+    } catch (err: any) {
+      console.error("서버 오류:", err.response?.data || err.message);
+      Alert.alert("서버 오류", err.response?.data?.errorCode || "요청 실패");
+    }
   };
 
   return (
@@ -83,7 +122,7 @@ const SelectCategoryPage = () => {
 
           <TouchableOpacity
             activeOpacity={0.8}
-            onPress={() => router.replace("/")}
+            onPress={handleSubmit}
             className="w-[104px] h-[49px] rounded-full bg-[#F5FCE9] items-center justify-center border border-[#006716] mt-20"
           >
             <Text className="text-black text-[18px]">확인</Text>
