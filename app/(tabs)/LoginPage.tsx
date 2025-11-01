@@ -107,7 +107,7 @@ const LoginPage = () => {
           {/* 입력 필드 */}
           <View className="gap-3 mb-3">
             <InputBox
-              placeholder="아이디를 입력해 주세요"
+              placeholder="이메일을 입력해 주세요"
               value={id}
               onChangeText={setId}
               variant="transparent"
@@ -132,10 +132,6 @@ const LoginPage = () => {
 
           {/* 하단 링크 */}
           <View className="flex-row items-center gap-2 mt-12">
-            <TouchableOpacity onPress={() => router.push("/FindIdPage")}>
-              <Text className="text-[#006716] text-[13px]">아이디 찾기</Text>
-            </TouchableOpacity>
-            <Text className="text-[#006716] text-[13px]">|</Text>
             <TouchableOpacity onPress={() => router.push("/CertificationPage")}>
               <Text className="text-[#006716] text-[13px]">비밀번호 변경</Text>
             </TouchableOpacity>

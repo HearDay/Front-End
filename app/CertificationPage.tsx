@@ -5,7 +5,7 @@ import { Stack, useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Text, View } from "react-native";
 
-const FindIdPage = () => {
+const CertificationPage = () => {
   const router = useRouter();
 
   const [emailId, setEmailId] = useState("");
@@ -19,22 +19,26 @@ const FindIdPage = () => {
 
   const handleModalConfirm = () => {
     setModalVisible(false);
-    router.replace("/ResetPasswordPage");
+
+    // ✅ 전체 이메일 주소 조합 후 비밀번호 재설정 페이지로 전달
+    const fullEmail = `${emailId}${emailDomain}`;
+    router.replace({
+      pathname: "/ResetPasswordPage",
+      params: { email: fullEmail },
+    });
   };
 
   return (
     <View className="flex-1 bg-[#F5FCE9]">
-
       <Stack.Screen options={{ headerShown: false }} />
 
       <TopBar showBackButton />
 
       <View className="flex-[0.75] items-center justify-center">
-        <Text
-          className="text-2xl font-bold text-[#002C09] mb-10"
-        >
+        <Text className="text-2xl font-bold text-[#002C09] mb-10">
           비밀번호 변경하기
         </Text>
+
         <EmailInputWithSelect
           emailId={emailId}
           onChangeEmailId={setEmailId}
@@ -55,4 +59,4 @@ const FindIdPage = () => {
   );
 };
 
-export default FindIdPage;
+export default CertificationPage;

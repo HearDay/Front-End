@@ -91,8 +91,18 @@ const SignUpPage = () => {
           }}
           showsVerticalScrollIndicator={false}
         >
+          <View className="mt-3">
+            <EmailInputWithSelect
+              emailId={emailId}
+              onChangeEmailId={setEmailId}
+              emailDomain={emailDomain}
+              onChangeEmailDomain={setEmailDomain}
+              onPressVerify={() => console.log("본인인증 클릭")}
+            />
+          </View>
+          
           <InputBoxWithButton
-            placeholder="아이디"
+            placeholder="닉네임"
             value={id}
             onChangeText={setId}
             buttonText="중복확인"
@@ -120,16 +130,6 @@ const SignUpPage = () => {
               placeholder="전화번호 (-없이 번호 입력)"
               value={phone}
               onChangeText={setPhone}
-            />
-          </View>
-
-          <View className="mt-3">
-            <EmailInputWithSelect
-              emailId={emailId}
-              onChangeEmailId={setEmailId}
-              emailDomain={emailDomain}
-              onChangeEmailDomain={setEmailDomain}
-              onPressVerify={() => console.log("본인인증 클릭")}
             />
           </View>
 
