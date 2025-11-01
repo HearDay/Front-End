@@ -7,14 +7,16 @@ export const ENDPOINTS = {
     SIGNUP: '/api/auth/signup',
   },
 
-  // 뉴스
-  NEWS: {
-    LIST: '/api/news',
-    DETAIL: (id: string) => `/api/news/${id}`,
-    AUDIO: (id: string) => `/api/news/${id}/audio`,
-    SAVE: (id: string) => `/api/news/${id}/save`,
-    UNSAVE: (id: string) => `/api/news/${id}/unsave`,
-    VIEWED: '/api/news/viewed',
+  // 기사 (뉴스)
+  ARTICLE: {
+    LIST: '/api/v1/article/list',
+    DETAIL: (id: string) => `/api/v1/article/${id}`,
+    // SAVE, UNSAVE 등 필요한 다른 엔드포인트들도 여기에 추가할 수 있습니다.
+  },
+
+  // 오디오
+  AUDIO: {
+    PLAY: (articleId: string) => `/api/v1/audio/play/${articleId}`,
   },
 
   // 저장된 뉴스

@@ -2,7 +2,7 @@ import TopBar from '@/components/common/TopBar';
 import { DictionaryModal, DictionarySearchBar } from '@/components/screens/Dictionary';
 import { articleService, wordbookService } from '@/services';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity } from 'react-native'; // ✅ 개선: ActivityIndicator 추가
+import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity } from 'react-native'; // 개선: ActivityIndicator 추가
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NewsArticleData } from '../../../types/screens';
 import { NewsArticleContent } from './NewsArticleContent';
