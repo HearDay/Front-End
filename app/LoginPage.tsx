@@ -8,13 +8,13 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Stack, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  Alert,
-  Image,
-  SafeAreaView,
-  StatusBar,
-  Text,
-  TouchableOpacity,
-  View,
+    Alert,
+    Image,
+    SafeAreaView,
+    StatusBar,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 const LoginPage = () => {
@@ -89,7 +89,7 @@ const LoginPage = () => {
           {/* 로고 */}
           <View className="items-center mb-5 mt-3">
             <Image
-              source={require("../../my-expo-app/assets/images/HEARDAY.png")}
+              source={require("../my-expo-app/assets/images/HEARDAY.png")}
               className="w-[156px] h-[56px]"
               resizeMode="contain"
             />
@@ -98,7 +98,7 @@ const LoginPage = () => {
           {/* 메인 트리 이미지 */}
           <View className="items-center mb-3">
             <Image
-              source={require("../../my-expo-app/assets/images/Tree.png")}
+              source={require("../my-expo-app/assets/images/Tree.png")}
               className="w-[267px] h-[267px]"
               resizeMode="contain"
             />
