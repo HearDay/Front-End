@@ -37,6 +37,13 @@ export function DiscussionScreen() {
       const response = await newsService.getViewedNews(sortBy)
       setViewedNews(response)
     } catch (err) {
+      // 디버깅을 위한 상세 에러 로그 추가
+      if (err.response) {
+        console.log('--- AI 토론 화면 API 에러 정보 ---');
+        console.log('상태 코드:', err.response.status);
+        console.log('응답 데이터:', JSON.stringify(err.response.data, null, 2));
+        console.log('---------------------------------');
+      }
       setError('뉴스 목록을 불러올 수 없습니다.')
       console.error('뉴스 로드 실패:', err)
     } finally {

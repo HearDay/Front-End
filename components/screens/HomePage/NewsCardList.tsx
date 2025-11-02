@@ -29,11 +29,11 @@ const NewsCardList = ({ background = "white" }: NewsCardListProps) => {
           onPress={() => handleNewsPress(item.id)}
           activeOpacity={0.8}
           >
-          <NewsCard 
+          <NewsCard
             title={item.title}
             description={item.description}
             image={item.image}
-            background={background} 
+            background={background}
           />
           </TouchableOpacity>
         ))}

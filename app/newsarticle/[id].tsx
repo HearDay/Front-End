@@ -60,7 +60,7 @@ export default function NewsArticlePage() {
       <NewsArticleScreen
         title={article.title}
         imageUrl={article.imageUrl}
-        content={article.articleContent} // articleContent를 content로 전달
+        content={article.detail.content} // 중첩 구조 사용
       />
     </ScrollView>
   )

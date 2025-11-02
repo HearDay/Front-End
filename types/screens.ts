@@ -35,14 +35,26 @@ export interface SavedNewsScreenProps {
 // ========== 뉴스/기사 공통 데이터 관련 ==========
 
 // GET /api/v1/article/{articleId} 응답 타입
+export interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
+  errorCode: string;
+}
+
+interface ArticleDetail {
+  content: string;
+  ttsUrl: string;
+}
+
 export interface ArticleData {
-  id: string;
+  id: number;
   title: string;
-  reporter: string;
-  publishedAt: string;
-  category: string;
+  description: string;
+  detail: ArticleDetail;
   imageUrl: string;
-  articleContent: string; // 기사 본문
+  category: string;
+  updatedAt: string;
 }
 
 // GET /api/v1/audio/play/{articleId} 응답 타입
