@@ -2,33 +2,71 @@ import { Modal } from "@/components/common";
 import InputBox from "@/components/common/InputBox";
 import PrimaryButton from "@/components/common/PrimaryButton";
 import KakaoAgreement from "@/components/screens/Login/KakaoAgreement";
+import { login } from "@/services/api/login";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { Stack, useRouter } from "expo-router";
-import React, { useState, } from "react";
+import React, { useState } from "react";
 import {
-  Image,
-  SafeAreaView,
-  StatusBar,
-  Text,
-  TouchableOpacity,
-  View,
+    Image,
+    SafeAreaView,
+    StatusBar,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 const LoginPage = () => {
   const router = useRouter();
+
   const [id, setId] = useState("");
   const [password, setPassword] = useState("");
-  const [isModalVisible, setIsModalVisible] = useState(false); 
-  const [isKakaoModalVisible, setIsKakaoModalVisible] = useState(false); 
 
-  const handleLogin = () => {
-    // 로그인 검증 (테스트용) 
-    setIsModalVisible(true);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [isKakaoModalVisible, setIsKakaoModalVisible] = useState(false);
+
+  // 로그인 처리 함수
+  const handleLogin = async () => {
+    if (!id || !password) {
+      setModalMessage("아이디와 비밀번호를 모두 입력해주세요.");
+      setIsSuccess(false);
+      setIsModalVisible(true);
+      return;
+    }
+
+    try {
+      const res = await login({ LoginId: id, password });
+
+      if (res.success && res.data?.accessToken) {
+        await AsyncStorage.setItem("accessToken", res.data.accessToken);
+        setModalMessage("로그인에 성공했습니다!");
+        setIsSuccess(true);
+        setIsModalVisible(true);
+
+      } else {
+        setModalMessage(res.message || "존재하지 않는 아이디입니다.");
+        setIsSuccess(false);
+        setIsModalVisible(true);
+      }
+    } catch (err: any) {
+      console.error("로그인 오류:", err.response?.data || err.message);
+      setModalMessage("서버 요청 중 오류가 발생했습니다.");
+      setIsSuccess(false);
+      setIsModalVisible(true);
+    }
   };
 
-  const handleKakaoStart = () => {
-    // 카카오 이용약관 모달 띄우기
-    setIsKakaoModalVisible(true);
+
+  const handleModalConfirm = async () => {
+    setIsModalVisible(false);
+    if (isSuccess) {
+      // 토큰 저장이 완료되면 홈으로 이동
+      setTimeout(() => {
+        router.replace("/(tabs)");
+      }, 300); // 살짝 지연시켜 모달 애니메이션 겹침 방지
+    }
   };
 
   return (
@@ -45,22 +83,25 @@ const LoginPage = () => {
         className="items-center justify-center"
       >
         <SafeAreaView className="flex-1 w-full items-center justify-center">
+          {/* 로고 */}
           <View className="items-center mb-5 mt-3">
             <Image
-              source={require("../../my-expo-app/assets/images/HEARDAY.png")}
+              source={require("../my-expo-app/assets/images/HEARDAY.png")}
               className="w-[156px] h-[56px]"
               resizeMode="contain"
             />
           </View>
 
+          {/* 트리 이미지 */}
           <View className="items-center mb-3">
             <Image
-              source={require("../../my-expo-app/assets/images/Tree.png")}
+              source={require("../my-expo-app/assets/images/Tree.png")}
               className="w-[267px] h-[267px]"
               resizeMode="contain"
             />
           </View>
 
+          {/* 입력 필드 */}
           <View className="gap-3 mb-3">
             <InputBox
               placeholder="아이디를 입력해 주세요"
@@ -76,16 +117,18 @@ const LoginPage = () => {
             />
           </View>
 
+          {/* 버튼 */}
           <View className="gap-3">
             <PrimaryButton title="로그인" variant="white" onPress={handleLogin} />
-            <PrimaryButton title="카카오로 시작하기" variant="kakao" onPress={handleKakaoStart} /> 
+            <PrimaryButton
+              title="카카오로 시작하기"
+              variant="kakao"
+              onPress={() => setIsKakaoModalVisible(true)}
+            />
           </View>
 
+          {/* 하단 링크 */}
           <View className="flex-row items-center gap-2 mt-12">
-            <TouchableOpacity onPress={() => router.push("/FindIdPage")}>
-              <Text className="text-[#006716] text-[13px]">아이디 찾기</Text>
-            </TouchableOpacity>
-            <Text className="text-[#006716] text-[13px]">|</Text>
             <TouchableOpacity onPress={() => router.push("/CertificationPage")}>
               <Text className="text-[#006716] text-[13px]">비밀번호 변경</Text>
             </TouchableOpacity>
@@ -96,21 +139,21 @@ const LoginPage = () => {
           </View>
         </SafeAreaView>
 
+        {/* 결과 모달 */}
         <Modal
           visible={isModalVisible}
-          title="존재하지 않는 아이디입니다."
-          onConfirm={() => setIsModalVisible(false)}
-          onClose={() => setIsModalVisible(false)}
+          title={modalMessage}
           confirmText="확인"
+          onConfirm={handleModalConfirm}
+          onClose={() => setIsModalVisible(false)}
         />
-      
 
+        {/* ✅ 카카오 약관 모달 */}
         <KakaoAgreement
           visible={isKakaoModalVisible}
           onClose={() => setIsKakaoModalVisible(false)}
           onConfirm={() => {
             setIsKakaoModalVisible(false);
-            // 약관 동의 완료 후 다음 단계 진행 (ex. 카카오 로그인 API 호출)
             console.log("약관 동의 완료");
           }}
         />

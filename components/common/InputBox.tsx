@@ -1,6 +1,6 @@
 import { Eye, EyeOff } from "lucide-react-native";
 import React, { useState } from "react";
-import { TextInput, TouchableOpacity, View } from "react-native";
+import { Platform, TextInput, TouchableOpacity, View } from "react-native";
 
 type InputVariant = "transparent" | "default" | "password";
 
@@ -20,33 +20,42 @@ const InputBox = ({
   const [isSecure, setIsSecure] = useState(true);
 
   const baseStyle =
-    "flex-row items-center w-[350px] h-[50px] rounded-[10px] px-6";
+    "flex-row items-center w-[350px] rounded-[10px] px-6"; 
 
   const getVariantStyle = () => {
     switch (variant) {
       case "transparent":
-        return "bg-white/20"; 
+        return "bg-white/20";
       case "password":
-        return "bg-[#FEFFF5]"; 
+        return "bg-[#FEFFF5]";
       default:
         return "bg-[#FEFFF5]";
     }
   };
 
   return (
-    <View className={`${baseStyle} ${getVariantStyle()}`}>
+    <View
+      className={`${baseStyle} ${getVariantStyle()}`}
+      style={{
+        minHeight: 50,              // 고정 height 대신 minHeight로 유연하게
+        paddingVertical: Platform.OS === "ios" ? 10 : 6, // 플랫폼별 세로 패딩 조정
+        alignItems: "center",      
+      }}
+    >
       <TextInput
-        textAlignVertical="center"
         placeholder={placeholder}
         placeholderTextColor={variant === "transparent" ? "#FFFFFF" : "#8AA989"}
         value={value}
         onChangeText={onChangeText}
-        secureTextEntry={
-          variant === "password" || placeholder.includes("비밀번호")
-        } // 비밀번호 입력창일 때 자동으로 *** 처리!
-        className={`flex-1 text-lg font-normal ${
-          variant === "transparent" ? "text-white" : "text-[#1F2D1F]"
-        }`}
+        secureTextEntry={variant === "password" && isSecure}
+        style={{
+          flex: 1,
+          fontSize: 17,
+          color: variant === "transparent" ? "#FFFFFF" : "#1F2D1F",
+          includeFontPadding: false, // 안드로이드에서 하단 여백 없애기
+          textAlignVertical: "center", // iOS/Android 공통 세로 중앙
+          paddingVertical: 0,
+        }}
       />
 
       {variant === "password" && (
