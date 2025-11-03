@@ -1,10 +1,17 @@
+// app/SelectCategoryPage.tsx
 import axiosInstance from "@/services/api/axiosInstance";
-import { signup } from "@/services/api/signup";
-import { SignUpRequest } from "@/types/auth/signup";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 const categories = [
   "경제",
@@ -19,21 +26,32 @@ const categories = [
 
 const SelectCategoryPage = () => {
   const [selected, setSelected] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const params = useLocalSearchParams<{
-    loginId: string;
-    password: string;
-    email: string;
-    phone: string;
-  }>();
-
+  // 선택 토글
   const toggleSelect = (category: string) => {
     setSelected((prev) =>
-      prev.includes(category)
-        ? prev.filter((item) => item !== category)
-        : [...prev, category]
+      prev.includes(category) ? prev.filter((p) => p !== category) : [...prev, category]
     );
+  };
+
+  // 카테고리 등록 API 호출
+  const registerCategories = async (categoriesToRegister: string[]) => {
+    // 토큰을 AsyncStorage에서 꺼내서 Authorization 헤더에 넣음
+    const token = await AsyncStorage.getItem("accessToken");
+
+    if (!token) {
+      throw new Error("로그인 상태가 아닙니다. 다시 로그인해주세요.");
+    }
+
+    const res = await axiosInstance.post("/api/users/category", categoriesToRegister, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return res.data;
   };
 
   const handleSubmit = async () => {
@@ -41,29 +59,23 @@ const SelectCategoryPage = () => {
       return Alert.alert("카테고리를 하나 이상 선택해주세요!");
     }
 
-    const body: SignUpRequest = {
-      loginId: params.loginId!,
-      password: params.password!,
-      email: params.email!,
-      phone: params.phone!,
-      userCategory: selected,
-    };
-
-    console.log("요청 URL:", axiosInstance.defaults.baseURL + "/api/users");
-    console.log("요청 Body:", body);
-
     try {
-      const res = await signup(body);
+      setLoading(true);
+      const res = await registerCategories(selected);
 
-      if (res.success) {
-        Alert.alert("회원가입 완료!", "로그인 페이지로 이동합니다.");
-        router.replace("/LoginPage");
+      // 서버 응답 구조에 맞게 처리
+      if (res?.success) {
+        Alert.alert("완료", "관심 카테고리가 등록되었습니다!");
+        router.replace("/(tabs)"); 
       } else {
-        Alert.alert("회원가입 실패", res.errorCode || "오류가 발생했습니다.");
+        console.error("카테고리 등록 실패 응답:", res);
+        Alert.alert("카테고리 등록 실패", res?.errorCode || res?.message || "오류가 발생했습니다.");
       }
     } catch (err: any) {
-      console.error("서버 오류:", err.response?.data || err.message);
-      Alert.alert("서버 오류", err.response?.data?.errorCode || "요청 실패");
+      console.error("카테고리 등록 오류:", err.response?.data || err.message);
+      Alert.alert("오류", err.response?.data?.errorCode || err.message || "카테고리 등록 실패");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -124,8 +136,13 @@ const SelectCategoryPage = () => {
             activeOpacity={0.8}
             onPress={handleSubmit}
             className="w-[104px] h-[49px] rounded-full bg-[#F5FCE9] items-center justify-center border border-[#006716] mt-20"
+            disabled={loading}
           >
-            <Text className="text-black text-[18px]">확인</Text>
+            {loading ? (
+              <ActivityIndicator size="small" color="#006716" />
+            ) : (
+              <Text className="text-black text-[18px]">확인</Text>
+            )}
           </TouchableOpacity>
         </ScrollView>
       </LinearGradient>

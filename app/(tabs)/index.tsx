@@ -10,8 +10,9 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
+const nickname = "지니";
+
 export default function Index() {  // ← function Index로 변경
-  const userName = "지니";
   const categories = [
     "경제",
     "방송 / 연예",
@@ -73,7 +74,7 @@ export default function Index() {  // ← function Index로 변경
         <>
           <View className="px-6 mt-4">
             <Text className="text-[16px] text-right font-extrabold text-[#002C14] mt-2 mr-2">
-              {userName}님이 좋아할 만한 오늘의 뉴스
+              {nickname}님이 좋아할 만한 오늘의 뉴스
             </Text>
           </View>
 
