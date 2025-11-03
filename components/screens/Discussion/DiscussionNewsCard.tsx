@@ -20,7 +20,7 @@ export function DiscussionNewsCard({ news, onPress }: DiscussionNewsCardProps) {
             </View>
           ) : (
             <Image
-              source={{ uri: news.imageUrl }}
+              source={{ uri: news.thumbnail }}
               className="w-40 h-24 rounded-xl"
               resizeMode="cover"
               onError={() => setImageError(true)}

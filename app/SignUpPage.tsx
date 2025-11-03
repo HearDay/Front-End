@@ -2,7 +2,6 @@ import InputBox from "@/components/common/InputBox";
 import PrimaryButton from "@/components/common/PrimaryButton";
 import TopBar from "@/components/common/TopBar";
 import EmailInputWithSelect from "@/components/screens/SignUp/EmailInputWithSelect";
-import InputBoxWithButton from "@/components/screens/SignUp/InputWithButton";
 import TermsAgreement from "@/components/screens/SignUp/TermsAgreement";
 import axiosInstance from "@/services/api/axiosInstance";
 import { signup } from "@/services/api/signup";
@@ -11,9 +10,9 @@ import React, { useState } from "react";
 import { Alert, ScrollView, StatusBar, Text, View } from "react-native";
 
 const SignUpPage = () => {
-  const router = useRouter(); // 라우터 훅 선언
+  const router = useRouter();
 
-  const [id, setId] = useState("");
+  const [nickname, setNickname] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPw, setConfirmPw] = useState("");
   const [phone, setPhone] = useState("");
@@ -36,11 +35,10 @@ const SignUpPage = () => {
     }
 
     const body = {
-      loginId: id,
+      nickname,
       password,
       email: `${emailId}${emailDomain}`,
       phone,
-      userCategory: ["경제"], // 임시 값
     };
 
     console.log("요청 URL:", axiosInstance.defaults.baseURL + "/api/users/");
@@ -48,26 +46,30 @@ const SignUpPage = () => {
 
     try {
       const res = await signup(body);
-      console.log("✅ 회원가입 성공:", res);
 
-      // ✅ 회원가입 성공 시 카테고리 선택 페이지로 이동
-      Alert.alert("회원가입 성공", "선호 카테고리를 선택해주세요!", [
-        {
-          text: "확인",
-          onPress: () =>
-            router.push({
-              pathname: "/SelectCategoryPage",
-              params: {
-                loginId: id,
-                password,
-                email: `${emailId}${emailDomain}`,
-                phone,
-              },
-            }),
-        },
-      ]);
+      if (res.success) {
+
+        // 토큰 저장은 signup() 내부에서 이미 완료됨
+        Alert.alert("회원가입 성공", "선호 카테고리를 선택해주세요!", [
+          {
+            text: "확인",
+            onPress: () =>
+              router.push({
+                pathname: "/SelectCategoryPage",
+                params: {
+                  nickname,
+                  password,
+                  email: `${emailId}${emailDomain}`,
+                  phone,
+                },
+              }),
+          },
+        ]);
+      } else {
+        Alert.alert("회원가입 실패", res.message || "오류가 발생했습니다.");
+      }
     } catch (err: any) {
-      console.error("❌ 회원가입 실패:", err.response?.data || err.message);
+      console.error("회원가입 실패:", err.response?.data || err.message);
       Alert.alert(
         "회원가입 실패",
         err.response?.data?.message || "요청 중 오류가 발생했습니다."
@@ -100,21 +102,21 @@ const SignUpPage = () => {
               onPressVerify={() => console.log("본인인증 클릭")}
             />
           </View>
-          
-          <InputBoxWithButton
-            placeholder="닉네임"
-            value={id}
-            onChangeText={setId}
-            buttonText="중복확인"
-            onPressButton={() => console.log("중복확인 클릭!")}
-          />
 
           <InputBox
-            placeholder="비밀번호"
-            value={password}
-            onChangeText={setPassword}
-            variant="password"
+            placeholder="닉네임"
+            value={nickname}
+            onChangeText={setNickname}
           />
+
+          <View className="mt-3">
+            <InputBox
+              placeholder="비밀번호"
+              value={password}
+              onChangeText={setPassword}
+              variant="password"
+            />
+          </View>
 
           <View className="mt-3">
             <InputBox

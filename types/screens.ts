@@ -32,15 +32,38 @@ export interface SavedNewsScreenProps {
   // 필요시 추가
 }
 
-// ========== 뉴스 플레이어 관련 ==========
+// ========== 뉴스/기사 공통 데이터 관련 ==========
 
-export interface NewsPlayerData {
-  id: string
-  title: string
-  imageUrl: string
-  fullText: string    // 전체 기사 내용
-  audioUrl: string    // 오디오 URL
+// GET /api/v1/article/{articleId} 응답 타입
+export interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
+  errorCode: string;
 }
+
+interface ArticleDetail {
+  content: string;
+  ttsUrl: string;
+}
+
+export interface ArticleData {
+  id: number;
+  title: string;
+  description: string;
+  detail: ArticleDetail;
+  imageUrl: string;
+  category: string;
+  updatedAt: string;
+}
+
+// GET /app/audio/play/{articleId} 응답 타입
+export interface AudioData {
+  audioUrl: string;
+}
+
+
+// ========== 뉴스 플레이어 관련 ==========
 
 export interface NewsPlayerHeaderProps {
   title: string

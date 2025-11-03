@@ -34,9 +34,28 @@ export function DiscussionScreen() {
     try {
       setLoading(true)
       setError(null)
-      const response = await newsService.getViewedNews(sortBy)
-      setViewedNews(response)
-    } catch (err) {
+      // sortBy를 API 형식으로 변환: 'latest' → 'RECENT', 'oldest' → 'PUBLISH_DATE'
+      const apiSortBy = sortBy === 'latest' ? 'RECENT' : 'PUBLISH_DATE'
+      const response = await newsService.getRecentArticles(apiSortBy)
+
+      // ArticleData[]를 DiscussionNewsItem[]로 변환
+      const transformedNews: DiscussionNewsItem[] = response.map(article => ({
+        id: String(article.id),
+        title: article.title,
+        imageUrl: article.imageUrl,
+        summary: article.description,
+        viewedAt: article.updatedAt,
+      }))
+
+      setViewedNews(transformedNews)
+    } catch (err: any) {
+      // 디버깅을 위한 상세 에러 로그 추가
+      if (err?.response) {
+        console.log('--- AI 토론 화면 API 에러 정보 ---');
+        console.log('상태 코드:', err.response.status);
+        console.log('응답 데이터:', JSON.stringify(err.response.data, null, 2));
+        console.log('---------------------------------');
+      }
       setError('뉴스 목록을 불러올 수 없습니다.')
       console.error('뉴스 로드 실패:', err)
     } finally {

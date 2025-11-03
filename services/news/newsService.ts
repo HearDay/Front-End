@@ -1,69 +1,41 @@
-import { DiscussionNewsItem, NewsPlayerData, SavedNewsItem } from '../../types/screens'
+import { ApiResponse, ArticleData, DiscussionNewsItem, SavedNewsItem } from '../../types/screens'
 import apiClient from '../api/client'
 import { ENDPOINTS } from '../api/endpoints'
 
-// 개발용 더미 데이터
-const DUMMY_NEWS_PLAYER: NewsPlayerData = {
-  id: '1',
-  title: '테스트 뉴스 제목',
-  imageUrl: 'https://picsum.photos/400/300',
-  fullText: '첫 번째 줄입니다.\n두 번째 줄입니다.\n세 번째 줄입니다.\n네 번째 줄입니다.\n다섯 번째 줄입니다.\n여섯 번째 줄입니다.',
-  audioUrl: 'https://example.com/audio.mp3',
-}
-
-const DUMMY_SAVED_NEWS: SavedNewsItem[] = [
-  {
-    id: '1',
-    title: '저장된 뉴스 1',
-    summary: '뉴스 요약 내용입니다.',
-    imageUrl: 'https://picsum.photos/400/300',
-    category: '경제',
-    savedAt: '2025-01-10',
-  },
-  {
-    id: '2',
-    title: '저장된 뉴스 2',
-    summary: '또 다른 뉴스 요약입니다.',
-    imageUrl: 'https://picsum.photos/400/301',
-    category: '기술',
-    savedAt: '2025-01-09',
-  },
-]
-
-const DUMMY_VIEWED_NEWS: DiscussionNewsItem[] = [
-  {
-    id: '1',
-    title: '본 뉴스 1',
-    imageUrl: 'https://picsum.photos/400/300',
-    summary: '뉴스 요약',
-    viewedAt: '2025-01-10T12:00:00',
-    popularity: 100,
-    viewCount: 500,
-  },
-]
-
 // 개발 모드 플래그
-const USE_DUMMY_DATA = true // API가 준비되면 false로 변경
+const USE_DUMMY_DATA = false // API가 준비되면 false로 변경
 
 export const newsService = {
-  async getNewsDetail(newsId: string): Promise<NewsPlayerData> {
+  // 뉴스 기사 상세 정보 조회
+  async getArticleDetail(articleId: string): Promise<ArticleData> {
     if (USE_DUMMY_DATA) {
-      return new Promise((resolve) => {
-        setTimeout(() => resolve(DUMMY_NEWS_PLAYER), 500)
-      })
+      // 필요시 더미 데이터 로직 구현
+      return {} as ArticleData
     }
     
-    const response = await apiClient.get(ENDPOINTS.NEWS.DETAIL(newsId))
-    return response.data
+    const response = await apiClient.get<ApiResponse<ArticleData>>(ENDPOINTS.ARTICLE.DETAIL(articleId))
+    return response.data.data // wrapper 구조에 맞춰 실제 데이터 반환
   },
 
-  async getNewsAudio(newsId: string): Promise<string> {
-    if (USE_DUMMY_DATA) {
-      return DUMMY_NEWS_PLAYER.audioUrl
-    }
-    
-    const response = await apiClient.get(ENDPOINTS.NEWS.AUDIO(newsId))
-    return response.data.audioUrl
+  // 뉴스 기사 목록 조회/검색
+  async getArticles(
+    page: number,
+    size: number,
+    categories?: string[],
+    title?: string,
+    sort?: string[]
+  ): Promise<ArticleData[]> {
+    const response = await apiClient.post<ApiResponse<ArticleData[]>>(
+      ENDPOINTS.ARTICLE.LIST,
+      {
+        categories,
+        title,
+      },
+      {
+        params: { page, size, sort }
+      }
+    );
+    return response.data.data;
   },
 
   async saveNews(newsId: string): Promise<void> {
@@ -73,6 +45,7 @@ export const newsService = {
       })
     }
     
+    // @ts-ignore - ENDPOINTS.NEWS is deprecated
     await apiClient.post(ENDPOINTS.NEWS.SAVE(newsId))
   },
 
@@ -82,13 +55,14 @@ export const newsService = {
         setTimeout(() => resolve(), 500)
       })
     }
-    
+    // @ts-ignore - ENDPOINTS.NEWS is deprecated
     await apiClient.delete(ENDPOINTS.NEWS.UNSAVE(newsId))
   },
 
   async getSavedNews(): Promise<SavedNewsItem[]> {
     if (USE_DUMMY_DATA) {
       return new Promise((resolve) => {
+        // @ts-ignore - DUMMY_SAVED_NEWS is not defined
         setTimeout(() => resolve(DUMMY_SAVED_NEWS), 500)
       })
     }
@@ -107,16 +81,21 @@ export const newsService = {
     await apiClient.delete(ENDPOINTS.SAVED_NEWS.DELETE(newsId))
   },
 
-  async getViewedNews(sortBy: 'latest' | 'popular' | 'views'): Promise<DiscussionNewsItem[]> {
-    if (USE_DUMMY_DATA) {
-      return new Promise((resolve) => {
-        setTimeout(() => resolve(DUMMY_VIEWED_NEWS), 500)
-      })
-    }
-    
-    const response = await apiClient.get(ENDPOINTS.NEWS.VIEWED, {
-      params: { sort: sortBy }
-    })
-    return response.data
+  async getViewedNews(sortBy: 'latest' | 'popular' | 'views'): Promise<ArticleData[]> {
+    // TODO: "내가 본 뉴스" API가 명확해지면 수정 필요.
+    // 현재는 임시로 전체 글 목록 조회 API를 사용합니다.
+    console.warn('getViewedNews는 현재 전체 목록을 가져옵니다.');
+    return this.getArticles(0, 10);
+  },
+
+  // 최근 본 기사 목록 조회
+  async getRecentArticles(sortBy: 'RECENT' | 'PUBLISH_DATE' = 'RECENT'): Promise<ArticleData[]> {
+    const response = await apiClient.get<ApiResponse<ArticleData[]>>(
+      ENDPOINTS.ARTICLE.RECENT,
+      {
+        params: { sortBy }
+      }
+    );
+    return response.data.data;
   },
 }

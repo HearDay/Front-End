@@ -1,16 +1,24 @@
-// app/_layout.tsx
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Slot } from "expo-router";
+import { Slot, usePathname } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import "../global.css";
-import LoginPage from "./LoginPage"; // 로그인 페이지 직접 import
+import LoginPage from "./LoginPage";
 
 export default function RootLayout() {
-  const [isLoading, setIsLoading] = useState(true); // 로딩 여부
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // 로그인 여부
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const pathname = usePathname();
 
-  // 1. 앱 실행 시 토큰 검사
+  // 로그인 없이 접근 가능한 페이지 목록
+  const publicRoutes = [
+    "/LoginPage",
+    "/SignUpPage",
+    "/CertificationPage",
+    "/ResetPasswordPage",
+    "/SelectCategoryPage"
+  ];
+
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -25,7 +33,7 @@ export default function RootLayout() {
     checkAuth();
   }, []);
 
-  // 2. 로딩 중이면 스피너 표시
+  // 로딩 중이면 스피너
   if (isLoading) {
     return (
       <View className="flex-1 items-center justify-center bg-white">
@@ -34,11 +42,10 @@ export default function RootLayout() {
     );
   }
 
-  // 3. 로그인 안 되어 있으면 LoginPage 렌더링
-  if (!isAuthenticated) {
+  // 비로그인 시, publicRoutes 외 페이지는 LoginPage로 이동
+  if (!isAuthenticated && !publicRoutes.includes(pathname)) {
     return <LoginPage />;
   }
 
-  // 4. 로그인 되어 있으면 나머지 라우트 보여주기
   return <Slot />;
 }

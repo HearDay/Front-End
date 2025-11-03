@@ -1,20 +1,24 @@
 export const ENDPOINTS = {
   // 인증
   AUTH: {
-    LOGIN: '/api/auth/login',
+    LOGIN: '/api/users/login',
     LOGOUT: '/api/auth/logout',
     REFRESH: '/api/auth/refresh',
-    SIGNUP: '/api/auth/signup',
+    SIGNUP: '/api/users',
+    RESET_PASSWORD: '/api/users/password/reset',
   },
 
-  // 뉴스
-  NEWS: {
-    LIST: '/api/news',
-    DETAIL: (id: string) => `/api/news/${id}`,
-    AUDIO: (id: string) => `/api/news/${id}/audio`,
-    SAVE: (id: string) => `/api/news/${id}/save`,
-    UNSAVE: (id: string) => `/api/news/${id}/unsave`,
-    VIEWED: '/api/news/viewed',
+  // 기사 (뉴스)
+  ARTICLE: {
+    LIST: '/api/articles', // Swagger: POST /api/articles
+    DETAIL: (id: string) => `/api/articles/${id}`, // Swagger: GET /api/articles/{id}
+    HIGHLIGHT: (id: string) => `/api/articles/${id}/highlight`,
+    RECENT: '/api/recent-articles', // Swagger: GET /api/recent-articles
+  },
+
+  // 오디오
+  AUDIO: {
+    PLAY: (articleId: string) => `/api/audio/play/${articleId}`,
   },
 
   // 저장된 뉴스
@@ -45,11 +49,5 @@ export const ENDPOINTS = {
     DETAIL: (id: string) => `/api/discussion/${id}`,
     MESSAGES: (id: string) => `/api/discussion/${id}/messages`,
     SEND_MESSAGE: (id: string) => `/api/discussion/${id}/messages`,
-  },
-
-  // 기사 본문
-  ARTICLE: {
-    DETAIL: (id: string) => `/api/articles/${id}`,
-    HIGHLIGHT: (id: string) => `/api/articles/${id}/highlight`,
   },
 }
