@@ -85,6 +85,17 @@ export const newsService = {
     // TODO: "내가 본 뉴스" API가 명확해지면 수정 필요.
     // 현재는 임시로 전체 글 목록 조회 API를 사용합니다.
     console.warn('getViewedNews는 현재 전체 목록을 가져옵니다.');
-    return this.getArticles(0, 10); 
+    return this.getArticles(0, 10);
+  },
+
+  // 최근 본 기사 목록 조회
+  async getRecentArticles(sortBy: 'RECENT' | 'PUBLISH_DATE' = 'RECENT'): Promise<ArticleData[]> {
+    const response = await apiClient.get<ApiResponse<ArticleData[]>>(
+      ENDPOINTS.ARTICLE.RECENT,
+      {
+        params: { sortBy }
+      }
+    );
+    return response.data.data;
   },
 }

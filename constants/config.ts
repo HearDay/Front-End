@@ -18,8 +18,8 @@ export const API_HEADERS = {
 
 // 스토리지 키
 export const STORAGE_KEYS = {
-  ACCESS_TOKEN: '@hearday_access_token',
-  REFRESH_TOKEN: '@hearday_refresh_token',
+  ACCESS_TOKEN: 'accessToken',
+  REFRESH_TOKEN: 'refreshToken',
   USER_INFO: '@hearday_user_info',
   SELECTED_CATEGORIES: '@hearday_selected_categories',
 }
