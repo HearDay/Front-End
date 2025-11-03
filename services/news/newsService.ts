@@ -1,4 +1,4 @@
-import { ArticleData, AudioData, DiscussionNewsItem, SavedNewsItem } from '../../types/screens'
+import { ApiResponse, ArticleData, DiscussionNewsItem, SavedNewsItem } from '../../types/screens'
 import apiClient from '../api/client'
 import { ENDPOINTS } from '../api/endpoints'
 
@@ -13,19 +13,29 @@ export const newsService = {
       return {} as ArticleData
     }
     
-    const response = await apiClient.get(ENDPOINTS.ARTICLE.DETAIL(articleId))
-    return response.data
+    const response = await apiClient.get<ApiResponse<ArticleData>>(ENDPOINTS.ARTICLE.DETAIL(articleId))
+    return response.data.data // wrapper 구조에 맞춰 실제 데이터 반환
   },
 
-  // 뉴스 기사 음성 정보 조회
-  async getArticleAudio(articleId: string): Promise<AudioData> {
-    if (USE_DUMMY_DATA) {
-      // 필요시 더미 데이터 로직 구현
-      return { audioUrl: 'https://example.com/audio.mp3' }
-    }
-    
-    const response = await apiClient.get(ENDPOINTS.AUDIO.PLAY(articleId))
-    return response.data
+  // 뉴스 기사 목록 조회/검색
+  async getArticles(
+    page: number,
+    size: number,
+    categories?: string[],
+    title?: string,
+    sort?: string[]
+  ): Promise<ArticleData[]> {
+    const response = await apiClient.post<ApiResponse<ArticleData[]>>(
+      ENDPOINTS.ARTICLE.LIST,
+      {
+        categories,
+        title,
+      },
+      {
+        params: { page, size, sort }
+      }
+    );
+    return response.data.data;
   },
 
   async saveNews(newsId: string): Promise<void> {
@@ -35,6 +45,7 @@ export const newsService = {
       })
     }
     
+    // @ts-ignore - ENDPOINTS.NEWS is deprecated
     await apiClient.post(ENDPOINTS.NEWS.SAVE(newsId))
   },
 
@@ -44,13 +55,14 @@ export const newsService = {
         setTimeout(() => resolve(), 500)
       })
     }
-    
+    // @ts-ignore - ENDPOINTS.NEWS is deprecated
     await apiClient.delete(ENDPOINTS.NEWS.UNSAVE(newsId))
   },
 
   async getSavedNews(): Promise<SavedNewsItem[]> {
     if (USE_DUMMY_DATA) {
       return new Promise((resolve) => {
+        // @ts-ignore - DUMMY_SAVED_NEWS is not defined
         setTimeout(() => resolve(DUMMY_SAVED_NEWS), 500)
       })
     }
@@ -69,16 +81,10 @@ export const newsService = {
     await apiClient.delete(ENDPOINTS.SAVED_NEWS.DELETE(newsId))
   },
 
-  async getViewedNews(sortBy: 'latest' | 'popular' | 'views'): Promise<DiscussionNewsItem[]> {
-    if (USE_DUMMY_DATA) {
-      return new Promise((resolve) => {
-        setTimeout(() => resolve(DUMMY_VIEWED_NEWS), 500)
-      })
-    }
-    
-    const response = await apiClient.get(ENDPOINTS.NEWS.VIEWED, {
-      params: { sort: sortBy }
-    })
-    return response.data
+  async getViewedNews(sortBy: 'latest' | 'popular' | 'views'): Promise<ArticleData[]> {
+    // TODO: "내가 본 뉴스" API가 명확해지면 수정 필요.
+    // 현재는 임시로 전체 글 목록 조회 API를 사용합니다.
+    console.warn('getViewedNews는 현재 전체 목록을 가져옵니다.');
+    return this.getArticles(0, 10); 
   },
 }

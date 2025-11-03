@@ -9,14 +9,14 @@ export const ENDPOINTS = {
 
   // 기사 (뉴스)
   ARTICLE: {
-    LIST: '/api/v1/article/list',
-    DETAIL: (id: string) => `/api/v1/article/${id}`,
-    // SAVE, UNSAVE 등 필요한 다른 엔드포인트들도 여기에 추가할 수 있습니다.
+    LIST: '/api/articles', // Swagger: POST /api/articles
+    DETAIL: (id: string) => `/api/articles/${id}`, // Swagger: GET /api/articles/{id}
+    HIGHLIGHT: (id: string) => `/api/articles/${id}/highlight`,
   },
 
   // 오디오
   AUDIO: {
-    PLAY: (articleId: string) => `/api/v1/audio/play/${articleId}`,
+    PLAY: (articleId: string) => `/api/audio/play/${articleId}`,
   },
 
   // 저장된 뉴스
@@ -47,11 +47,5 @@ export const ENDPOINTS = {
     DETAIL: (id: string) => `/api/discussion/${id}`,
     MESSAGES: (id: string) => `/api/discussion/${id}/messages`,
     SEND_MESSAGE: (id: string) => `/api/discussion/${id}/messages`,
-  },
-
-  // 기사 본문
-  ARTICLE: {
-    DETAIL: (id: string) => `/api/articles/${id}`,
-    HIGHLIGHT: (id: string) => `/api/articles/${id}/highlight`,
   },
 }

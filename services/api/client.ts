@@ -1,8 +1,11 @@
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
 import { storage } from '../../utils/storage'
 
-// 임시로 직접 값 넣기
-const BASE_URL = 'http://hearday-backend-env.eba-cz9gkqcp.ap-northeast-2.elasticbeanstalk.com'
+// .env 파일에서 환경변수 가져오기 (필수)
+const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL
+if (!BASE_URL) {
+  throw new Error('EXPO_PUBLIC_API_BASE_URL이 .env 파일에 정의되지 않았습니다!')
+}
 const TIMEOUT = 10000
 
 // API 클라이언트 인스턴스 생성
