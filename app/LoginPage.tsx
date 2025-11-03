@@ -8,18 +8,18 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Stack, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-    Image,
-    SafeAreaView,
-    StatusBar,
-    Text,
-    TouchableOpacity,
-    View,
+  Image,
+  SafeAreaView,
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 const LoginPage = () => {
   const router = useRouter();
 
-  const [id, setId] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -29,7 +29,7 @@ const LoginPage = () => {
 
   // 로그인 처리 함수
   const handleLogin = async () => {
-    if (!id || !password) {
+    if ( !email || !password) {
       setModalMessage("아이디와 비밀번호를 모두 입력해주세요.");
       setIsSuccess(false);
       setIsModalVisible(true);
@@ -37,7 +37,7 @@ const LoginPage = () => {
     }
 
     try {
-      const res = await login({ LoginId: id, password });
+      const res = await login({ email, password });
 
       if (res.success && res.data?.accessToken) {
         await AsyncStorage.setItem("accessToken", res.data.accessToken);
@@ -104,9 +104,9 @@ const LoginPage = () => {
           {/* 입력 필드 */}
           <View className="gap-3 mb-3">
             <InputBox
-              placeholder="아이디를 입력해 주세요"
-              value={id}
-              onChangeText={setId}
+              placeholder="이메일을 입력해 주세요"
+              value={email}
+              onChangeText={setEmail}
               variant="transparent"
             />
             <InputBox
@@ -148,7 +148,7 @@ const LoginPage = () => {
           onClose={() => setIsModalVisible(false)}
         />
 
-        {/* ✅ 카카오 약관 모달 */}
+        {/* 카카오 약관 모달 */}
         <KakaoAgreement
           visible={isKakaoModalVisible}
           onClose={() => setIsKakaoModalVisible(false)}
