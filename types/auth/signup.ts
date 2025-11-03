@@ -3,7 +3,6 @@ export interface SignUpRequest {
   password: string;
   email: string;
   phone: string;
-  // 회원가입 단계에서는 userCategory를 포함하지 않음
 }
 
 export interface SignUpResponse {

@@ -1,6 +1,4 @@
-// app/SelectCategoryPage.tsx
-import axiosInstance from "@/services/api/axiosInstance";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { registerUserCategories } from "@/services/api/category";
 import { LinearGradient } from "expo-linear-gradient";
 import { Stack, useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -29,29 +27,12 @@ const SelectCategoryPage = () => {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  // 선택 토글
   const toggleSelect = (category: string) => {
     setSelected((prev) =>
-      prev.includes(category) ? prev.filter((p) => p !== category) : [...prev, category]
+      prev.includes(category)
+        ? prev.filter((p) => p !== category)
+        : [...prev, category]
     );
-  };
-
-  // 카테고리 등록 API 호출
-  const registerCategories = async (categoriesToRegister: string[]) => {
-    // 토큰을 AsyncStorage에서 꺼내서 Authorization 헤더에 넣음
-    const token = await AsyncStorage.getItem("accessToken");
-
-    if (!token) {
-      throw new Error("로그인 상태가 아닙니다. 다시 로그인해주세요.");
-    }
-
-    const res = await axiosInstance.post("/api/users/category", categoriesToRegister, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    return res.data;
   };
 
   const handleSubmit = async () => {
@@ -61,19 +42,24 @@ const SelectCategoryPage = () => {
 
     try {
       setLoading(true);
-      const res = await registerCategories(selected);
+      const res = await registerUserCategories(selected); 
 
-      // 서버 응답 구조에 맞게 처리
       if (res?.success) {
         Alert.alert("완료", "관심 카테고리가 등록되었습니다!");
-        router.replace("/(tabs)"); 
+        router.replace("/(tabs)");
       } else {
         console.error("카테고리 등록 실패 응답:", res);
-        Alert.alert("카테고리 등록 실패", res?.errorCode || res?.message || "오류가 발생했습니다.");
+        Alert.alert(
+          "카테고리 등록 실패",
+          res?.errorCode || res?.message || "오류가 발생했습니다."
+        );
       }
     } catch (err: any) {
       console.error("카테고리 등록 오류:", err.response?.data || err.message);
-      Alert.alert("오류", err.response?.data?.errorCode || err.message || "카테고리 등록 실패");
+      Alert.alert(
+        "오류",
+        err.response?.data?.errorCode || err.message || "카테고리 등록 실패"
+      );
     } finally {
       setLoading(false);
     }
@@ -82,7 +68,6 @@ const SelectCategoryPage = () => {
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
-
       <LinearGradient
         colors={["#006716", "#428F48", "#85B77A", "#FBFFD3"]}
         locations={[0, 0.22, 0.54, 0.85]}

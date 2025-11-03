@@ -1,10 +1,10 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axiosInstance from "./axiosInstance";
 
-
 export const registerUserCategories = async (categories: string[]) => {
   try {
     const token = await AsyncStorage.getItem("accessToken");
+   
 
     if (!token) {
       throw new Error("로그인 토큰이 없습니다. 다시 로그인해주세요.");
@@ -17,7 +17,7 @@ export const registerUserCategories = async (categories: string[]) => {
       },
     });
 
-    return res.data; 
+    return res.data;
   } catch (error: any) {
     console.error("카테고리 등록 오류:", error.response?.data || error.message);
     throw error;

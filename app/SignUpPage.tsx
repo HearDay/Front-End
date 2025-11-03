@@ -4,12 +4,13 @@ import TopBar from "@/components/common/TopBar";
 import EmailInputWithSelect from "@/components/screens/SignUp/EmailInputWithSelect";
 import TermsAgreement from "@/components/screens/SignUp/TermsAgreement";
 import axiosInstance from "@/services/api/axiosInstance";
+import { signup } from "@/services/api/signup";
 import { Stack, useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Alert, ScrollView, StatusBar, Text, View } from "react-native";
 
 const SignUpPage = () => {
-  const router = useRouter(); // 라우터 훅 선언
+  const router = useRouter();
 
   const [nickname, setNickname] = useState("");
   const [password, setPassword] = useState("");
@@ -37,32 +38,38 @@ const SignUpPage = () => {
       nickname,
       password,
       email: `${emailId}${emailDomain}`,
-      phone
+      phone,
     };
 
     console.log("요청 URL:", axiosInstance.defaults.baseURL + "/api/users/");
     console.log("요청 Body:", body);
 
     try {
+      const res = await signup(body);
 
-      // 회원가입 성공 시 카테고리 선택 페이지로 이동
-      Alert.alert("회원가입 성공", "선호 카테고리를 선택해주세요!", [
-        {
-          text: "확인",
-          onPress: () =>
-            router.push({
-              pathname: "/SelectCategoryPage",
-              params: {
-                nickname,
-                password,
-                email: `${emailId}${emailDomain}`,
-                phone,
-              },
-            }),
-        },
-      ]);
+      if (res.success) {
+
+        // 토큰 저장은 signup() 내부에서 이미 완료됨
+        Alert.alert("회원가입 성공", "선호 카테고리를 선택해주세요!", [
+          {
+            text: "확인",
+            onPress: () =>
+              router.push({
+                pathname: "/SelectCategoryPage",
+                params: {
+                  nickname,
+                  password,
+                  email: `${emailId}${emailDomain}`,
+                  phone,
+                },
+              }),
+          },
+        ]);
+      } else {
+        Alert.alert("회원가입 실패", res.message || "오류가 발생했습니다.");
+      }
     } catch (err: any) {
-      console.error("❌ 회원가입 실패:", err.response?.data || err.message);
+      console.error("회원가입 실패:", err.response?.data || err.message);
       Alert.alert(
         "회원가입 실패",
         err.response?.data?.message || "요청 중 오류가 발생했습니다."
@@ -95,7 +102,6 @@ const SignUpPage = () => {
               onPressVerify={() => console.log("본인인증 클릭")}
             />
           </View>
-          
 
           <InputBox
             placeholder="닉네임"
