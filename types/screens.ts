@@ -57,7 +57,7 @@ export interface ArticleData {
   updatedAt: string;
 }
 
-// GET /api/v1/audio/play/{articleId} 응답 타입
+// GET /app/audio/play/{articleId} 응답 타입
 export interface AudioData {
   audioUrl: string;
 }
