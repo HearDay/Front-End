@@ -1,44 +1,62 @@
-import { getKakaoAuthUrl } from "@/services/api/kakaoAuth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter } from "expo-router";
-import React, { useCallback } from "react";
+import { Stack, useRouter } from "expo-router";
+import React from "react";
+import { ActivityIndicator, View } from "react-native";
 import { WebView } from "react-native-webview";
 
-const REDIRECT_URI = process.env.EXPO_PUBLIC_REDIRECT_URI; // 🌟 env에서 가져오기
+const CLIENT_ID = process.env.EXPO_PUBLIC_CLIENT_ID;
+const REDIRECT_URI = process.env.EXPO_PUBLIC_REDIRECT_URI;
 
 const KakaoLoginView = () => {
   const router = useRouter();
 
-  // WebView의 URL 변경 감지
-  const handleNavigationStateChange = useCallback(async (navState: any) => {
+  // 카카오 인가 코드 요청 URL
+  const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}`;
+  console.log("KAKAO AUTH URL:", kakaoAuthUrl);
+
+  // WebView에서 redirect 시 accessToken 감지
+  const handleNavigationStateChange = async (navState: any) => {
     const { url } = navState;
-    if (!url) return;
 
-    // 카카오 로그인 완료 후 redirect_uri로 돌아왔는지 확인
-    if (url.startsWith(REDIRECT_URI) && url.includes("accessToken=")) {
-      const token = url.split("accessToken=")[1];
-      const accessToken = decodeURIComponent(token);
-      console.log("Access Token:", accessToken);
-
+    // accessToken이 포함된 URL이면 저장
+    if (url.includes("accessToken=")) {
       try {
-        await AsyncStorage.setItem("accessToken", accessToken);
-        console.log("로그인 성공, 토큰 저장 완료");
-        router.push("/(tabs)");
+        const token = url.split("accessToken=")[1];
+        console.log("카카오 로그인 성공, 토큰:", token);
+
+        await AsyncStorage.setItem("accessToken", token);
+        router.replace("/(tabs)"); // 홈 화면 이동
       } catch (err) {
-        console.error("토큰 저장 오류:", err);
-        alert("로그인 중 오류가 발생했습니다.");
+        console.error("토큰 저장 실패:", err);
       }
     }
-  }, []);
+
+    // 로그인 실패 시
+    if (url.includes("error")) {
+      console.log("카카오 로그인 실패:", url);
+      router.replace("/LoginPage");
+    }
+  };
 
   return (
-    <WebView
-      source={{ uri: getKakaoAuthUrl() }}
-      onNavigationStateChange={handleNavigationStateChange}
-      startInLoadingState
-      javaScriptEnabled
-      originWhitelist={["*"]}
-    />
+    <>
+      <Stack.Screen options={{ headerShown: false }} />
+      <View style={{ flex: 1 }}>
+        <WebView
+          source={{ uri: kakaoAuthUrl }}
+          onNavigationStateChange={handleNavigationStateChange}
+          startInLoadingState
+          renderLoading={() => (
+            <View className="flex-1 items-center justify-center">
+              <ActivityIndicator size="large" color="#000" />
+            </View>
+          )}
+          javaScriptEnabled
+          domStorageEnabled
+          originWhitelist={["*"]}
+        />
+      </View>
+    </>
   );
 };
 
