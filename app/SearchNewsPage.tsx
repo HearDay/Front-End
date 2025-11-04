@@ -3,18 +3,24 @@
 import NewsCardList from "@/components/screens/HomePage/NewsCardList";
 import ScrollButton from "@/components/screens/SearchNews/ScrollButton";
 import SearchBar from "@/components/screens/SearchNews/SearchBar";
+import { fetchArticles } from "@/services/api/articles";
 import { LinearGradient } from "expo-linear-gradient";
 import { Stack, useRouter } from "expo-router";
-import React, { useState } from "react";
-import { Dimensions, Image, StyleSheet, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  View
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const { width } = Dimensions.get("window");
 
 const SearchNewsPage = () => {
   const router = useRouter();
   const [searchText, setSearchText] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("전체");
+  const [articles, setArticles] = useState<any[]>([]);
 
   const categories = [
     "전체",
@@ -28,9 +34,24 @@ const SearchNewsPage = () => {
     "정치",
   ];
 
+  // 기사 조회 함수
+  const handleSearch = async (title?: string, category?: string) => {
+    const result = await fetchArticles(title ?? searchText, category ?? selectedCategory);
+    setArticles(result);
+  };
+
+  // 페이지 처음 진입 시 전체 기사 자동 조회
+  useEffect(() => {
+    handleSearch("", "전체");
+  }, []);
+
+  // 카테고리 변경 시 자동 갱신
+  useEffect(() => {
+    handleSearch();
+  }, [selectedCategory]);
+
   return (
     <>
-
       <Stack.Screen options={{ headerShown: false }} />
 
       <LinearGradient
@@ -62,16 +83,16 @@ const SearchNewsPage = () => {
             </View>
           </SafeAreaView>
 
+          {/* 검색창 */}
           <View className="items-center">
             <SearchBar
               value={searchText}
               onChangeText={setSearchText}
-              onPressSearch={() =>
-                console.log("검색 실행:", searchText, selectedCategory)
-              }
+              onPressSearch={() => handleSearch()}
             />
           </View>
 
+          {/* 카테고리 버튼 */}
           <View className="mt-3">
             <ScrollButton
               categories={categories}
@@ -79,8 +100,9 @@ const SearchNewsPage = () => {
             />
           </View>
 
+          {/* 기사 리스트 */}
           <View className="flex-1 mt-2">
-            <NewsCardList background="white" />
+            <NewsCardList background="white" articles={articles} />
           </View>
         </View>
       </LinearGradient>

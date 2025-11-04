@@ -1,21 +1,29 @@
 import NewsCard from "@/components/common/NewsCard";
 import { useRouter } from "expo-router";
 import React from "react";
-import { ScrollView, TouchableOpacity, View } from "react-native";
-import { newsDummy } from "./NewsCardDummy";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 type BackgroundVariant = "green" | "white";
 
 interface NewsCardListProps {
   background?: BackgroundVariant;
+  articles?: any[];
 }
 
-const NewsCardList = ({ background = "white" }: NewsCardListProps) => {
+const NewsCardList = ({ background = "white", articles = [] }: NewsCardListProps) => {
   const router = useRouter();
 
   const handleNewsPress = (newsId: string) => {
     router.push(`/newsplayer/${newsId}`);
   };
+
+  if (!articles || articles.length === 0) {
+    return (
+      <View className="flex-1 items-center justify-center mt-10">
+        <Text className="text-gray-500">검색 결과가 없습니다.</Text>
+      </View>
+    );
+  }
 
   return (
     <ScrollView
@@ -23,18 +31,18 @@ const NewsCardList = ({ background = "white" }: NewsCardListProps) => {
       contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20 }}
     >
       <View className="mt-4">
-        {newsDummy.map((item, index) => (
+        {articles.map((item) => (
           <TouchableOpacity
-          key={item.id}
-          onPress={() => handleNewsPress(item.id)}
-          activeOpacity={0.8}
+            key={item.id}
+            onPress={() => handleNewsPress(item.id)}
+            activeOpacity={0.8}
           >
-          <NewsCard
-            title={item.title}
-            description={item.description}
-            image={item.image}
-            background={background}
-          />
+            <NewsCard
+              title={item.title}
+              description={item.description}
+              image={item.imageUrl}
+              background={background}
+            />
           </TouchableOpacity>
         ))}
       </View>
