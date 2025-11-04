@@ -1,4 +1,4 @@
-import { ApiResponse, ArticleData, DiscussionNewsItem, SavedNewsItem } from '../../types/screens'
+import { ApiResponse, ArticleData, SavedNewsItem } from '../../types/screens'
 import apiClient from '../api/client'
 import { ENDPOINTS } from '../api/endpoints'
 
@@ -79,13 +79,6 @@ export const newsService = {
     }
     
     await apiClient.delete(ENDPOINTS.SAVED_NEWS.DELETE(newsId))
-  },
-
-  async getViewedNews(sortBy: 'latest' | 'popular' | 'views'): Promise<ArticleData[]> {
-    // TODO: "내가 본 뉴스" API가 명확해지면 수정 필요.
-    // 현재는 임시로 전체 글 목록 조회 API를 사용합니다.
-    console.warn('getViewedNews는 현재 전체 목록을 가져옵니다.');
-    return this.getArticles(0, 10);
   },
 
   // 최근 본 기사 목록 조회
