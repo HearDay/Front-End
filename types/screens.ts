@@ -33,8 +33,6 @@ export interface SavedNewsScreenProps {
 }
 
 // ========== 뉴스/기사 공통 데이터 관련 ==========
-
-// GET /api/v1/article/{articleId} 응답 타입
 export interface ApiResponse<T> {
   success: boolean;
   message: string;
@@ -61,7 +59,6 @@ export interface ArticleData {
 export interface AudioData {
   audioUrl: string;
 }
-
 
 // ========== 뉴스 플레이어 관련 ==========
 

@@ -10,10 +10,10 @@ export const ENDPOINTS = {
 
   // 기사 (뉴스)
   ARTICLE: {
-    LIST: '/api/articles', // Swagger: POST /api/articles
-    DETAIL: (id: string) => `/api/articles/${id}`, // Swagger: GET /api/articles/{id}
+    LIST: '/api/articles', 
+    DETAIL: (id: string) => `/api/articles/${id}`,
     HIGHLIGHT: (id: string) => `/api/articles/${id}/highlight`,
-    RECENT: '/api/recent-articles', // Swagger: GET /api/recent-articles
+    RECENT: '/api/recent-articles',
   },
 
   // 오디오
@@ -44,7 +44,7 @@ export const ENDPOINTS = {
   // 토론
   DISCUSSION: {
     LIST: '/api/discussion',
-    RECORDS: '/api/discussion/records', // 기록 API 엔드포인트 추가
+    RECORDS: '/api/discussion/records', 
     CREATE: '/api/discussion',
     DETAIL: (id: string) => `/api/discussion/${id}`,
     MESSAGES: (id: string) => `/api/discussion/${id}/messages`,

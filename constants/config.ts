@@ -8,7 +8,7 @@ export const API_CONFIG = {
   },
 }
 */
-// 환경 변수에서 직접 API URL을 가져옵니다.
+// 환경 변수에서 직접 API URL을 가져옴
 export const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL
 export const API_TIMEOUT = 10000
 export const API_HEADERS = {
