@@ -1,36 +1,12 @@
-import { KakaoLoginResponse } from "@/types/auth/kakao";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { KakaoOAuthToken, login } from "@react-native-seoul/kakao-login";
-import axiosInstance from "./axiosInstance";
 
-// 1️⃣ 카카오 로그인 실행 (AuthSession 안씀)
-export const getKakaoAuthCode = async (): Promise<string | null> => {
-  try {
-    const token: KakaoOAuthToken = await login();
-    console.log("카카오 Access Token:", token.accessToken);
-    return token.accessToken; // 인가 코드 대신 access token 직접 반환
-  } catch (err) {
-    console.error("카카오 로그인 실패:", err);
-    return null;
-  }
-};
+const CLIENT_ID = process.env.EXPO_PUBLIC_CLIENT_ID;
+const REDIRECT_URI = process.env.EXPO_PUBLIC_REDIRECT_URI;
 
-// 2️⃣ 받은 토큰을 백엔드로 전송
-export const kakaoLogin = async (accessToken: string): Promise<KakaoLoginResponse> => {
-  try {
-    const res = await axiosInstance.post<KakaoLoginResponse>(
-      "/api/users/login/kakao",
-      { accessToken } // 백엔드에서 이걸로 유저 식별
-    );
-
-    if (res.data.success && res.data.data.accessToken) {
-      await AsyncStorage.setItem("accessToken", res.data.data.accessToken);
-      console.log("백엔드 로그인 성공. 토큰 저장됨.");
-    }
-
-    return res.data;
-  } catch (err: any) {
-    console.error("카카오 로그인 API 오류:", err.response?.data || err.message);
-    throw err;
-  }
+/**
+ * 카카오 로그인 URL 생성
+ * - 사용자가 클릭하면 카카오 로그인 페이지로 이동
+ * - 로그인 성공 시 REDIRECT_URI로 리디렉트되며 서버가 토큰 처리함
+ */
+export const getKakaoAuthUrl = () => {
+  return `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}`;
 };

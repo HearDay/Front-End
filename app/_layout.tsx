@@ -16,7 +16,8 @@ export default function RootLayout() {
     "/SignUpPage",
     "/CertificationPage",
     "/ResetPasswordPage",
-    "/SelectCategoryPage"
+    "/SelectCategoryPage",
+    "/KakaoLoginView",
   ];
 
   useEffect(() => {

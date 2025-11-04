@@ -1,7 +1,6 @@
 import { Modal } from "@/components/common";
 import InputBox from "@/components/common/InputBox";
 import PrimaryButton from "@/components/common/PrimaryButton";
-import KakaoAgreement from "@/components/screens/Login/KakaoAgreement";
 import { login } from "@/services/api/login";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
@@ -25,11 +24,10 @@ const LoginPage = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
-  const [isKakaoModalVisible, setIsKakaoModalVisible] = useState(false);
 
-  // 로그인 처리 함수
+  // 이메일 로그인 처리 함수
   const handleLogin = async () => {
-    if ( !email || !password) {
+    if (!email || !password) {
       setModalMessage("아이디와 비밀번호를 모두 입력해주세요.");
       setIsSuccess(false);
       setIsModalVisible(true);
@@ -44,7 +42,6 @@ const LoginPage = () => {
         setModalMessage("로그인에 성공했습니다!");
         setIsSuccess(true);
         setIsModalVisible(true);
-
       } else {
         setModalMessage(res.message || "존재하지 않는 아이디입니다.");
         setIsSuccess(false);
@@ -58,14 +55,12 @@ const LoginPage = () => {
     }
   };
 
-
   const handleModalConfirm = async () => {
     setIsModalVisible(false);
     if (isSuccess) {
-      // 토큰 저장이 완료되면 홈으로 이동
       setTimeout(() => {
         router.replace("/(tabs)");
-      }, 300); // 살짝 지연시켜 모달 애니메이션 겹침 방지
+      }, 300);
     }
   };
 
@@ -123,7 +118,7 @@ const LoginPage = () => {
             <PrimaryButton
               title="카카오로 시작하기"
               variant="kakao"
-              onPress={() => setIsKakaoModalVisible(true)}
+              onPress={() => router.push("/KakaoLoginView")} // 바로 이동
             />
           </View>
 
@@ -139,23 +134,13 @@ const LoginPage = () => {
           </View>
         </SafeAreaView>
 
-        {/* 결과 모달 */}
+        {/* 로그인 결과 모달 */}
         <Modal
           visible={isModalVisible}
           title={modalMessage}
           confirmText="확인"
           onConfirm={handleModalConfirm}
           onClose={() => setIsModalVisible(false)}
-        />
-
-        {/* 카카오 약관 모달 */}
-        <KakaoAgreement
-          visible={isKakaoModalVisible}
-          onClose={() => setIsKakaoModalVisible(false)}
-          onConfirm={() => {
-            setIsKakaoModalVisible(false);
-            console.log("약관 동의 완료");
-          }}
         />
       </LinearGradient>
     </>
