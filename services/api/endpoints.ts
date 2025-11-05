@@ -21,10 +21,11 @@ export const ENDPOINTS = {
     PLAY: (articleId: string) => `/api/audio/play/${articleId}`,
   },
 
-  // 저장된 뉴스
+  // 저장된 뉴스 (북마크)
   SAVED_NEWS: {
-    LIST: '/api/saved-news',
-    DELETE: (id: string) => `/api/saved-news/${id}`,
+    LIST: '/api/article-bookmarks', // 내 북마크 목록 조회
+    SAVE: (articleId: string) => `/api/article-bookmarks/${articleId}`, // 북마크 추가
+    DELETE: (articleId: string) => `/api/article-bookmarks/${articleId}`, // 북마크 삭제
   },
 
   // 단어장

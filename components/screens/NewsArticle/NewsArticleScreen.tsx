@@ -1,8 +1,9 @@
+import { Modal } from '@/components/common';
 import TopBar from '@/components/common/TopBar';
 import { DictionaryModal, DictionarySearchBar } from '@/components/screens/Dictionary';
 import { articleService, wordbookService } from '@/services';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity } from 'react-native'; // 개선: ActivityIndicator 추가
+import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native'; // 개선: ActivityIndicator 추가
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NewsArticleData } from '../../../types/screens';
 import { NewsArticleContent } from './NewsArticleContent';
@@ -30,6 +31,10 @@ export function NewsArticleScreen({ newsId }: NewsArticleScreenProps) {
   // 개선: 로딩/에러 상태 추가
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  // 모달 상태 추가
+  const [showSearchErrorModal, setShowSearchErrorModal] = useState(false)
+  const [showSaveErrorModal, setShowSaveErrorModal] = useState(false)
 
   const scrollRef = useRef<ScrollView>(null)
 
@@ -78,7 +83,7 @@ export function NewsArticleScreen({ newsId }: NewsArticleScreenProps) {
     }
 
     if (matches.length === 0) {
-      Alert.alert('검색 결과 없음', '기사 본문에서 해당 단어를 찾을 수 없습니다.')
+      setShowSearchErrorModal(true)
     }
 
     setHighlightMatches(matches)
@@ -113,7 +118,7 @@ export function NewsArticleScreen({ newsId }: NewsArticleScreenProps) {
     try {
       setSaveState('SAVING');
       await wordbookService.saveWord(selectedWord, definition)
-      
+
       setSaveState('SAVED');
       setSavedWords(prev => [...prev, selectedWord]); // 저장된 단어 목록에 추가
 
@@ -126,7 +131,8 @@ export function NewsArticleScreen({ newsId }: NewsArticleScreenProps) {
     } catch (error) {
       console.error('단어 저장 실패:', error)
       setSaveState('IDLE'); // 에러 발생 시 상태 초기화
-      Alert.alert('오류', '단어 저장에 실패했습니다.');
+      setShowDictionaryModal(false);
+      setShowSaveErrorModal(true);
     }
   }, [selectedWord, saveState])
 
@@ -219,6 +225,42 @@ export function NewsArticleScreen({ newsId }: NewsArticleScreenProps) {
         onClose={() => setShowDictionaryModal(false)}
         onSave={handleSaveWord}
       />
+
+      {/* 검색 결과 없음 모달 */}
+      <Modal
+        visible={showSearchErrorModal}
+        title="기사 본문에서 해당 단어를 찾을 수 없습니다."
+        onConfirm={() => setShowSearchErrorModal(false)}
+        onClose={() => setShowSearchErrorModal(false)}
+      >
+        <View className="mt-6 mb-[-16px]">
+          <TouchableOpacity
+            className="bg-[#006716] py-3 rounded-xl"
+            onPress={() => setShowSearchErrorModal(false)}
+            activeOpacity={0.7}
+          >
+            <Text className="text-white text-center font-semibold">확인</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
+
+      {/* 단어 저장 실패 모달 */}
+      <Modal
+        visible={showSaveErrorModal}
+        title="단어 저장에 실패했습니다."
+        onConfirm={() => setShowSaveErrorModal(false)}
+        onClose={() => setShowSaveErrorModal(false)}
+      >
+        <View className="mt-6 mb-[-16px]">
+          <TouchableOpacity
+            className="bg-[#006716] py-3 rounded-xl"
+            onPress={() => setShowSaveErrorModal(false)}
+            activeOpacity={0.7}
+          >
+            <Text className="text-white text-center font-semibold">확인</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </SafeAreaView>
   )
 }
