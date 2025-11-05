@@ -11,10 +11,9 @@ import {
   Image,
   StyleSheet,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
 
 const SearchNewsPage = () => {
   const router = useRouter();
@@ -22,21 +21,26 @@ const SearchNewsPage = () => {
   const [selectedCategory, setSelectedCategory] = useState("전체");
   const [articles, setArticles] = useState<any[]>([]);
 
-  const categories = [
-    "전체",
-    "경제",
-    "방송/연예",
-    "IT",
-    "쇼핑",
-    "생활",
-    "해외",
-    "스포츠",
-    "정치",
-  ];
+  // ✅ UI 표시용 ↔ 백엔드 전송용 매핑 객체
+  const categoryMap: Record<string, string> = {
+    "전체": "전체",
+    "경제": "경제",
+    "방송 / 연예": "방송_연예",
+    "IT": "IT",
+    "쇼핑": "쇼핑",
+    "생활": "생활",
+    "해외": "해외",
+    "스포츠": "스포츠",
+    "정치": "정치",
+  };
+
+  // ✅ UI에 표시할 카테고리 이름 리스트
+  const categories = Object.keys(categoryMap);
 
   // 기사 조회 함수
   const handleSearch = async (title?: string, category?: string) => {
-    const result = await fetchArticles(title ?? searchText, category ?? selectedCategory);
+    const backendCategory = categoryMap[category ?? selectedCategory]; // 매핑 적용
+    const result = await fetchArticles(title ?? searchText, backendCategory);
     setArticles(result);
   };
 
