@@ -206,10 +206,10 @@ export const NewsPlayerScreen = ({ newsId }: NewsPlayerScreenProps) => {
         {/* 토론 모달 */}
         <Modal visible={showDiscussionModal} title="방금 들은 뉴스로 AI와 토론하시겠어요?" onConfirm={() => {}} onClose={() => setShowDiscussionModal(false)}>
           <View className="gap-3 mt-6 mb-[-16px]">
-            <TouchableOpacity className="bg-[#DBFDE0] py-4 rounded-2xl" onPress={() => handleDiscussionStart('voice')} activeOpacity={0.7}>
+            <TouchableOpacity className="bg-[#DBFDE0] py-4 rounded-2xl" onPress={handleDiscussionStart} activeOpacity={0.7}>
               <Text className="text-center font-medium">음성으로 토론하러 가기</Text>
             </TouchableOpacity>
-            <TouchableOpacity className="bg-[#DBFDE0] py-4 rounded-2xl" onPress={() => handleDiscussionStart('chat')} activeOpacity={0.7}>
+            <TouchableOpacity className="bg-[#DBFDE0] py-4 rounded-2xl" onPress={handleDiscussionStart} activeOpacity={0.7}>
               <Text className="text-center font-medium">채팅으로 토론하러 가기</Text>
             </TouchableOpacity>
             <TouchableOpacity className="bg-[#DBFDE0] py-4 rounded-2xl" onPress={() => setShowDiscussionModal(false)} activeOpacity={0.7}>
