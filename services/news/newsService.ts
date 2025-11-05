@@ -1,4 +1,4 @@
-import { ApiResponse, ArticleData, SavedNewsItem } from '../../types/screens'
+import { ApiResponse, ArticleData, SavedNewsItem, NewsPlayerData } from '../../types/screens'
 import apiClient from '../api/client'
 import { ENDPOINTS } from '../api/endpoints'
 
@@ -12,9 +12,20 @@ export const newsService = {
       // 필요시 더미 데이터 로직 구현
       return {} as ArticleData
     }
-    
+
     const response = await apiClient.get<ApiResponse<ArticleData>>(ENDPOINTS.ARTICLE.DETAIL(articleId))
     return response.data.data // wrapper 구조에 맞춰 실제 데이터 반환
+  },
+
+  // 뉴스 플레이어용 데이터 조회
+  async getNewsDetail(newsId: string): Promise<NewsPlayerData> {
+    const article = await this.getArticleDetail(newsId)
+    return {
+      title: article.title,
+      imageUrl: article.imageUrl,
+      fullText: article.detail.content,
+      audioUrl: article.detail.ttsUrl,
+    }
   },
 
   // 뉴스 기사 목록 조회/검색
