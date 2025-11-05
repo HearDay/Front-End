@@ -60,6 +60,14 @@ export interface AudioData {
   audioUrl: string;
 }
 
+// 뉴스 플레이어 데이터 타입
+export interface NewsPlayerData {
+  title: string;
+  imageUrl: string;
+  fullText: string;
+  audioUrl: string;
+}
+
 // ========== 뉴스 플레이어 관련 ==========
 
 export interface NewsPlayerHeaderProps {

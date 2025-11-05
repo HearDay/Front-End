@@ -1,4 +1,4 @@
-import { NewsArticleData } from '../../types/screens'
+import { NewsArticleData, ApiResponse, ArticleData } from '../../types/screens'
 import apiClient from '../api/client'
 import { ENDPOINTS } from '../api/endpoints'
 
@@ -9,7 +9,7 @@ const DUMMY_ARTICLE: NewsArticleData = {
   content: '이것은 기사 본문입니다. 여러 단락으로 구성되어 있습니다.\n경제 뉴스에 대한 내용입니다. 기술 발전과 환경 문제에 대해 다룹니다.\n마지막 단락입니다.',
 }
 
-const USE_DUMMY_DATA = true
+const USE_DUMMY_DATA = false
 
 export const articleService = {
   async getArticleDetail(articleId: string): Promise<NewsArticleData> {
@@ -18,9 +18,18 @@ export const articleService = {
         setTimeout(() => resolve(DUMMY_ARTICLE), 500)
       })
     }
-    
-    const response = await apiClient.get(ENDPOINTS.ARTICLE.DETAIL(articleId))
-    return response.data
+
+    // newsService와 같은 API 사용
+    const response = await apiClient.get<ApiResponse<ArticleData>>(ENDPOINTS.ARTICLE.DETAIL(articleId))
+    const article = response.data.data
+
+    // ArticleData를 NewsArticleData로 변환
+    return {
+      id: String(article.id),
+      title: article.title,
+      imageUrl: article.imageUrl,
+      content: article.detail.content,
+    }
   },
 
   async getHighlightedContent(articleId: string, word: string): Promise<string> {
