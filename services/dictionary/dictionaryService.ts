@@ -1,26 +1,10 @@
-import { WordDefinition } from '../../types/screens'
+import { WordDefinition, ApiResponse } from '../../types/screens'
 import apiClient from '../api/client'
 import { ENDPOINTS } from '../api/endpoints'
 
-const USE_DUMMY_DATA = true
+const USE_DUMMY_DATA = false
 
 export const dictionaryService = {
-  async searchWord(query: string): Promise<string[]> {
-    if (USE_DUMMY_DATA) {
-      const results = ['example', 'test', 'word'].filter(w => 
-        w.toLowerCase().includes(query.toLowerCase())
-      )
-      return new Promise((resolve) => {
-        setTimeout(() => resolve(results), 300)
-      })
-    }
-    
-    const response = await apiClient.get(ENDPOINTS.DICTIONARY.SEARCH, {
-      params: { q: query }
-    })
-    return response.data
-  },
-
   async getDefinition(word: string): Promise<WordDefinition> {
     if (USE_DUMMY_DATA) {
       const dummyDefinition: WordDefinition = {
@@ -34,8 +18,14 @@ export const dictionaryService = {
         setTimeout(() => resolve(dummyDefinition), 500)
       })
     }
-    
-    const response = await apiClient.get(ENDPOINTS.DICTIONARY.DEFINITION(word))
-    return response.data
+
+    // API 호출: GET /api/dictionary/search/{word}
+    const response = await apiClient.get<ApiResponse<string[]>>(ENDPOINTS.DICTIONARY.SEARCH(word))
+
+    // 응답의 data 배열을 WordDefinition 형태로 변환
+    return {
+      word,
+      definitions: response.data.data,
+    }
   },
 }

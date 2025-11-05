@@ -17,11 +17,12 @@ export const WordBookScreen = () => {
   const [todayWords, setTodayWords] = useState<SavedWord[]>([])
   const [selectedWord, setSelectedWord] = useState<SavedWord | null>(null)
   const [showModal, setShowModal] = useState(false)
-  
+
   // 추가: 로딩/에러 상태
   // 이유: API 호출 중 사용자에게 피드백 제공
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [loadingDefinition, setLoadingDefinition] = useState(false)
 
   // 개선: useCallback
   // 이유: useEffect 의존성 배열에 안전하게 사용, 불필요한 함수 재생성 방지
@@ -71,9 +72,31 @@ export const WordBookScreen = () => {
 
   // 개선: useCallback으로 이벤트 핸들러
   // 이유: WordBookChipList에 props로 전달되므로 불필요한 리렌더링 방지
-  const handleWordPress = useCallback((word: SavedWord) => {
+  const handleWordPress = useCallback(async (word: SavedWord) => {
     setSelectedWord(word)
     setShowModal(true)
+
+    // 단어 뜻이 없으면 API로 조회
+    if (!word.definition) {
+      try {
+        setLoadingDefinition(true)
+        const wordId = parseInt(word.id)
+        const result = await wordbookService.getWordDefinition(wordId)
+
+        // selectedWord 업데이트
+        setSelectedWord(prev => prev ? { ...prev, definition: result.definition } : null)
+
+        // todayWords 목록도 업데이트
+        setTodayWords(prev => prev.map(w =>
+          w.id === word.id ? { ...w, definition: result.definition } : w
+        ))
+      } catch (err) {
+        console.error('단어 뜻 조회 실패:', err)
+        setSelectedWord(prev => prev ? { ...prev, definition: '단어 뜻을 불러올 수 없습니다.' } : null)
+      } finally {
+        setLoadingDefinition(false)
+      }
+    }
   }, [])
 
   // 개선: useCallback으로 이벤트 핸들러
@@ -175,8 +198,12 @@ export const WordBookScreen = () => {
           onConfirm={() => setShowModal(false)}
           onClose={() => setShowModal(false)}
         >
-          <View className="bg-green-50 rounded-2xl p-4 mb-6 mt-4">
-            <Text className="text-base">{selectedWord.definition || '단어 뜻이 없습니다.'}</Text>
+          <View className="bg-green-50 rounded-2xl p-4 mb-6 mt-4 min-h-24 justify-center">
+            {loadingDefinition ? (
+              <ActivityIndicator size="large" color="#16a34a" />
+            ) : (
+              <Text className="text-base">{selectedWord.definition || '단어 뜻이 없습니다.'}</Text>
+            )}
           </View>
 
           <TouchableOpacity
