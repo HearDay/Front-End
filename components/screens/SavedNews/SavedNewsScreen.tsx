@@ -111,7 +111,7 @@ export function SavedNewsScreen() {
 
       <View className="-mt-8 -mb-2">
       <CategoryChipGroup
-        categories={['전체', '경제', '기술', '환경', '사회']}
+        categories={['전체', '경제', '방송/연예', 'IT', '쇼핑', '생활', '해외', '스포츠', '정치']}
         selectedCategory={selectedCategory}
         onSelectCategory={setSelectedCategory}
       />
