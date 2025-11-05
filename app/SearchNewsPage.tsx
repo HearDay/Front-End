@@ -21,7 +21,6 @@ const SearchNewsPage = () => {
   const [selectedCategory, setSelectedCategory] = useState("전체");
   const [articles, setArticles] = useState<any[]>([]);
 
-  // ✅ UI 표시용 ↔ 백엔드 전송용 매핑 객체
   const categoryMap: Record<string, string> = {
     "전체": "전체",
     "경제": "경제",
@@ -34,7 +33,6 @@ const SearchNewsPage = () => {
     "정치": "정치",
   };
 
-  // ✅ UI에 표시할 카테고리 이름 리스트
   const categories = Object.keys(categoryMap);
 
   // 기사 조회 함수
@@ -69,7 +67,7 @@ const SearchNewsPage = () => {
           <SafeAreaView style={styles.safeArea}>
             <View className="w-full items-center justify-center pb-2 relative bg-transparent">
               <TouchableOpacity
-                onPress={() => router.back()}
+                onPress={() => router.push("/(tabs)")}
                 className="absolute left-4 top-1"
               >
                 <Image
