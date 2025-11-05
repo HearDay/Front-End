@@ -26,8 +26,8 @@ const NewsCardSlider = () => {
   };
 
 
-  const handleNewsPress = (newsId: string) => {
-    router.push(`/newsplayer/${newsId}`);
+  const handleNewsPress = (articleId: string) => {
+    router.push(`/newsplayer/${articleId}`);
   };
 
   return (

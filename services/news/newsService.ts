@@ -18,8 +18,8 @@ export const newsService = {
   },
 
   // 뉴스 플레이어용 데이터 조회
-  async getNewsDetail(newsId: string): Promise<NewsPlayerData> {
-    const article = await this.getArticleDetail(newsId)
+  async getNewsDetail(articleId: string): Promise<NewsPlayerData> {
+    const article = await this.getArticleDetail(articleId)
     return {
       title: article.title,
       imageUrl: article.imageUrl,
@@ -50,7 +50,7 @@ export const newsService = {
   },
 
   // 뉴스 북마크 추가
-  async saveNews(newsId: string): Promise<void> {
+  async saveNews(articleId: string): Promise<void> {
     if (USE_DUMMY_DATA) {
       return new Promise((resolve) => {
         setTimeout(() => resolve(), 500)
@@ -58,11 +58,11 @@ export const newsService = {
     }
 
     // POST /api/article-bookmarks/{articleId}
-    await apiClient.post(ENDPOINTS.SAVED_NEWS.SAVE(newsId))
+    await apiClient.post(ENDPOINTS.SAVED_NEWS.SAVE(articleId))
   },
 
   // 뉴스 북마크 삭제
-  async deleteSavedNews(newsId: string): Promise<void> {
+  async deleteSavedNews(articleId: string): Promise<void> {
     if (USE_DUMMY_DATA) {
       return new Promise((resolve) => {
         setTimeout(() => resolve(), 500)
@@ -70,12 +70,12 @@ export const newsService = {
     }
 
     console.log('=== 북마크 삭제 요청 ===')
-    console.log('newsId:', newsId)
-    console.log('URL:', ENDPOINTS.SAVED_NEWS.DELETE(newsId))
+    console.log('articleId:', articleId)
+    console.log('URL:', ENDPOINTS.SAVED_NEWS.DELETE(articleId))
 
     // DELETE /api/article-bookmarks/{articleId}
     try {
-      await apiClient.delete(ENDPOINTS.SAVED_NEWS.DELETE(newsId))
+      await apiClient.delete(ENDPOINTS.SAVED_NEWS.DELETE(articleId))
       console.log('삭제 성공')
     } catch (error: any) {
       console.error('삭제 실패 상세:', error.response?.data)

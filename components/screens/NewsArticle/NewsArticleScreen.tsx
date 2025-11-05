@@ -10,10 +10,10 @@ import { NewsArticleContent } from './NewsArticleContent';
 import { NewsArticleImage } from './NewsArticleImage';
 
 interface NewsArticleScreenProps {
-  newsId: string
+  articleId: string
 }
 
-export function NewsArticleScreen({ newsId }: NewsArticleScreenProps) {
+export function NewsArticleScreen({ articleId }: NewsArticleScreenProps) {
   const [newsData, setNewsData] = useState<NewsArticleData | null>(null)
   const [showSearchBar, setShowSearchBar] = useState(false)
   const [highlightWord, setHighlightWord] = useState<string | undefined>()
@@ -43,19 +43,19 @@ export function NewsArticleScreen({ newsId }: NewsArticleScreenProps) {
     try {
       setLoading(true) // 개선: 로딩 시작
       setError(null)   // 개선: 에러 초기화
-      
-      const response = await articleService.getArticleDetail(newsId)
+
+      const response = await articleService.getArticleDetail(articleId)
       setNewsData(response)
-      
-      console.log('기사 로드:', newsId)
-      
+
+      console.log('기사 로드:', articleId)
+
     } catch (err) {
       setError('기사를 불러올 수 없습니다.') // 개선: 에러 상태 설정
       console.error('기사 로드 실패:', err)
     } finally {
       setLoading(false) // 개선: 로딩 종료
     }
-  }, [newsId]) // newsId가 변경될 때만 함수 재생성
+  }, [articleId]) // articleId가 변경될 때만 함수 재생성
 
   // 뉴스 데이터 로드
   useEffect(() => {

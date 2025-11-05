@@ -4,7 +4,7 @@ import { ENDPOINTS } from '../api/endpoints'
 
 interface Discussion {
   id: string
-  newsId: string
+  articleId: string
   type: 'voice' | 'chat'
   createdAt: string
 }
@@ -19,7 +19,7 @@ interface DiscussionMessage {
 const DUMMY_DISCUSSIONS: Discussion[] = [
   {
     id: '1',
-    newsId: 'news1',
+    articleId: 'news1',
     type: 'chat',
     createdAt: '2025-01-10T12:00:00',
   },
@@ -94,11 +94,11 @@ export const discussionService = {
     return response.data
   },
 
-  async createDiscussion(newsId: string, type: 'voice' | 'chat'): Promise<Discussion> {
+  async createDiscussion(articleId: string, type: 'voice' | 'chat'): Promise<Discussion> {
     if (USE_DUMMY_DATA) {
       const newDiscussion: Discussion = {
         id: Date.now().toString(),
-        newsId,
+        articleId,
         type,
         createdAt: new Date().toISOString(),
       }
@@ -106,9 +106,9 @@ export const discussionService = {
         setTimeout(() => resolve(newDiscussion), 500)
       })
     }
-    
+
     const response = await apiClient.post(ENDPOINTS.DISCUSSION.CREATE, {
-      newsId,
+      articleId,
       type,
     })
     return response.data

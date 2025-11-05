@@ -56,13 +56,13 @@ export function SavedNewsScreen() {
     })
   }, [savedNews, selectedCategory])
 
-  const handleNewsPress = useCallback((newsId: string) => {
-    router.push(`/newsplayer/${newsId}`)
+  const handleNewsPress = useCallback((articleId: string) => {
+    router.push(`/newsplayer/${articleId}`)
   }, [router])
 
   // 삭제 버튼 클릭 시 모달을 띄우는 함수
-  const handleDeletePress = useCallback((newsId: string) => {
-    setDeletingNewsId(newsId)
+  const handleDeletePress = useCallback((articleId: string) => {
+    setDeletingNewsId(articleId)
     setShowDeleteConfirmModal(true)
   }, [])
 
