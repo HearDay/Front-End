@@ -33,15 +33,12 @@ export const LyricsDisplay = memo(function LyricsDisplay({
       disabled={!onPress}
     >
     <View className="px-6 pt-6">
-      {currentLines.map((line, index) => (
-        <Text 
-          key={index} 
-          className="text-base leading-7 text-gray-800 text-center mb-2"
-          // 추가: mb-2로 줄 간격 추가
-        >
-          {line}
-        </Text>
-      ))}
+      <Text
+        numberOfLines={3}
+        className="text-base leading-7 text-gray-800 text-center"
+      >
+        {currentLines.join(' ')}
+      </Text>
     </View>
   </TouchableOpacity>
   )

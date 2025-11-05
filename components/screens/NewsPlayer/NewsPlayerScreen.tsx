@@ -24,7 +24,6 @@ export const NewsPlayerScreen = ({ newsId }: NewsPlayerScreenProps) => {
   const [isCarMode, setIsCarMode] = useState(false);
   const [showDiscussionModal, setShowDiscussionModal] = useState(false);
   const [currentLines, setCurrentLines] = useState<string[]>([]);
-  const [currentLineIndex, setCurrentLineIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const soundRef = useRef<Audio.Sound | null>(null);
@@ -41,7 +40,7 @@ export const NewsPlayerScreen = ({ newsId }: NewsPlayerScreenProps) => {
       setError(null);
       const response = await newsService.getNewsDetail(newsId);
       setNewsData(response);
-    } catch (err) {
+    } catch {
       setError('뉴스를 불러올 수 없습니다.');
     } finally {
       setLoading(false);
@@ -54,10 +53,9 @@ export const NewsPlayerScreen = ({ newsId }: NewsPlayerScreenProps) => {
 
   useEffect(() => {
     if (!newsData) return;
-    const allLines = newsData.fullText.split('\n');
-    const displayLines = allLines.slice(currentLineIndex, currentLineIndex + 3);
-    setCurrentLines(displayLines);
-  }, [newsData, currentLineIndex]);
+    // 전체 텍스트를 currentLines에 배열로 설정 (LyricsDisplay에서 join으로 합침)
+    setCurrentLines([newsData.fullText]);
+  }, [newsData]);
 
   const loadAudio = useCallback(async () => {
     if (!newsData?.audioUrl) return;
@@ -68,20 +66,14 @@ export const NewsPlayerScreen = ({ newsId }: NewsPlayerScreenProps) => {
       );
       soundRef.current = sound;
       sound.setOnPlaybackStatusUpdate((status) => {
-        if (status.isLoaded && status.durationMillis) {
+        if (status.isLoaded) {
           setIsPlaying(status.isPlaying);
-          const totalLines = newsData.fullText.split('\n').length;
-          const progress = status.positionMillis / status.durationMillis;
-          const lineIndex = Math.floor(progress * totalLines);
-          if (lineIndex !== currentLineIndex) {
-            setCurrentLineIndex(lineIndex);
-          }
         }
       });
     } catch (err) {
       console.error('오디오 로드 실패:', err);
     }
-  }, [newsData, currentLineIndex]);
+  }, [newsData]);
 
   useEffect(() => {
     if (newsData) {
@@ -127,14 +119,14 @@ export const NewsPlayerScreen = ({ newsId }: NewsPlayerScreenProps) => {
         shouldDuckAndroid: newCarMode,
         playThroughEarpieceAndroid: false,
       });
-    } catch (error) {
+    } catch {
       setShowCarModeErrorModal(true);
     }
   }, [isCarMode]);
 
   const handleDiscussion = useCallback(() => setShowDiscussionModal(true), []);
 
-  const handleDiscussionStart = useCallback((type: 'voice' | 'chat') => {
+  const handleDiscussionStart = useCallback(() => {
     setShowDiscussionModal(false);
     router.push('/(tabs)/AiPage');
   }, [router]);
