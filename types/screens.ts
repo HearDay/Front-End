@@ -24,8 +24,8 @@ export interface SavedNewsCardProps {
 
 export interface SavedNewsListProps {
   newsList: SavedNewsItem[];
-  onNewsPress: (newsId: string) => void
-  onDelete: (newsId: string) => void
+  onNewsPress: (articleId: string) => void
+  onDelete: (articleId: string) => void
 }
 
 export interface SavedNewsScreenProps {
@@ -144,7 +144,7 @@ export interface NewsArticleData {
 }
 
 export interface NewsArticleScreenProps {
-  newsId: string
+  articleId: string
 }
 
 export interface NewsArticleImageProps {
@@ -208,7 +208,7 @@ export interface DiscussionNewsListProps {
   news: DiscussionNewsItem[]
   sortBy: 'latest' | 'oldest'
   onSortChange: (sort: 'latest' | 'oldest') => void
-  onNewsPress: (newsId: string) => void
+  onNewsPress: (articleId: string) => void
 }
 
 export interface DiscussionNewsCardProps {
@@ -218,9 +218,9 @@ export interface DiscussionNewsCardProps {
 
 export interface DiscussionModalProps {
   visible: boolean
-  newsId: string | null
+  articleId: string | null
   onClose: () => void
-  onStartDiscussion: (type: 'voice' | 'chat', newsId: string) => void
+  onStartDiscussion: (type: 'voice' | 'chat', articleId: string) => void
 }
 
 // ========== 토론 기록 관련 ==========

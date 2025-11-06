@@ -1,4 +1,4 @@
-import { ApiResponse, ArticleData, SavedNewsItem, NewsPlayerData } from '../../types/screens'
+import { ApiResponse, ArticleData, NewsPlayerData } from '../../types/screens'
 import apiClient from '../api/client'
 import { ENDPOINTS } from '../api/endpoints'
 
@@ -18,8 +18,8 @@ export const newsService = {
   },
 
   // 뉴스 플레이어용 데이터 조회
-  async getNewsDetail(newsId: string): Promise<NewsPlayerData> {
-    const article = await this.getArticleDetail(newsId)
+  async getNewsDetail(articleId: string): Promise<NewsPlayerData> {
+    const article = await this.getArticleDetail(articleId)
     return {
       title: article.title,
       imageUrl: article.imageUrl,
@@ -49,47 +49,64 @@ export const newsService = {
     return response.data.data;
   },
 
-  async saveNews(newsId: string): Promise<void> {
+  // 뉴스 북마크 추가
+  async saveNews(articleId: string): Promise<void> {
     if (USE_DUMMY_DATA) {
       return new Promise((resolve) => {
         setTimeout(() => resolve(), 500)
       })
     }
-    
-    // @ts-ignore - ENDPOINTS.NEWS is deprecated
-    await apiClient.post(ENDPOINTS.NEWS.SAVE(newsId))
+
+    // POST /api/article-bookmarks/{articleId}
+    await apiClient.post(ENDPOINTS.SAVED_NEWS.SAVE(articleId))
   },
 
-  async unsaveNews(newsId: string): Promise<void> {
+  // 뉴스 북마크 삭제
+  async deleteSavedNews(articleId: string): Promise<void> {
     if (USE_DUMMY_DATA) {
       return new Promise((resolve) => {
         setTimeout(() => resolve(), 500)
       })
     }
-    // @ts-ignore - ENDPOINTS.NEWS is deprecated
-    await apiClient.delete(ENDPOINTS.NEWS.UNSAVE(newsId))
+
+    console.log('=== 북마크 삭제 요청 ===')
+    console.log('articleId:', articleId)
+    console.log('URL:', ENDPOINTS.SAVED_NEWS.DELETE(articleId))
+
+    // DELETE /api/article-bookmarks/{articleId}
+    try {
+      await apiClient.delete(ENDPOINTS.SAVED_NEWS.DELETE(articleId))
+      console.log('삭제 성공')
+    } catch (error: any) {
+      console.error('삭제 실패 상세:', error.response?.data)
+      throw error
+    }
   },
 
-  async getSavedNews(): Promise<SavedNewsItem[]> {
+  // 내 북마크 목록 조회
+  async getSavedNews(page: number = 0, size: number = 20): Promise<ArticleData[]> {
     if (USE_DUMMY_DATA) {
       return new Promise((resolve) => {
-        // @ts-ignore - DUMMY_SAVED_NEWS is not defined
-        setTimeout(() => resolve(DUMMY_SAVED_NEWS), 500)
+        setTimeout(() => resolve([]), 500)
       })
     }
-    
-    const response = await apiClient.get(ENDPOINTS.SAVED_NEWS.LIST)
-    return response.data
-  },
 
-  async deleteSavedNews(newsId: string): Promise<void> {
-    if (USE_DUMMY_DATA) {
-      return new Promise((resolve) => {
-        setTimeout(() => resolve(), 500)
-      })
-    }
-    
-    await apiClient.delete(ENDPOINTS.SAVED_NEWS.DELETE(newsId))
+    console.log('=== 북마크 목록 조회 ===')
+
+    // GET /api/article-bookmarks?page=0&size=20
+    const response = await apiClient.get<ApiResponse<ArticleData[]>>(
+      ENDPOINTS.SAVED_NEWS.LIST,
+      {
+        params: {
+          page,
+          size,
+          sort: ['string'] // Swagger에서 필요한 경우
+        }
+      }
+    )
+
+    console.log('북마크 목록 응답:', JSON.stringify(response.data.data, null, 2))
+    return response.data.data
   },
 
   // 최근 본 기사 목록 조회

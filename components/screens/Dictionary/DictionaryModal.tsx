@@ -26,10 +26,13 @@ export function DictionaryModal({
       setLoading(true)
       setError(null)
       const response = await dictionaryService.getDefinition(word)
+      console.log('사전 API 응답:', response)
       setDefinition(response)
-    } catch (err) {
-      setError('단어 뜻을 불러올 수 없습니다.')
+    } catch (err: any) {
       console.error('단어 뜻 로드 실패:', err)
+      console.error('에러 상세:', err.response?.data)
+      const errorMessage = err.response?.data?.message || '단어 뜻을 불러올 수 없습니다.'
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }

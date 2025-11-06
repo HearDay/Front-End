@@ -25,7 +25,7 @@ export function DiscussionScreen() {
 
   // 공통 상태
   const [showModal, setShowModal] = useState(false)
-  const [selectedNewsId, setSelectedNewsId] = useState<string | null>(null)
+  const [selectedArticleId, setSelectedArticleId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -101,15 +101,15 @@ export function DiscussionScreen() {
     setActiveButton('record')
   }
 
-  const handleNewsPress = useCallback((newsId: string) => {
-    setSelectedNewsId(newsId)
+  const handleNewsPress = useCallback((articleId: string) => {
+    setSelectedArticleId(articleId)
     setShowModal(true)
   }, [])
 
-  const handleStartDiscussion = useCallback(async (type: 'voice' | 'chat', newsId: string) => {
+  const handleStartDiscussion = useCallback(async (type: 'voice' | 'chat', articleId: string) => {
     try {
       setShowModal(false)
-      const discussion = await discussionService.createDiscussion(newsId, type)
+      const discussion = await discussionService.createDiscussion(articleId, type)
       console.log('토론 시작:', discussion)
       router.push('/(tabs)/AiPage')
     } catch (error) {
@@ -174,7 +174,7 @@ export function DiscussionScreen() {
 
       <DiscussionModal
         visible={showModal}
-        newsId={selectedNewsId}
+        articleId={selectedArticleId}
         onClose={() => setShowModal(false)}
         onStartDiscussion={handleStartDiscussion}
       />

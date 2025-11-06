@@ -8,5 +8,5 @@ export default function NewsPlayerPage() {
     return null
   }
 
-  return <NewsPlayerScreen newsId={id} />
+  return <NewsPlayerScreen articleId={id} />
 }
