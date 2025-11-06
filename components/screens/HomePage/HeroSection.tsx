@@ -2,15 +2,13 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
-import Animated, {
-  interpolate,
-  useAnimatedStyle,
-  withTiming,
-} from "react-native-reanimated";
 
-const HeroSection = ({ offset }: { offset: any }) => {
-  const router = useRouter(); 
-  const userLevel: number = 5; // 더미 데이터
+interface HeroSectionProps {
+  userLevel: number;
+}
+
+const HeroSection = ({ userLevel }: HeroSectionProps) => {
+  const router = useRouter();
 
   // 레벨별 이미지 선택
   const treeImage = (() => {
@@ -55,39 +53,15 @@ const HeroSection = ({ offset }: { offset: any }) => {
   const levelText =
     userLevel === 6 ? "나무가 다 자랐어요!" : "뉴스를 시청하면\n나무가 자라요!";
 
-  // 전체 HeroSection 높이 애니메이션
-  const animatedContainerStyle = useAnimatedStyle(() => {
-    const height = interpolate(offset.value, [0, 1], [440, 104]);
-    return {
-      height: withTiming(height, { duration: 600 }),
-    };
-  });
-
-  // 나무 + Lv 문구 애니메이션
-  const animatedTreeStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: withTiming(offset.value * -250) }],
-    opacity: withTiming(1 - offset.value),
-  }));
-
-  // 돋보기 아이콘 전환 애니메이션
-  const search1Style = useAnimatedStyle(() => ({
-    opacity: withTiming(1 - offset.value, { duration: 400 }),
-  }));
-
-  const search2Style = useAnimatedStyle(() => ({
-    opacity: withTiming(offset.value, { duration: 400 }),
-    position: "absolute",
-  }));
-
   return (
-    <Animated.View style={[animatedContainerStyle]}>
+    <View className="!h-[440px]">
       <LinearGradient
         colors={["#0F7022", "#85B77A", "#FBFFD3"]}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
-        className="w-full rounded-b-[24px] overflow-hidden"
-        style={{ flex: 1 }}
+        className="w-full h-full rounded-b-[24px] overflow-hidden"
       >
+        {/* 로고 & 검색 버튼 */}
         <View className="flex-row justify-between items-center px-6 pt-12 relative">
           <Image
             className="w-[130px] h-[40px] mt-4"
@@ -96,24 +70,18 @@ const HeroSection = ({ offset }: { offset: any }) => {
           />
 
           <TouchableOpacity
-            className="w-[24px] h-[24px] mt-4 relative"
+            className="w-[24px] h-[24px] mt-4"
             onPress={() => router.push("/SearchNewsPage")}
           >
-            <Animated.Image
+            <Image
               source={require("../../../my-expo-app/assets/images/Search1.png")}
-              style={[{ width: 24, height: 24, resizeMode: "contain" }, search1Style]}
-            />
-            <Animated.Image
-              source={require("../../../my-expo-app/assets/images/Search2.png")}
-              style={[{ width: 24, height: 24, resizeMode: "contain" }, search2Style]}
+              style={{ width: 24, height: 24, resizeMode: "contain" }}
             />
           </TouchableOpacity>
         </View>
 
-        <Animated.View
-          style={animatedTreeStyle}
-          className="flex-1 justify-end items-center"
-        >
+        {/* 나무 이미지 & 레벨 텍스트 */}
+        <View className="flex-1 justify-end items-center">
           <Image
             source={treeImage}
             style={{
@@ -131,9 +99,9 @@ const HeroSection = ({ offset }: { offset: any }) => {
               {levelText}
             </Text>
           </View>
-        </Animated.View>
+        </View>
       </LinearGradient>
-    </Animated.View>
+    </View>
   );
 };
 
