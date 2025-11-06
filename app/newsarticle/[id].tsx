@@ -8,5 +8,5 @@ export default function NewsArticlePage() {
     return null
   }
 
-  return <NewsArticleScreen newsId={id} />
+  return <NewsArticleScreen articleId={id} />
 }

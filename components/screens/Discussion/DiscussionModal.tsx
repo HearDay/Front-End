@@ -5,14 +5,14 @@ import { DiscussionModalProps } from '../../../types/screens'
 
 export function DiscussionModal({
   visible,
-  newsId,
+  articleId,
   onClose,
 }: DiscussionModalProps) {
   const router = useRouter()
 
   // 토론 시작 핸들러
   const handleStartDiscussion = (mode: 'voice' | 'chat') => {
-    if (!newsId) return
+    if (!articleId) return
     if (mode === 'voice') {
       router.push('/AIVoiceDebatePage') // 음성 토론 페이지로 이동
     } else {

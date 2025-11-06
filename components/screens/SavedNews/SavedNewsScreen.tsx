@@ -18,13 +18,25 @@ export function SavedNewsScreen() {
   // 삭제 확인 모달 관련 상태
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false)
   const [deletingNewsId, setDeletingNewsId] = useState<string | null>(null)
+  const [showDeleteErrorModal, setShowDeleteErrorModal] = useState(false)
 
   const fetchSavedNews = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
       const response = await newsService.getSavedNews()
-      setSavedNews(response)
+
+      // ArticleData를 SavedNewsItem으로 변환
+      const savedNewsItems: SavedNewsItem[] = response.map(article => ({
+        id: String(article.id),
+        title: article.title,
+        summary: article.description,
+        imageUrl: article.imageUrl,
+        category: article.category,
+        savedAt: article.updatedAt,
+      }))
+
+      setSavedNews(savedNewsItems)
     } catch (err) {
       setError('저장된 뉴스를 불러올 수 없습니다.')
       console.error('저장된 뉴스 로드 실패:', err)
@@ -44,13 +56,13 @@ export function SavedNewsScreen() {
     })
   }, [savedNews, selectedCategory])
 
-  const handleNewsPress = useCallback((newsId: string) => {
-    router.push(`/newsplayer/${newsId}`)
+  const handleNewsPress = useCallback((articleId: string) => {
+    router.push(`/newsplayer/${articleId}`)
   }, [router])
 
   // 삭제 버튼 클릭 시 모달을 띄우는 함수
-  const handleDeletePress = useCallback((newsId: string) => {
-    setDeletingNewsId(newsId)
+  const handleDeletePress = useCallback((articleId: string) => {
+    setDeletingNewsId(articleId)
     setShowDeleteConfirmModal(true)
   }, [])
 
@@ -62,7 +74,7 @@ export function SavedNewsScreen() {
       setSavedNews(prev => prev.filter(news => news.id !== deletingNewsId))
     } catch (error) {
       console.error('삭제 실패:', error)
-      alert('삭제에 실패했습니다.') // 실패 시에는 간단히 alert
+      setShowDeleteErrorModal(true)
     } finally {
       setShowDeleteConfirmModal(false)
       setDeletingNewsId(null)
@@ -99,7 +111,7 @@ export function SavedNewsScreen() {
 
       <View className="-mt-8 -mb-2">
       <CategoryChipGroup
-        categories={['전체', '경제', '기술', '환경', '사회']}
+        categories={['전체', '경제', '방송/연예', 'IT', '쇼핑', '생활', '해외', '스포츠', '정치']}
         selectedCategory={selectedCategory}
         onSelectCategory={setSelectedCategory}
       />
@@ -134,6 +146,24 @@ export function SavedNewsScreen() {
             </TouchableOpacity>
           </View>
         </Modal>
+
+      {/* 삭제 실패 모달 */}
+      <Modal
+        visible={showDeleteErrorModal}
+        title="삭제에 실패했습니다."
+        onConfirm={() => setShowDeleteErrorModal(false)}
+        onClose={() => setShowDeleteErrorModal(false)}
+      >
+        <View className="mt-6 mb-[-16px]">
+          <TouchableOpacity
+            className="bg-[#006716] py-3 rounded-xl"
+            onPress={() => setShowDeleteErrorModal(false)}
+            activeOpacity={0.7}
+          >
+            <Text className="text-white text-center font-semibold">확인</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </SafeAreaView>
   )
 }

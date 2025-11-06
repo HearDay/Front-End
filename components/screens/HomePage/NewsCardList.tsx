@@ -13,8 +13,8 @@ interface NewsCardListProps {
 const NewsCardList = ({ background = "white", articles = [] }: NewsCardListProps) => {
   const router = useRouter();
 
-  const handleNewsPress = (newsId: string) => {
-    router.push(`/newsplayer/${newsId}`);
+  const handleNewsPress = (articleId: string) => {
+    router.push(`/newsplayer/${articleId}`);
   };
 
   if (!articles || articles.length === 0) {

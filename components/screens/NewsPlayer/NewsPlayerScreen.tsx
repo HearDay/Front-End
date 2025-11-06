@@ -14,10 +14,10 @@ import { NewsImagePlaceholder } from './NewsImagePlaceholder';
 import { NewsPlayerHeader } from './NewsPlayerHeader';
 
 interface NewsPlayerScreenProps {
-  newsId: string;
+  articleId: string;
 }
 
-export const NewsPlayerScreen = ({ newsId }: NewsPlayerScreenProps) => {
+export const NewsPlayerScreen = ({ articleId }: NewsPlayerScreenProps) => {
   const router = useRouter();
   const [newsData, setNewsData] = useState<NewsPlayerData | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -38,14 +38,14 @@ export const NewsPlayerScreen = ({ newsId }: NewsPlayerScreenProps) => {
     try {
       setLoading(true);
       setError(null);
-      const response = await newsService.getNewsDetail(newsId);
+      const response = await newsService.getNewsDetail(articleId);
       setNewsData(response);
     } catch {
       setError('뉴스를 불러올 수 없습니다.');
     } finally {
       setLoading(false);
     }
-  }, [newsId]);
+  }, [articleId]);
 
   useEffect(() => {
     fetchNewsData();
@@ -138,14 +138,14 @@ export const NewsPlayerScreen = ({ newsId }: NewsPlayerScreenProps) => {
   const handleConfirmSave = useCallback(async () => {
     setShowSaveConfirmModal(false);
     try {
-      await newsService.saveNews(newsId);
+      await newsService.saveNews(articleId);
       setSaveResultMessage('뉴스가 저장되었습니다!');
       setShowSaveResultModal(true);
     } catch (error) {
       setSaveResultMessage('저장에 실패했습니다.');
       setShowSaveResultModal(true);
     }
-  }, [newsId]);
+  }, [articleId]);
 
   if (loading) {
     return (
@@ -187,10 +187,10 @@ export const NewsPlayerScreen = ({ newsId }: NewsPlayerScreenProps) => {
         <NewsPlayerHeader title={newsData.title} onBack={handleBack} />
         
         {/* 이미지와 가사를 포함하는 클릭 가능한 컨테이너 */}
-        <TouchableOpacity 
+        <TouchableOpacity
           className="flex-1"
           activeOpacity={0.9}
-          onPress={() => router.push(`/newsarticle/${newsId}`)}
+          onPress={() => router.push(`/newsarticle/${articleId}`)}
         >
           <NewsImagePlaceholder imageUrl={newsData.imageUrl} />
           
