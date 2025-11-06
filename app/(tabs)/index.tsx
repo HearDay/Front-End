@@ -2,7 +2,8 @@ import { CategoryChipGroup } from "@/components/common";
 import HeroSection from "@/components/screens/HomePage/HeroSection";
 import NewsCardList from "@/components/screens/HomePage/NewsCardList";
 import NewsCardSlider from "@/components/screens/HomePage/NewsCardSlider";
-import React, { useState } from "react";
+import { fetchUserInfo } from "@/services/api/userInfo";
+import React, { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -10,9 +11,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-const nickname = "지니";
-
-export default function Index() {  // ← function Index로 변경
+export default function Index() {
   const categories = [
     "경제",
     "방송 / 연예",
@@ -25,7 +24,27 @@ export default function Index() {  // ← function Index로 변경
   ];
 
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [nickname, setNickname] = useState<string>("");
+  const [level, setLevel] = useState<number>(1);
+  const [updateTime, setUpdateTime] = useState<string>("");
+
   const offset = useSharedValue(0);
+
+  useEffect(() => {
+    const loadUserInfo = async () => {
+      try {
+        const res = await fetchUserInfo();
+        if (res.success) {
+          setNickname(res.data.nickname);
+          setLevel(res.data.level);
+          setUpdateTime(res.data.updateTime);
+        }
+      } catch (error) {
+        console.error("유저 정보 로드 실패:", error);
+      }
+    };
+    loadUserInfo();
+  }, []);
 
   const handleSelectCategory = (category: string) => {
     setSelectedCategory(category);
@@ -44,7 +63,7 @@ export default function Index() {  // ← function Index로 변경
 
   return (
     <View className="flex-1 bg-white">
-      <HeroSection offset={offset} />
+      <HeroSection offset={offset} userLevel={level} />
 
       {selectedCategory ? (
         <Animated.View style={listStyle}>
@@ -74,11 +93,14 @@ export default function Index() {  // ← function Index로 변경
         <>
           <View className="px-6 mt-4">
             <Text className="text-[16px] text-right font-extrabold text-[#002C14] mt-2 mr-2">
-              {nickname}님이 좋아할 만한 오늘의 뉴스
+              {nickname
+                ? `${nickname}님이 좋아할 만한 오늘의 뉴스`
+                : "오늘의 추천 뉴스"}
             </Text>
           </View>
 
-          <NewsCardSlider />
+          <NewsCardSlider updateTime={updateTime} />
+
 
           <View className="px-6 mt-4">
             <Text className="text-[16px] text-right font-extrabold text-[#002C14] mt-2 mb-4 mr-2">
