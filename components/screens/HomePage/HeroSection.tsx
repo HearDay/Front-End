@@ -8,9 +8,21 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-const HeroSection = ({ offset }: { offset: any }) => {
-  const router = useRouter(); 
-  const userLevel: number = 5; // 더미 데이터
+interface HeroSectionProps {
+  offset: any;
+  userLevel: number;
+}
+
+const HeroSection = ({ offset, userLevel }: HeroSectionProps) => {
+  const router = useRouter();
+
+  // 높이 애니메이션 (440 → 104)
+  const animatedContainerStyle = useAnimatedStyle(() => {
+    const height = interpolate(offset.value, [0, 1], [440, 104]);
+    return {
+      height: withTiming(height, { duration: 500 }),
+    };
+  });
 
   // 레벨별 이미지 선택
   const treeImage = (() => {
@@ -55,15 +67,7 @@ const HeroSection = ({ offset }: { offset: any }) => {
   const levelText =
     userLevel === 6 ? "나무가 다 자랐어요!" : "뉴스를 시청하면\n나무가 자라요!";
 
-  // 전체 HeroSection 높이 애니메이션
-  const animatedContainerStyle = useAnimatedStyle(() => {
-    const height = interpolate(offset.value, [0, 1], [440, 104]);
-    return {
-      height: withTiming(height, { duration: 600 }),
-    };
-  });
-
-  // 나무 + Lv 문구 애니메이션
+  // ✅ 나무와 텍스트 애니메이션 (카테고리 선택 시 위로 올라감)
   const animatedTreeStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: withTiming(offset.value * -250) }],
     opacity: withTiming(1 - offset.value),
@@ -88,7 +92,8 @@ const HeroSection = ({ offset }: { offset: any }) => {
         className="w-full rounded-b-[24px] overflow-hidden"
         style={{ flex: 1 }}
       >
-        <View className="flex-row justify-between items-center px-6 pt-12 relative">
+        {/* 로고 & 검색 버튼 */}
+        <View className="flex-row justify-between items-center px-6 pt-12">
           <Image
             className="w-[130px] h-[40px] mt-4"
             style={{ resizeMode: "contain" }}
@@ -101,18 +106,25 @@ const HeroSection = ({ offset }: { offset: any }) => {
           >
             <Animated.Image
               source={require("../../../my-expo-app/assets/images/Search1.png")}
-              style={[{ width: 24, height: 24, resizeMode: "contain" }, search1Style]}
+              style={[
+                { width: 24, height: 24, resizeMode: "contain" },
+                search1Style,
+              ]}
             />
             <Animated.Image
               source={require("../../../my-expo-app/assets/images/Search2.png")}
-              style={[{ width: 24, height: 24, resizeMode: "contain" }, search2Style]}
+              style={[
+                { width: 24, height: 24, resizeMode: "contain" },
+                search2Style,
+              ]}
             />
           </TouchableOpacity>
         </View>
 
+        {/* 나무 이미지 (항상 하단 정렬 + 애니메이션 적용) */}
         <Animated.View
           style={animatedTreeStyle}
-          className="flex-1 justify-end items-center"
+          className="flex-1 justify-end items-center pb-1"
         >
           <Image
             source={treeImage}

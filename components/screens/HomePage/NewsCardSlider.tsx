@@ -12,10 +12,13 @@ import {
 } from "react-native";
 import { newsDummy } from "./NewsCardDummy";
 
-
 const { width } = Dimensions.get("window");
 
-const NewsCardSlider = () => {
+interface NewsCardSliderProps {
+  updateTime?: string; // 홈 API에서 받아온 업데이트 시간 표시용
+}
+
+const NewsCardSlider = ({ updateTime }: NewsCardSliderProps) => {
   const router = useRouter();
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -24,7 +27,6 @@ const NewsCardSlider = () => {
     const index = Math.round(offsetX / width);
     setActiveIndex(index);
   };
-
 
   const handleNewsPress = (articleId: string) => {
     router.push(`/newsplayer/${articleId}`);
@@ -45,17 +47,18 @@ const NewsCardSlider = () => {
               onPress={() => handleNewsPress(item.id)}
               activeOpacity={0.8}
             >
-            <NewsCard
-              title={item.title}
-              description={item.description}
-              image={item.image}
-              background="green"
-            />
+              <NewsCard
+                title={item.title}
+                description={item.description}
+                image={item.image}
+                background="green"
+              />
             </TouchableOpacity>
           </View>
         ))}
       </ScrollView>
 
+      {/* 슬라이드 인디케이터 */}
       <View className="flex-row justify-center mt-2">
         {newsDummy.map((_, index) => (
           <View
@@ -67,8 +70,9 @@ const NewsCardSlider = () => {
         ))}
       </View>
 
-      <Text className="text-gray-500 text-xs self-end pr-8">
-        9월 17일 16:00 업데이트
+      {/* 업데이트 시간 표시 */}
+      <Text className="text-gray-500 text-xs self-end pr-8 mt-1">
+        {updateTime ? `${updateTime} 업데이트` : "업데이트 정보 없음"}
       </Text>
     </View>
   );
