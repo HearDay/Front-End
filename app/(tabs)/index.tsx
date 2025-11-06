@@ -63,7 +63,7 @@ export default function Index() {
 
   return (
     <View className="flex-1 bg-white">
-      <HeroSection userLevel={level} />
+      <HeroSection offset={offset} userLevel={level} />
 
       {selectedCategory ? (
         <Animated.View style={listStyle}>
