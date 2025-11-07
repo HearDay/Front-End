@@ -8,10 +8,17 @@ export function DiscussionNewsCard({ news, onPress }: DiscussionNewsCardProps) {
   return (
     <TouchableOpacity
       onPress={onPress}
-      className="bg-white rounded-2xl mx-4 mb-3 shadow-lg"
+      className="bg-white rounded-2xl mx-4 mb-3"
+      style={{
+        shadowColor: "#000",
+        shadowOffset: { width: 2, height: 2 },
+        shadowOpacity: 0.15,
+        shadowRadius: 6,
+        elevation: 4,
+      }}
       activeOpacity={0.7}
     >
-      <View className="p-4 rounded-xl overflow-hidden">
+      <View className="pt-4 px-4 pb-1 rounded-xl overflow-hidden">
         <View className="flex-row gap-3">
           {/* 이미지 */}
           {imageError ? (

@@ -11,8 +11,14 @@ import { WordBookChipList } from './WordBookChipList';
 import { WordBookDateDisplay } from './WordBookDateDisplay';
 
 export const WordBookScreen = () => {
-  const [currentDate, setCurrentDate] = useState(new Date())
-  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date())
+  // 타임존 문제 방지: 초기 날짜를 정오(12:00)로 설정
+  const getDateAtNoon = () => {
+    const now = new Date()
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0, 0)
+  }
+
+  const [currentDate, setCurrentDate] = useState(getDateAtNoon())
+  const [selectedDate, setSelectedDate] = useState<Date | null>(getDateAtNoon())
   const [calendarData, setCalendarData] = useState<WordBookCalendarItem[]>([])
   const [todayWords, setTodayWords] = useState<SavedWord[]>([])
   const [selectedWord, setSelectedWord] = useState<SavedWord | null>(null)
@@ -30,12 +36,15 @@ export const WordBookScreen = () => {
     try {
       setLoading(true)
       setError(null)
-      
+
       const response = await wordbookService.getCalendar(currentDate)
       setCalendarData(response)
-      
-      console.log('캘린더 데이터 로드:', currentDate)
-      
+
+      // 타임존 문제 없이 날짜 출력
+      const year = currentDate.getFullYear()
+      const month = String(currentDate.getMonth() + 1).padStart(2, '0')
+      console.log('캘린더 데이터 로드:', `${year}-${month}`)
+
     } catch (err) {
       setError('캘린더를 불러올 수 없습니다.')
       console.error('캘린더 로드 실패:', err)
@@ -50,9 +59,13 @@ export const WordBookScreen = () => {
     try {
       const response = await wordbookService.getWordsByDate(date)
       setTodayWords(response)
-      
-      console.log('단어 로드:', date)
-      
+
+      // 타임존 문제 없이 날짜 출력
+      const year = date.getFullYear()
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const day = String(date.getDate()).padStart(2, '0')
+      console.log('단어 로드:', `${year}-${month}-${day}`)
+
     } catch (error) {
       console.error('단어 로드 실패:', error)
     }

@@ -56,7 +56,11 @@ export const wordbookService = {
       })
     }
 
-    const dateStr = format(date, 'yyyy-MM-dd')
+    // 타임존 영향 없이 날짜 문자열 생성
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    const dateStr = `${year}-${month}-${day}`
 
     // GET /api/words/date?date=2025-11-05
     const response = await apiClient.get<ApiResponse<{ words: Array<{ wordId: number; word: string }> }>>(

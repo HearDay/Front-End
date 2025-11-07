@@ -4,4 +4,3 @@ export { LyricsDisplay } from './LyricsDisplay'
 export { NewsImagePlaceholder } from './NewsImagePlaceholder'
 export { NewsPlayerHeader } from './NewsPlayerHeader'
 export { NewsPlayerScreen } from './NewsPlayerScreen'
-

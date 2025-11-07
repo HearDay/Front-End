@@ -8,14 +8,14 @@ export const CategoryChipGroup = ({
   selectedCategory,
   onSelectCategory,
 }: CategoryChipGroupProps) => (
-  <View className="h-16 items-center"> 
+  <View className="h-16 items-center">
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={{
         alignItems: 'center',
         paddingHorizontal: 16,
-        gap: 8, // gap-2에 해당
+        gap: 8,
       }}
     >
       {categories.map((category) => (

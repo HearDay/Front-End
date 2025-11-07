@@ -28,11 +28,30 @@ export const NewsPlayerScreen = ({ articleId }: NewsPlayerScreenProps) => {
   const [error, setError] = useState<string | null>(null);
   const soundRef = useRef<Audio.Sound | null>(null);
 
+  // 최근 본 기사 목록
+  const [recentArticles, setRecentArticles] = useState<number[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(-1);
+
   // 모달 상태 추가
   const [showCarModeErrorModal, setShowCarModeErrorModal] = useState(false);
   const [showSaveConfirmModal, setShowSaveConfirmModal] = useState(false);
   const [showSaveResultModal, setShowSaveResultModal] = useState(false);
   const [saveResultMessage, setSaveResultMessage] = useState('');
+
+  // 최근 본 기사 목록 가져오기
+  const fetchRecentArticles = useCallback(async () => {
+    try {
+      const response = await newsService.getRecentArticles('RECENT');
+      const articleIds = response.map(article => article.id);
+      setRecentArticles(articleIds);
+
+      // 현재 기사의 인덱스 찾기
+      const index = articleIds.findIndex(id => id === parseInt(articleId));
+      setCurrentIndex(index);
+    } catch (err) {
+      console.error('최근 본 기사 목록 로드 실패:', err);
+    }
+  }, [articleId]);
 
   const fetchNewsData = useCallback(async () => {
     try {
@@ -49,7 +68,8 @@ export const NewsPlayerScreen = ({ articleId }: NewsPlayerScreenProps) => {
 
   useEffect(() => {
     fetchNewsData();
-  }, [fetchNewsData]);
+    fetchRecentArticles();
+  }, [fetchNewsData, fetchRecentArticles]);
 
   useEffect(() => {
     if (!newsData) return;
@@ -106,8 +126,35 @@ export const NewsPlayerScreen = ({ articleId }: NewsPlayerScreenProps) => {
     }
   }, []);
 
-  const handleNext = useCallback(() => console.log('다음 기사'), []);
-  const handlePrev = useCallback(() => console.log('이전 기사'), []);
+  const handleNext = useCallback(async () => {
+    if (currentIndex === -1 || currentIndex >= recentArticles.length - 1) {
+      console.log('다음 기사가 없습니다');
+      return;
+    }
+
+    // 오디오 정리
+    await soundRef.current?.unloadAsync();
+    soundRef.current = null;
+
+    // 다음 기사로 이동
+    const nextArticleId = recentArticles[currentIndex + 1];
+    router.replace(`/newsplayer/${nextArticleId}`);
+  }, [currentIndex, recentArticles, router]);
+
+  const handlePrev = useCallback(async () => {
+    if (currentIndex <= 0) {
+      console.log('이전 기사가 없습니다');
+      return;
+    }
+
+    // 오디오 정리
+    await soundRef.current?.unloadAsync();
+    soundRef.current = null;
+
+    // 이전 기사로 이동
+    const prevArticleId = recentArticles[currentIndex - 1];
+    router.replace(`/newsplayer/${prevArticleId}`);
+  }, [currentIndex, recentArticles, router]);
 
   const handleCarModeToggle = useCallback(async () => {
     const newCarMode = !isCarMode;

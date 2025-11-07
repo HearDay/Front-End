@@ -20,6 +20,13 @@ export const newsService = {
   // 뉴스 플레이어용 데이터 조회
   async getNewsDetail(articleId: string): Promise<NewsPlayerData> {
     const article = await this.getArticleDetail(articleId)
+
+    // 디버깅: audioUrl 로그
+    console.log('=== 기사 오디오 정보 ===')
+    console.log('articleId:', articleId)
+    console.log('ttsUrl:', article.detail.ttsUrl)
+    console.log('ttsUrl 존재:', !!article.detail.ttsUrl)
+
     return {
       title: article.title,
       imageUrl: article.imageUrl,
