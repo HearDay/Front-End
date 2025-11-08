@@ -106,7 +106,7 @@ export interface SavedWord {
   id: string
   word: string
 //  savedDate: string  // YYYY-MM-DD
-  definition?: string //추가: 단어 뜻 
+  definition?: string //추가: 단어 뜻
   savedAt: string
 }
 

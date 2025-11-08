@@ -64,7 +64,11 @@ export function DiscussionNewsList({
       </View>
 
       {/* 뉴스 리스트 */}
-      <ScrollView className="flex-1">
+      <ScrollView
+        className="flex-1"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 20 }}
+      >
         {news.length === 0 ? (
           <View className="flex-1 items-center justify-center py-20">
             <Text className="text-gray-400 text-base">본 뉴스가 없습니다</Text>

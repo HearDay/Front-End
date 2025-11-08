@@ -60,13 +60,19 @@ export const WordBookCalendar = ({
       const isCurrentMonth = d.getMonth() === currentDate.getMonth()
 
       days.push(
-        <View 
+        <View
           key={key}
           style={{ width: '14.28%' }}
           className="items-center py-3"
         >
           <TouchableOpacity
-            onPress={() => item && onDateSelect(d)}
+            onPress={() => {
+              if (item) {
+                // 타임존 문제 방지: 정오(12:00)로 설정
+                const dateAtNoon = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0, 0)
+                onDateSelect(dateAtNoon)
+              }
+            }}
             className="items-center"
             activeOpacity={0.7}
           >
@@ -98,18 +104,18 @@ export const WordBookCalendar = ({
     <View className="bg-white rounded-2xl p-4 mx-4 mt-4 border border-green-600">
       {/* 월 제목 및 화살표 */}
       <View className="flex-row items-center justify-between mb-4">
-        <TouchableOpacity 
+        <TouchableOpacity
           onPress={onPrevMonth}
-          activeOpacity={0.7} // 
+          activeOpacity={0.7}
         >
           <Text className="text-2xl text-gray-400">‹</Text>
         </TouchableOpacity>
         <Text className="text-lg font-semibold">
           {format(currentDate, 'MMMM yyyy')}
         </Text>
-        <TouchableOpacity 
+        <TouchableOpacity
           onPress={onNextMonth}
-          activeOpacity={0.7} // 
+          activeOpacity={0.7}
         >
           <Text className="text-2xl text-gray-400">›</Text>
         </TouchableOpacity>

@@ -2,8 +2,7 @@ import { ScrollView, Text, View } from 'react-native';
 
 interface WordDefinitionProps {
   word: string
-  definitions: string[]  // 여러 개 뜻
-  showWord?: boolean
+  definitions: string[]
 }
 
 export const WordDefinition = (
