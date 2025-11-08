@@ -40,7 +40,7 @@ const NewsCardList = ({ background = "white", articles = [] }: NewsCardListProps
             <NewsCard
               title={item.title}
               description={item.description}
-              image={item.imageUrl}
+              imageUrl={item.imageUrl}
               background={background}
             />
           </TouchableOpacity>

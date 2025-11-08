@@ -50,7 +50,7 @@ const NewsCardSlider = ({ updateTime }: NewsCardSliderProps) => {
               <NewsCard
                 title={item.title}
                 description={item.description}
-                image={item.image}
+                imageUrl={item.imageUrl}
                 background="green"
               />
             </TouchableOpacity>

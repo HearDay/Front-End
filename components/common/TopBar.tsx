@@ -12,20 +12,28 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 interface TopBarProps {
   showBackButton?: boolean;
+  onBackPress?: () => void; // 백버튼 동작을 props로 받음
 }
 
-const { width } = Dimensions.get("window"); // 전체 화면 너비
+const { width } = Dimensions.get("window");
 
-const TopBar = ({ showBackButton = false }: TopBarProps) => {
+const TopBar = ({ showBackButton = false, onBackPress }: TopBarProps) => {
   const router = useRouter();
+
+  const handleBackPress = () => {
+    if (onBackPress) {
+      onBackPress(); // 부모에서 전달된 함수 실행
+    } else {
+      router.back(); // 기본 동작: 이전 페이지로 돌아가기
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View className="w-full items-center justify-center pb-2 relative bg-transparent">
-
         {showBackButton && (
           <TouchableOpacity
-            onPress={() => router.back()}
+            onPress={handleBackPress}
             className="absolute left-4 top-1"
           >
             <Image
@@ -54,15 +62,13 @@ const TopBar = ({ showBackButton = false }: TopBarProps) => {
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    backgroundColor: "transparent", 
-  },
+  safeArea: { backgroundColor: "transparent" },
   gradientLine: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    height: 3, 
+    height: 3,
     zIndex: 0,
   },
 });

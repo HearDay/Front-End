@@ -3,6 +3,7 @@ import HeroSection from "@/components/screens/HomePage/HeroSection";
 import NewsCardList from "@/components/screens/HomePage/NewsCardList";
 import NewsCardSlider from "@/components/screens/HomePage/NewsCardSlider";
 import { fetchUserInfo } from "@/services/api/userInfo";
+import { usePathname } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import Animated, {
@@ -29,8 +30,24 @@ export default function Index() {
   const [updateTime, setUpdateTime] = useState<string>("");
 
   const offset = useSharedValue(0);
+  const pathname = usePathname(); // 현재 경로 가져오기
 
   useEffect(() => {
+    const publicRoutes = [
+      "/LoginPage",
+      "/SignUpPage",
+      "/CertificationPage",
+      "/ResetPasswordPage",
+      "/SelectCategoryPage",
+      "/KakaoLoginView",
+    ];
+
+    // publicRoutes 페이지에서는 유저 정보 로드 안 하도록
+    if (publicRoutes.includes(pathname)) {
+      console.log("public route 감지 → fetchUserInfo() 실행 안 함:", pathname);
+      return;
+    }
+
     const loadUserInfo = async () => {
       try {
         const res = await fetchUserInfo();
@@ -43,8 +60,9 @@ export default function Index() {
         console.error("유저 정보 로드 실패:", error);
       }
     };
+
     loadUserInfo();
-  }, []);
+  }, [pathname]);
 
   const handleSelectCategory = (category: string) => {
     setSelectedCategory(category);
@@ -100,7 +118,6 @@ export default function Index() {
           </View>
 
           <NewsCardSlider updateTime={updateTime} />
-
 
           <View className="px-6 mt-4">
             <Text className="text-[16px] text-right font-extrabold text-[#002C14] mt-2 mb-4 mr-2">
