@@ -104,18 +104,18 @@ export const WordBookCalendar = ({
     <View className="bg-white rounded-2xl p-4 mx-4 mt-4 border border-green-600">
       {/* 월 제목 및 화살표 */}
       <View className="flex-row items-center justify-between mb-4">
-        <TouchableOpacity 
+        <TouchableOpacity
           onPress={onPrevMonth}
-          activeOpacity={0.7} // 
+          activeOpacity={0.7}
         >
           <Text className="text-2xl text-gray-400">‹</Text>
         </TouchableOpacity>
         <Text className="text-lg font-semibold">
           {format(currentDate, 'MMMM yyyy')}
         </Text>
-        <TouchableOpacity 
+        <TouchableOpacity
           onPress={onNextMonth}
-          activeOpacity={0.7} // 
+          activeOpacity={0.7}
         >
           <Text className="text-2xl text-gray-400">›</Text>
         </TouchableOpacity>

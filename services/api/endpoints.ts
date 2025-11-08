@@ -45,7 +45,6 @@ export const ENDPOINTS = {
   // 토론
   DISCUSSION: {
     LIST: '/api/discussion',
-    RECORDS: '/api/discussion/records', 
     CREATE: '/api/discussion',
     DETAIL: (id: string) => `/api/discussion/${id}`,
     MESSAGES: (id: string) => `/api/discussion/${id}/messages`,
