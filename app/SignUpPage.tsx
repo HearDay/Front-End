@@ -6,8 +6,18 @@ import TermsAgreement from "@/components/screens/SignUp/TermsAgreement";
 import axiosInstance from "@/services/api/axiosInstance";
 import { signup } from "@/services/api/signup";
 import { Stack, useRouter } from "expo-router";
-import React, { useState } from "react";
-import { Alert, ScrollView, StatusBar, Text, View } from "react-native";
+import { Eye, EyeOff } from "lucide-react-native";
+import React, { useEffect, useState } from "react";
+import {
+  Alert,
+  Platform,
+  ScrollView,
+  StatusBar,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 const SignUpPage = () => {
   const router = useRouter();
@@ -23,6 +33,25 @@ const SignUpPage = () => {
     privacy: false,
     marketing: false,
   });
+
+  const [isSecure1, setIsSecure1] = useState(true);
+  const [isSecure2, setIsSecure2] = useState(true);
+  const [delayedSecure1, setDelayedSecure1] = useState(isSecure1);
+  const [delayedSecure2, setDelayedSecure2] = useState(isSecure2);
+
+  useEffect(() => {
+    if (Platform.OS === "ios") {
+      const t1 = setTimeout(() => setDelayedSecure1(isSecure1), 50);
+      const t2 = setTimeout(() => setDelayedSecure2(isSecure2), 50);
+      return () => {
+        clearTimeout(t1);
+        clearTimeout(t2);
+      };
+    } else {
+      setDelayedSecure1(isSecure1);
+      setDelayedSecure2(isSecure2);
+    }
+  }, [isSecure1, isSecure2]);
 
   const allRequiredAgreed = terms.service && terms.privacy;
 
@@ -48,8 +77,6 @@ const SignUpPage = () => {
       const res = await signup(body);
 
       if (res.success) {
-
-        // 토큰 저장은 signup() 내부에서 이미 완료됨
         Alert.alert("회원가입 성공", "선호 카테고리를 선택해주세요!", [
           {
             text: "확인",
@@ -93,6 +120,7 @@ const SignUpPage = () => {
           }}
           showsVerticalScrollIndicator={false}
         >
+          {/* 이메일 */}
           <View className="mt-3">
             <EmailInputWithSelect
               emailId={emailId}
@@ -103,30 +131,86 @@ const SignUpPage = () => {
             />
           </View>
 
+          {/* 닉네임 */}
           <InputBox
             placeholder="닉네임"
             value={nickname}
             onChangeText={setNickname}
           />
 
-          <View className="mt-3">
-            <InputBox
+          {/* 비밀번호 입력 */}
+          <View
+            className="flex-row items-center w-[350px] h-[50px] bg-[#FEFFF5] rounded-[10px] px-6 mt-3"
+            style={{
+              paddingVertical: Platform.OS === "ios" ? 10 : 6,
+            }}
+          >
+            <TextInput
               placeholder="비밀번호"
+              placeholderTextColor="#8AA989"
               value={password}
               onChangeText={setPassword}
-              variant="password"
+              secureTextEntry={delayedSecure1}
+              style={{
+                flex: 1,
+                fontSize: 17,
+                color: "#1F2D1F",
+                includeFontPadding: false,
+                textAlignVertical: "center",
+                paddingVertical: 0,
+              }}
+              autoCapitalize="none"
+              autoCorrect={false}
+              autoComplete="off"
+              importantForAutofill="no"
+              textContentType="none"
             />
+            <TouchableOpacity onPress={() => setIsSecure1(!isSecure1)}>
+              {isSecure1 ? (
+                <EyeOff size={22} color="#8AA989" />
+              ) : (
+                <Eye size={22} color="#8AA989" />
+              )}
+            </TouchableOpacity>
           </View>
 
-          <View className="mt-3">
-            <InputBox
+          {/* 비밀번호 확인 입력 */}
+          <View
+            className="flex-row items-center w-[350px] h-[50px] bg-[#FEFFF5] rounded-[10px] px-6 mt-3"
+            style={{
+              paddingVertical: Platform.OS === "ios" ? 10 : 6,
+            }}
+          >
+            <TextInput
               placeholder="비밀번호 확인"
+              placeholderTextColor="#8AA989"
               value={confirmPw}
               onChangeText={setConfirmPw}
-              variant="password"
+              secureTextEntry={delayedSecure2}
+              style={{
+                flex: 1,
+                fontSize: 17,
+                color: "#1F2D1F",
+                includeFontPadding: false,
+                textAlignVertical: "center",
+                paddingVertical: 0,
+              }}
+              autoCapitalize="none"
+              autoCorrect={false}
+              autoComplete="off"
+              importantForAutofill="no"
+              textContentType="none"
             />
+            <TouchableOpacity onPress={() => setIsSecure2(!isSecure2)}>
+              {isSecure2 ? (
+                <EyeOff size={22} color="#8AA989" />
+              ) : (
+                <Eye size={22} color="#8AA989" />
+              )}
+            </TouchableOpacity>
           </View>
 
+          {/* 전화번호 */}
           <View className="mt-3">
             <InputBox
               placeholder="전화번호 (-없이 번호 입력)"
@@ -135,6 +219,7 @@ const SignUpPage = () => {
             />
           </View>
 
+          {/* 안내 문구 */}
           <View className="w-[350px] mt-2 mb-5">
             <Text className="text-[12px] text-[#B7B7B7] leading-5 ml-3">
               • 앱의 모든 기능을 원활하게 사용하기 위해서 정확한 정보를 입력해야 합니다{"\n"}
@@ -142,8 +227,10 @@ const SignUpPage = () => {
             </Text>
           </View>
 
+          {/* 약관 */}
           <TermsAgreement value={terms} onChange={setTerms} />
 
+          {/* 회원가입 버튼 */}
           <PrimaryButton
             title="회원가입"
             variant={allRequiredAgreed ? "primary" : "secondary"}

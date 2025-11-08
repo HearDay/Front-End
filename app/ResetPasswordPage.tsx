@@ -23,7 +23,7 @@ const ResetPasswordPage = () => {
   const [modalMessage, setModalMessage] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
 
-  // ✅ iOS secureTextEntry 버그 대응 (한 템포 늦춰 적용)
+
   useEffect(() => {
     if (Platform.OS === "ios") {
       const t1 = setTimeout(() => setDelayedSecure1(isSecure1), 50);
@@ -99,7 +99,7 @@ const ResetPasswordPage = () => {
           비밀번호 변경하기
         </Text>
 
-        {/* ✅ 첫 번째 비밀번호 입력 */}
+        {/* 첫 번째 비밀번호 입력 */}
         <View
           className="flex-row items-center w-[350px] h-[50px] bg-[#FEFFF5] rounded-[10px] px-6"
           style={{
@@ -135,7 +135,7 @@ const ResetPasswordPage = () => {
           </TouchableOpacity>
         </View>
 
-        {/* ✅ 두 번째 비밀번호 확인 입력 */}
+        {/* 두 번째 비밀번호 확인 입력 */}
         <View
           className="flex-row items-center w-[350px] h-[50px] bg-[#FEFFF5] rounded-[10px] px-6 mt-6"
           style={{

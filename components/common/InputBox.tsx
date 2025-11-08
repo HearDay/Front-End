@@ -60,7 +60,7 @@ const InputBox = ({
           textAlignVertical: "center",
           paddingVertical: 0,
         }}
-        // 🔒 자동완성 및 비밀번호 제안 완전 차단
+        // 자동완성 및 비밀번호 제안 완전 차단
         autoCapitalize="none"
         autoCorrect={false}
         autoComplete="off"
