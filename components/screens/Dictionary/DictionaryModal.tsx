@@ -1,4 +1,5 @@
 import { dictionaryService } from '@/services'
+import axios from 'axios'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ActivityIndicator, Modal, Pressable, Text, TouchableOpacity, View } from 'react-native'
 import { DictionaryModalProps } from '../../../types/screens'
@@ -27,9 +28,12 @@ export function DictionaryModal({
       setError(null)
       const response = await dictionaryService.getDefinition(word)
       setDefinition(response)
-    } catch (err: any) {
-      const errorMessage = err.response?.data?.message || '단어 뜻을 불러올 수 없습니다.'
-      setError(errorMessage)
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response?.data?.message) {
+        setError(err.response.data.message)
+      } else {
+        setError('단어 뜻을 불러올 수 없습니다.')
+      }
     } finally {
       setLoading(false)
     }

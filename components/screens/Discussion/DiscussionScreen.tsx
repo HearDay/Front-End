@@ -48,7 +48,7 @@ export function DiscussionScreen() {
       }))
 
       setViewedNews(transformedNews)
-    } catch (err: any) {
+    } catch {
       setError('뉴스 목록을 불러올 수 없습니다.')
     } finally {
       setLoading(false)
