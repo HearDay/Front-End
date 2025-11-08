@@ -49,7 +49,7 @@ export const NewsPlayerScreen = ({ articleId }: NewsPlayerScreenProps) => {
       const index = articleIds.findIndex(id => id === parseInt(articleId));
       setCurrentIndex(index);
     } catch (err) {
-      console.error('최근 본 기사 목록 로드 실패:', err);
+      // 에러 발생 시 빈 배열 유지
     }
   }, [articleId]);
 
@@ -91,7 +91,7 @@ export const NewsPlayerScreen = ({ articleId }: NewsPlayerScreenProps) => {
         }
       });
     } catch (err) {
-      console.error('오디오 로드 실패:', err);
+      // 오디오 로드 실패 시 무음 처리
     }
   }, [newsData]);
 
@@ -112,7 +112,7 @@ export const NewsPlayerScreen = ({ articleId }: NewsPlayerScreenProps) => {
       await soundRef.current.playAsync();
       setIsPlaying(true);
     } catch (err) {
-      console.error('재생 실패:', err);
+      // 재생 실패 시 무시
     }
   }, []);
 
@@ -122,13 +122,12 @@ export const NewsPlayerScreen = ({ articleId }: NewsPlayerScreenProps) => {
       await soundRef.current.pauseAsync();
       setIsPlaying(false);
     } catch (err) {
-      console.error('일시정지 실패:', err);
+      // 일시정지 실패 시 무시
     }
   }, []);
 
   const handleNext = useCallback(async () => {
     if (currentIndex === -1 || currentIndex >= recentArticles.length - 1) {
-      console.log('다음 기사가 없습니다');
       return;
     }
 
@@ -143,7 +142,6 @@ export const NewsPlayerScreen = ({ articleId }: NewsPlayerScreenProps) => {
 
   const handlePrev = useCallback(async () => {
     if (currentIndex <= 0) {
-      console.log('이전 기사가 없습니다');
       return;
     }
 
