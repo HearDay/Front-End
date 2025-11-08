@@ -2,7 +2,7 @@ import { Modal } from '@/components/common';
 import TopBar from '@/components/common/TopBar';
 import { DictionaryModal, DictionarySearchBar } from '@/components/screens/Dictionary';
 import { articleService, wordbookService } from '@/services';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native'; // 개선: ActivityIndicator 추가
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NewsArticleData } from '../../../types/screens';
@@ -206,16 +206,6 @@ export function NewsArticleScreen({ articleId }: NewsArticleScreenProps) {
         onPrev={handlePrevHighlight}
         onNext={handleNextHighlight}
       />
-
-      {/* 제거: 별도 돋보기 버튼 (DictionarySearchBar에 통합) */}
-      {/* {!showSearchBar && (
-        <TouchableOpacity
-          onPress={() => setShowSearchBar(true)}
-          className="absolute bottom-8 right-6 bg-green-600 w-14 h-14 rounded-full items-center justify-center shadow-lg"
-        >
-          <Text className="text-2xl">🔍</Text>
-        </TouchableOpacity>
-      )} */}
 
       {/* 단어 뜻 모달 */}
       <DictionaryModal
