@@ -28,7 +28,11 @@ export const WordBookScreen = () => {
   // 이유: API 호출 중 사용자에게 피드백 제공
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [loadingDefinition, setLoadingDefinition] = useState(false)
+  const [definitionLoading, setDefinitionLoading] = useState(false)
+
+  // 에러 모달 상태
+  const [showErrorModal, setShowErrorModal] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
 
   // 개선: useCallback
   // 이유: useEffect 의존성 배열에 안전하게 사용, 불필요한 함수 재생성 방지
@@ -78,7 +82,7 @@ export const WordBookScreen = () => {
     // 단어 뜻이 없으면 API로 조회
     if (!word.definition) {
       try {
-        setLoadingDefinition(true)
+        setDefinitionLoading(true)
         const wordId = parseInt(word.id)
         const result = await wordbookService.getWordDefinition(wordId)
 
@@ -92,7 +96,7 @@ export const WordBookScreen = () => {
       } catch (err) {
         setSelectedWord(prev => prev ? { ...prev, definition: '단어 뜻을 불러올 수 없습니다.' } : null)
       } finally {
-        setLoadingDefinition(false)
+        setDefinitionLoading(false)
       }
     }
   }, [])
@@ -121,7 +125,8 @@ export const WordBookScreen = () => {
       fetchCalendarData()
 
     } catch (error) {
-      alert('단어 삭제에 실패했습니다.')
+      setErrorMessage('단어 삭제에 실패했습니다.')
+      setShowErrorModal(true)
     }
   }, [selectedWord, fetchCalendarData])
 
@@ -196,7 +201,7 @@ export const WordBookScreen = () => {
           onClose={() => setShowModal(false)}
         >
           <View className="bg-green-50 rounded-2xl p-4 mb-6 mt-4 min-h-24 justify-center">
-            {loadingDefinition ? (
+            {definitionLoading ? (
               <ActivityIndicator size="large" color="#16a34a" />
             ) : (
               <Text className="text-base">{selectedWord.definition || '단어 뜻이 없습니다.'}</Text>
@@ -212,6 +217,15 @@ export const WordBookScreen = () => {
           </TouchableOpacity>
         </Modal>
       )}
+
+      {/* 에러 모달 */}
+      <Modal
+        visible={showErrorModal}
+        title={errorMessage}
+        onConfirm={() => setShowErrorModal(false)}
+        onClose={() => setShowErrorModal(false)}
+        confirmText="확인"
+      />
     </SafeAreaView>
   )
 }

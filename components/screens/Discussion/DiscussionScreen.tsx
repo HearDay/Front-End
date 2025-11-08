@@ -1,3 +1,4 @@
+import { Modal } from '@/components/common'
 import TopBar from '@/components/common/TopBar'
 import { discussionService, newsService } from '@/services'
 import { useRouter } from 'expo-router'
@@ -28,6 +29,10 @@ export function DiscussionScreen() {
   const [selectedArticleId, setSelectedArticleId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  // 에러 모달 상태
+  const [showErrorModal, setShowErrorModal] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
 
   // 내가 본 뉴스 데이터 로드
   const fetchViewedNews = useCallback(async () => {
@@ -103,7 +108,8 @@ export function DiscussionScreen() {
       await discussionService.createDiscussion(articleId, type)
       router.push('/(tabs)/AiPage')
     } catch (error) {
-      alert('토론을 시작할 수 없습니다.')
+      setErrorMessage('토론을 시작할 수 없습니다.')
+      setShowErrorModal(true)
     }
   }, [router])
 
@@ -166,6 +172,15 @@ export function DiscussionScreen() {
         articleId={selectedArticleId}
         onClose={() => setShowModal(false)}
         onStartDiscussion={handleStartDiscussion}
+      />
+
+      {/* 에러 모달 */}
+      <Modal
+        visible={showErrorModal}
+        title={errorMessage}
+        onConfirm={() => setShowErrorModal(false)}
+        onClose={() => setShowErrorModal(false)}
+        confirmText="확인"
       />
     </SafeAreaView>
   )
