@@ -1,3 +1,4 @@
+import { Modal } from '@/components/common'
 import TopBar from '@/components/common/TopBar'
 import { discussionService, newsService } from '@/services'
 import { useRouter } from 'expo-router'
@@ -29,6 +30,10 @@ export function DiscussionScreen() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // 에러 모달 상태
+  const [showErrorModal, setShowErrorModal] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
+
   // 내가 본 뉴스 데이터 로드
   const fetchViewedNews = useCallback(async () => {
     try {
@@ -48,16 +53,8 @@ export function DiscussionScreen() {
       }))
 
       setViewedNews(transformedNews)
-    } catch (err: any) {
-      // 디버깅을 위한 상세 에러 로그 추가
-      if (err?.response) {
-        console.log('--- AI 토론 화면 API 에러 정보 ---');
-        console.log('상태 코드:', err.response.status);
-        console.log('응답 데이터:', JSON.stringify(err.response.data, null, 2));
-        console.log('---------------------------------');
-      }
+    } catch {
       setError('뉴스 목록을 불러올 수 없습니다.')
-      console.error('뉴스 로드 실패:', err)
     } finally {
       setLoading(false)
     }
@@ -72,7 +69,6 @@ export function DiscussionScreen() {
       setDiscussionRecords(response)
     } catch (err) {
       setError('토론 기록을 불러올 수 없습니다.')
-      console.error('토론 기록 로드 실패:', err)
     } finally {
       setLoading(false)
     }
@@ -109,12 +105,11 @@ export function DiscussionScreen() {
   const handleStartDiscussion = useCallback(async (type: 'voice' | 'chat', articleId: string) => {
     try {
       setShowModal(false)
-      const discussion = await discussionService.createDiscussion(articleId, type)
-      console.log('토론 시작:', discussion)
+      await discussionService.createDiscussion(articleId, type)
       router.push('/(tabs)/AiPage')
     } catch (error) {
-      console.error('토론 생성 실패:', error)
-      alert('토론을 시작할 수 없습니다.')
+      setErrorMessage('토론을 시작할 수 없습니다.')
+      setShowErrorModal(true)
     }
   }, [router])
 
@@ -164,11 +159,11 @@ export function DiscussionScreen() {
           onNewsPress={handleNewsPress}
         />
       ) : (
-        <DiscussionRecordList 
+        <DiscussionRecordList
           records={discussionRecords}
           sortBy={recordSortBy}
           onSortChange={setRecordSortBy}
-          onRecordPress={(recordId) => console.log('Record pressed:', recordId)}
+          onRecordPress={() => {}}
         />
       )}
 
@@ -177,6 +172,15 @@ export function DiscussionScreen() {
         articleId={selectedArticleId}
         onClose={() => setShowModal(false)}
         onStartDiscussion={handleStartDiscussion}
+      />
+
+      {/* 에러 모달 */}
+      <Modal
+        visible={showErrorModal}
+        title={errorMessage}
+        onConfirm={() => setShowErrorModal(false)}
+        onClose={() => setShowErrorModal(false)}
+        confirmText="확인"
       />
     </SafeAreaView>
   )

@@ -6,17 +6,25 @@ type BackgroundVariant = "green" | "white";
 interface NewsCardProps {
   title: string;
   description: string;
-  image: any;
+  imageUrl?: any; //
   background?: BackgroundVariant;
 }
 
 const NewsCard = ({
   title,
   description,
-  image,
+  imageUrl,
   background = "white",
 }: NewsCardProps) => {
   const backgroundColor = background === "green" ? "#F1F6EF" : "#FFFFFF";
+
+  //
+  const imageSource =
+    typeof imageUrl === "string"
+      ? { uri: imageUrl }
+      : imageUrl
+      ? imageUrl
+      : require("../../my-expo-app/assets/images/DefaultCard.png");
 
   return (
     <View
@@ -26,15 +34,13 @@ const NewsCard = ({
         shadowOpacity: 0.15,
         shadowRadius: 6,
         elevation: 4,
-        borderRadius: 16, 
+        borderRadius: 16,
       }}
       className="self-center mb-5"
     >
       <View
-        className="flex-row items-center w-[350px] h-[106px] px-4 py-3 rounded-2xl bg-white overflow-hidden"
-        style={{
-          backgroundColor,
-        }}
+        className="flex-row items-center w-[350px] h-[106px] px-4 py-3 rounded-2xl overflow-hidden"
+        style={{ backgroundColor }}
       >
         <View
           className="mr-4 rounded-md overflow-hidden"
@@ -44,7 +50,7 @@ const NewsCard = ({
           }}
         >
           <Image
-            source={image}
+            source={imageSource} 
             resizeMode="cover"
             style={{
               width: "100%",

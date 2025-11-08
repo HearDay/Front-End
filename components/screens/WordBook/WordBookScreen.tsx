@@ -28,7 +28,11 @@ export const WordBookScreen = () => {
   // 이유: API 호출 중 사용자에게 피드백 제공
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [loadingDefinition, setLoadingDefinition] = useState(false)
+  const [definitionLoading, setDefinitionLoading] = useState(false)
+
+  // 에러 모달 상태
+  const [showErrorModal, setShowErrorModal] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
 
   // 개선: useCallback
   // 이유: useEffect 의존성 배열에 안전하게 사용, 불필요한 함수 재생성 방지
@@ -39,15 +43,8 @@ export const WordBookScreen = () => {
 
       const response = await wordbookService.getCalendar(currentDate)
       setCalendarData(response)
-
-      // 타임존 문제 없이 날짜 출력
-      const year = currentDate.getFullYear()
-      const month = String(currentDate.getMonth() + 1).padStart(2, '0')
-      console.log('캘린더 데이터 로드:', `${year}-${month}`)
-
     } catch (err) {
       setError('캘린더를 불러올 수 없습니다.')
-      console.error('캘린더 로드 실패:', err)
     } finally {
       setLoading(false)
     }
@@ -59,15 +56,8 @@ export const WordBookScreen = () => {
     try {
       const response = await wordbookService.getWordsByDate(date)
       setTodayWords(response)
-
-      // 타임존 문제 없이 날짜 출력
-      const year = date.getFullYear()
-      const month = String(date.getMonth() + 1).padStart(2, '0')
-      const day = String(date.getDate()).padStart(2, '0')
-      console.log('단어 로드:', `${year}-${month}-${day}`)
-
     } catch (error) {
-      console.error('단어 로드 실패:', error)
+      // 에러 발생 시 빈 배열 유지
     }
   }, []) // 의존성 없음 - 한 번만 생성
 
@@ -92,7 +82,7 @@ export const WordBookScreen = () => {
     // 단어 뜻이 없으면 API로 조회
     if (!word.definition) {
       try {
-        setLoadingDefinition(true)
+        setDefinitionLoading(true)
         const wordId = parseInt(word.id)
         const result = await wordbookService.getWordDefinition(wordId)
 
@@ -104,10 +94,9 @@ export const WordBookScreen = () => {
           w.id === word.id ? { ...w, definition: result.definition } : w
         ))
       } catch (err) {
-        console.error('단어 뜻 조회 실패:', err)
         setSelectedWord(prev => prev ? { ...prev, definition: '단어 뜻을 불러올 수 없습니다.' } : null)
       } finally {
-        setLoadingDefinition(false)
+        setDefinitionLoading(false)
       }
     }
   }, [])
@@ -134,10 +123,10 @@ export const WordBookScreen = () => {
       
       // 캘린더 데이터도 새로고침
       fetchCalendarData()
-      
+
     } catch (error) {
-      console.error('단어 삭제 실패:', error)
-      alert('단어 삭제에 실패했습니다.')
+      setErrorMessage('단어 삭제에 실패했습니다.')
+      setShowErrorModal(true)
     }
   }, [selectedWord, fetchCalendarData])
 
@@ -212,7 +201,7 @@ export const WordBookScreen = () => {
           onClose={() => setShowModal(false)}
         >
           <View className="bg-green-50 rounded-2xl p-4 mb-6 mt-4 min-h-24 justify-center">
-            {loadingDefinition ? (
+            {definitionLoading ? (
               <ActivityIndicator size="large" color="#16a34a" />
             ) : (
               <Text className="text-base">{selectedWord.definition || '단어 뜻이 없습니다.'}</Text>
@@ -228,6 +217,15 @@ export const WordBookScreen = () => {
           </TouchableOpacity>
         </Modal>
       )}
+
+      {/* 에러 모달 */}
+      <Modal
+        visible={showErrorModal}
+        title={errorMessage}
+        onConfirm={() => setShowErrorModal(false)}
+        onClose={() => setShowErrorModal(false)}
+        confirmText="확인"
+      />
     </SafeAreaView>
   )
 }
