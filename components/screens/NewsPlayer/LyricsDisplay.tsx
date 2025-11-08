@@ -9,7 +9,6 @@ export const LyricsDisplay = memo(function LyricsDisplay({
   onPress
 }: LyricsDisplayProps) {
     const handlePress = () => {
-       // console.log('가사클릭') 
         if (onPress){
             onPress()
         }

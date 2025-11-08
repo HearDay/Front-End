@@ -39,15 +39,8 @@ export const WordBookScreen = () => {
 
       const response = await wordbookService.getCalendar(currentDate)
       setCalendarData(response)
-
-      // 타임존 문제 없이 날짜 출력
-      const year = currentDate.getFullYear()
-      const month = String(currentDate.getMonth() + 1).padStart(2, '0')
-      console.log('캘린더 데이터 로드:', `${year}-${month}`)
-
     } catch (err) {
       setError('캘린더를 불러올 수 없습니다.')
-      console.error('캘린더 로드 실패:', err)
     } finally {
       setLoading(false)
     }
@@ -59,15 +52,8 @@ export const WordBookScreen = () => {
     try {
       const response = await wordbookService.getWordsByDate(date)
       setTodayWords(response)
-
-      // 타임존 문제 없이 날짜 출력
-      const year = date.getFullYear()
-      const month = String(date.getMonth() + 1).padStart(2, '0')
-      const day = String(date.getDate()).padStart(2, '0')
-      console.log('단어 로드:', `${year}-${month}-${day}`)
-
     } catch (error) {
-      console.error('단어 로드 실패:', error)
+      // 에러 발생 시 빈 배열 유지
     }
   }, []) // 의존성 없음 - 한 번만 생성
 
@@ -104,7 +90,6 @@ export const WordBookScreen = () => {
           w.id === word.id ? { ...w, definition: result.definition } : w
         ))
       } catch (err) {
-        console.error('단어 뜻 조회 실패:', err)
         setSelectedWord(prev => prev ? { ...prev, definition: '단어 뜻을 불러올 수 없습니다.' } : null)
       } finally {
         setLoadingDefinition(false)
@@ -134,9 +119,8 @@ export const WordBookScreen = () => {
       
       // 캘린더 데이터도 새로고침
       fetchCalendarData()
-      
+
     } catch (error) {
-      console.error('단어 삭제 실패:', error)
       alert('단어 삭제에 실패했습니다.')
     }
   }, [selectedWord, fetchCalendarData])

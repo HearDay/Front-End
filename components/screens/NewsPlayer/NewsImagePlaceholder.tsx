@@ -14,7 +14,6 @@ export const NewsImagePlaceholder = memo(function NewsImagePlaceholder({
   const [imageError, setImageError] = useState(false)
 
 const handlePress = () => {
-    // console.log('클릭')
     if (onPress){
         onPress()
     }

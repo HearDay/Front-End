@@ -46,12 +46,8 @@ export function NewsArticleScreen({ articleId }: NewsArticleScreenProps) {
 
       const response = await articleService.getArticleDetail(articleId)
       setNewsData(response)
-
-      console.log('기사 로드:', articleId)
-
     } catch (err) {
-      setError('기사를 불러올 수 없습니다.') // 개선: 에러 상태 설정
-      console.error('기사 로드 실패:', err)
+      setError('기사를 불러올 수 없습니다.')
     } finally {
       setLoading(false) // 개선: 로딩 종료
     }
