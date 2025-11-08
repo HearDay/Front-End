@@ -159,7 +159,9 @@ export const NewsPlayerScreen = ({ articleId }: NewsPlayerScreenProps) => {
     setIsCarMode(newCarMode);
     try {
       await Audio.setAudioModeAsync({
-        staysActiveInBackground: true,
+        allowsRecordingIOS: false,
+        playsInSilentModeIOS: true,
+        staysActiveInBackground: newCarMode,
         interruptionModeIOS: newCarMode ? 1 : 0,
         shouldDuckAndroid: newCarMode,
         playThroughEarpieceAndroid: false,
