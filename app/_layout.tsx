@@ -10,7 +10,6 @@ export default function RootLayout() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const pathname = usePathname();
 
-  // 로그인 없이 접근 가능한 페이지 목록
   const publicRoutes = [
     "/LoginPage",
     "/SignUpPage",
@@ -34,7 +33,7 @@ export default function RootLayout() {
     checkAuth();
   }, []);
 
-  // 로딩 중이면 스피너
+  // 로딩 중일 땐 어떤 페이지도 렌더하지 않음
   if (isLoading) {
     return (
       <View className="flex-1 items-center justify-center bg-white">
@@ -43,10 +42,11 @@ export default function RootLayout() {
     );
   }
 
-  // 비로그인 시, publicRoutes 외 페이지는 LoginPage로 이동
+  // 로그인 안 된 상태 + publicRoutes 외 페이지 접근 차단
   if (!isAuthenticated && !publicRoutes.includes(pathname)) {
     return <LoginPage />;
   }
 
+  // 인증 여부 확인 후 Slot 렌더링
   return <Slot />;
 }

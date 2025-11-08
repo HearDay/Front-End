@@ -1,4 +1,4 @@
-import { Stack, useLocalSearchParams } from "expo-router";
+import { router, Stack, useLocalSearchParams } from "expo-router";
 import React from "react";
 import { View } from "react-native";
 
@@ -17,7 +17,10 @@ export default function AIChatDebatePage() {
       <Stack.Screen options={{ headerShown: false }} />
 
       {/* 상단 TopBar */}
-      <TopBar showBackButton />
+      <TopBar
+        showBackButton
+        onBackPress={() => router.replace("/AiPage")} 
+      />
 
       {/* 채팅 목록 (InputBar 유무에 따라 padding 자동 조정) */}
       <ChatList showInputBar={showInputBar} />

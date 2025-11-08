@@ -1,11 +1,11 @@
-import InputBox from "@/components/common/InputBox";
 import { Modal } from "@/components/common/Modal";
 import PrimaryButton from "@/components/common/PrimaryButton";
 import TopBar from "@/components/common/TopBar";
 import { resetPassword } from "@/services/api/resetpassword";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import React, { useState } from "react";
-import { Text, View } from "react-native";
+import { Eye, EyeOff } from "lucide-react-native";
+import React, { useEffect, useState } from "react";
+import { Platform, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 const ResetPasswordPage = () => {
   const router = useRouter();
@@ -14,9 +14,29 @@ const ResetPasswordPage = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  const [isSecure1, setIsSecure1] = useState(true);
+  const [isSecure2, setIsSecure2] = useState(true);
+  const [delayedSecure1, setDelayedSecure1] = useState(isSecure1);
+  const [delayedSecure2, setDelayedSecure2] = useState(isSecure2);
+
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
+
+  // ✅ iOS secureTextEntry 버그 대응 (한 템포 늦춰 적용)
+  useEffect(() => {
+    if (Platform.OS === "ios") {
+      const t1 = setTimeout(() => setDelayedSecure1(isSecure1), 50);
+      const t2 = setTimeout(() => setDelayedSecure2(isSecure2), 50);
+      return () => {
+        clearTimeout(t1);
+        clearTimeout(t2);
+      };
+    } else {
+      setDelayedSecure1(isSecure1);
+      setDelayedSecure2(isSecure2);
+    }
+  }, [isSecure1, isSecure2]);
 
   const handleNext = async () => {
     if (!newPassword || !confirmPassword) {
@@ -64,27 +84,91 @@ const ResetPasswordPage = () => {
     <View className="flex-1 bg-[#F5FCE9]">
       <Stack.Screen options={{ headerShown: false }} />
 
-      <TopBar showBackButton />
+      <TopBar
+        showBackButton
+        onBackPress={() =>
+          router.push({
+            pathname: "/CertificationPage",
+            params: { email },
+          })
+        }
+      />
 
       <View className="flex-[0.8] items-center justify-center">
         <Text className="text-2xl font-bold mb-6 text-[#002C09]">
           비밀번호 변경하기
         </Text>
 
-        <InputBox
-          placeholder="새 비밀번호"
-          value={newPassword}
-          onChangeText={setNewPassword}
-          variant="password"
-        />
+        {/* ✅ 첫 번째 비밀번호 입력 */}
+        <View
+          className="flex-row items-center w-[350px] h-[50px] bg-[#FEFFF5] rounded-[10px] px-6"
+          style={{
+            paddingVertical: Platform.OS === "ios" ? 10 : 6,
+          }}
+        >
+          <TextInput
+            placeholder="새 비밀번호"
+            placeholderTextColor="#8AA989"
+            value={newPassword}
+            onChangeText={setNewPassword}
+            secureTextEntry={delayedSecure1}
+            style={{
+              flex: 1,
+              fontSize: 17,
+              color: "#1F2D1F",
+              includeFontPadding: false,
+              textAlignVertical: "center",
+              paddingVertical: 0,
+            }}
+            autoCapitalize="none"
+            autoCorrect={false}
+            autoComplete="off"
+            importantForAutofill="no"
+            textContentType="none"
+          />
+          <TouchableOpacity onPress={() => setIsSecure1(!isSecure1)}>
+            {isSecure1 ? (
+              <EyeOff size={22} color="#8AA989" />
+            ) : (
+              <Eye size={22} color="#8AA989" />
+            )}
+          </TouchableOpacity>
+        </View>
 
-        <View className="mt-6">
-          <InputBox
+        {/* ✅ 두 번째 비밀번호 확인 입력 */}
+        <View
+          className="flex-row items-center w-[350px] h-[50px] bg-[#FEFFF5] rounded-[10px] px-6 mt-6"
+          style={{
+            paddingVertical: Platform.OS === "ios" ? 10 : 6,
+          }}
+        >
+          <TextInput
             placeholder="새 비밀번호 확인"
+            placeholderTextColor="#8AA989"
             value={confirmPassword}
             onChangeText={setConfirmPassword}
-            variant="password"
+            secureTextEntry={delayedSecure2}
+            style={{
+              flex: 1,
+              fontSize: 17,
+              color: "#1F2D1F",
+              includeFontPadding: false,
+              textAlignVertical: "center",
+              paddingVertical: 0,
+            }}
+            autoCapitalize="none"
+            autoCorrect={false}
+            autoComplete="off"
+            importantForAutofill="no"
+            textContentType="none"
           />
+          <TouchableOpacity onPress={() => setIsSecure2(!isSecure2)}>
+            {isSecure2 ? (
+              <EyeOff size={22} color="#8AA989" />
+            ) : (
+              <Eye size={22} color="#8AA989" />
+            )}
+          </TouchableOpacity>
         </View>
 
         <View className="mt-6">

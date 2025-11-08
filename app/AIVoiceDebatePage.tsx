@@ -80,7 +80,7 @@ export default function AIVoiceDebatePage() {
         {/* 끝내기 버튼 */}
         <TouchableOpacity
           className="w-[101px] h-[43px] rounded-full border border-[#2E7D32] bg-white flex items-center justify-center"
-          onPress={() => router.back()}
+          onPress={() => router.replace("/AiPage")}
         >
           <Text className="text-[#2E7D32] font-medium text-[15px]">
             끝내기
