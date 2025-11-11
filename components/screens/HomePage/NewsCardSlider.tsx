@@ -30,7 +30,7 @@ const NewsCardSlider = ({ updateTime, articles = [] }: NewsCardSliderProps) => {
   };
 
   const handleNewsPress = (articleId: number) => {
-    router.push(`/newsplayer/${articleId}`);
+    router.push(`/newsplayer/${articleId}?from=home`);
   };
 
   return (

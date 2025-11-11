@@ -127,6 +127,10 @@ export const NewsPlayerScreen = ({ articleId, from }: NewsPlayerScreenProps) => 
   const handleBack = useCallback(() => {
     if (from === 'savednews') {
       router.push('/(tabs)/savednews');
+    } else if (from === 'home') {
+      router.push('/(tabs)');
+    } else if (from === 'category') {
+      router.push('/(tabs)');
     } else {
       router.back();
     }

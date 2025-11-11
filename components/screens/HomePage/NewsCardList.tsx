@@ -14,7 +14,7 @@ const NewsCardList = ({ background = "white", articles = [] }: NewsCardListProps
   const router = useRouter();
 
   const handleNewsPress = (articleId: string) => {
-    router.push(`/newsplayer/${articleId}`);
+    router.push(`/newsplayer/${articleId}?from=category`);
   };
 
   if (!articles || articles.length === 0) {
