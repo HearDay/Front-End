@@ -87,7 +87,7 @@ export default function Index() {
         <Animated.View style={listStyle}>
           <View className="flex-row justify-between items-center px-6 mt-7 mb-2">
             <Text className="text-[17px] font-extrabold text-[#002C14]">
-              {selectedCategory} 관련 뉴스
+              {selectedCategory} 관련 추천 뉴스
             </Text>
             <Text
               className="text-[14px] text-gray-600 pr-2"
@@ -112,7 +112,7 @@ export default function Index() {
           <View className="px-6 mt-4">
             <Text className="text-[16px] text-right font-extrabold text-[#002C14] mt-2 mr-2">
               {nickname
-                ? `${nickname}님이 좋아할 만한 오늘의 뉴스`
+                ? `${nickname}님이 좋아할 만한 오늘의 추천 뉴스`
                 : "오늘의 추천 뉴스"}
             </Text>
           </View>
@@ -121,7 +121,7 @@ export default function Index() {
 
           <View className="px-6 mt-4">
             <Text className="text-[16px] text-right font-extrabold text-[#002C14] mt-2 mb-4 mr-2">
-              카테고리별로 골라보기
+              카테고리별로 추천 뉴스 골라보기
             </Text>
           </View>
 

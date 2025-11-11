@@ -32,7 +32,7 @@ const EmailInputWithSelect = ({
   const [isDropdownVisible, setDropdownVisible] = useState(false);
 
   // 버튼 텍스트 결정
-  const buttonText = buttonType === "verify" ? "본인인증" : "확인";
+  const buttonText = buttonType === "verify" ? "확인" : "본인인증";
 
   return (
     <View className="flex-row items-center w-[350px] mx-auto mb-3 gap-2">

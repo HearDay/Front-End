@@ -14,20 +14,33 @@ const KakaoLoginView = () => {
   const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}`;
   console.log("KAKAO AUTH URL:", kakaoAuthUrl);
 
-  // WebView에서 redirect 시 accessToken 감지
+  // WebView에서 redirect 시 accessToken, refreshToken 감지
   const handleNavigationStateChange = async (navState: any) => {
     const { url } = navState;
 
-    // accessToken이 포함된 URL이면 저장
-    if (url.includes("accessToken=")) {
+    // accessToken과 refreshToken이 모두 포함된 경우
+    if (url.includes("accessToken=") && url.includes("refreshToken=")) {
       try {
-        const token = url.split("accessToken=")[1];
-        console.log("카카오 로그인 성공, 토큰:", token);
+        const queryString = url.split("?")[1];
+        const params = new URLSearchParams(queryString);
 
-        await AsyncStorage.setItem("accessToken", token);
-        router.replace("/(tabs)"); // 홈 화면 이동
+        const accessToken = params.get("accessToken");
+        const refreshToken = params.get("refreshToken");
+
+        if (accessToken && refreshToken) {
+          console.log("카카오 로그인 성공!");
+          console.log("AccessToken:", accessToken);
+          console.log("RefreshToken:", refreshToken);
+
+          await AsyncStorage.setItem("accessToken", accessToken);
+          await AsyncStorage.setItem("refreshToken", refreshToken);
+
+          router.replace("/(tabs)"); // 홈 화면 이동
+        } else {
+          console.warn("⚠️ 토큰 추출 실패:", url);
+        }
       } catch (err) {
-        console.error("토큰 저장 실패:", err);
+        console.error("❌ 토큰 저장 실패:", err);
       }
     }
 

@@ -29,7 +29,7 @@ const TermsAgreement = ({ value, onChange }: TermsAgreementProps) => {
   };
 
   return (
-    <View className="w-[350px] mx-auto bg-white border border-[#9CB59F] rounded-2xl p-5 mb-6">
+    <View className="w-[350px] mx-auto bg-white border border-[#9CB59F] rounded-2xl p-5 mb-4">
       {/* 전체 동의하기 */}
       <TouchableOpacity
         onPress={handleAllChange}
@@ -57,7 +57,7 @@ const TermsAgreement = ({ value, onChange }: TermsAgreementProps) => {
       <View className="h-[1px] bg-[#9CB59F] mb-4" />
 
       {/* 개별 동의 항목 */}
-      <View className="flex-col gap-4">
+      <View className="flex-col gap-3">
         {[
           { key: "service", label: "[필수] 이용약관" },
           { key: "privacy", label: "[필수] 개인정보 보호 정책" },

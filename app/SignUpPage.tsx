@@ -1,9 +1,11 @@
 import InputBox from "@/components/common/InputBox";
+import { Modal } from "@/components/common/Modal";
 import PrimaryButton from "@/components/common/PrimaryButton";
 import TopBar from "@/components/common/TopBar";
 import EmailInputWithSelect from "@/components/screens/SignUp/EmailInputWithSelect";
+import InputBoxWithButton from "@/components/screens/SignUp/InputWithButton";
 import TermsAgreement from "@/components/screens/SignUp/TermsAgreement";
-import axiosInstance from "@/services/api/axiosInstance";
+import { sendCertificationCode, verifyCertificationCode } from "@/services/api/certification";
 import { signup } from "@/services/api/signup";
 import { Stack, useRouter } from "expo-router";
 import { Eye, EyeOff } from "lucide-react-native";
@@ -15,7 +17,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 
 const SignUpPage = () => {
@@ -27,6 +29,10 @@ const SignUpPage = () => {
   const [phone, setPhone] = useState("");
   const [emailId, setEmailId] = useState("");
   const [emailDomain, setEmailDomain] = useState("@gmail.com");
+  const [certificationCode, setCertificationCode] = useState("");
+
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
+
   const [terms, setTerms] = useState({
     service: false,
     privacy: false,
@@ -37,6 +43,10 @@ const SignUpPage = () => {
   const [isSecure2, setIsSecure2] = useState(true);
   const [delayedSecure1, setDelayedSecure1] = useState(isSecure1);
   const [delayedSecure2, setDelayedSecure2] = useState(isSecure2);
+
+  const [showCodeInput, setShowCodeInput] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
 
   useEffect(() => {
     if (Platform.OS === "ios") {
@@ -54,12 +64,59 @@ const SignUpPage = () => {
 
   const allRequiredAgreed = terms.service && terms.privacy;
 
-  const handleSignUp = async () => {
-    if (!allRequiredAgreed) {
-      return Alert.alert("필수 약관에 동의해주세요!");
+  // 이메일 인증번호 전송
+  const handleVerify = async () => {
+    const fullEmail = `${emailId}${emailDomain}`;
+    if (!emailId) return Alert.alert("이메일을 입력해주세요.");
+
+    try {
+      const res = await sendCertificationCode(fullEmail);
+      if (res.success) {
+        setShowCodeInput(true);
+        setModalMessage("이메일로 인증코드를 발송했습니다.\n5분 안에 인증을 완료해주세요.");
+        setModalVisible(true);
+      } else {
+        Alert.alert("발송 실패", res.message || "이메일 전송에 실패했습니다.");
+      }
+    } catch (err) {
+      console.error("이메일 인증 전송 실패:", err);
+      Alert.alert("오류", "서버 요청 중 문제가 발생했습니다.");
     }
-    if (pwd !== confirmPw) {
-      return Alert.alert("비밀번호가 일치하지 않습니다.");
+  };
+
+  // 인증번호 확인
+  const handleCodeConfirm = async () => {
+    const fullEmail = `${emailId}${emailDomain}`;
+    if (!certificationCode) return Alert.alert("인증번호를 입력해주세요.");
+
+    try {
+      const res = await verifyCertificationCode(fullEmail, certificationCode);
+      if (res.success) {
+        setIsEmailVerified(true);
+        Alert.alert("인증 완료", "이메일 인증이 성공적으로 완료되었습니다!");
+      } else {
+        setIsEmailVerified(false);
+        Alert.alert("인증 실패", res.message || "잘못된 인증번호입니다.");
+      }
+    } catch (err) {
+      console.error("인증번호 확인 실패:", err);
+      Alert.alert("오류", "서버 요청 중 문제가 발생했습니다.");
+    }
+  };
+
+  // 회원가입 버튼 활성 조건
+  const isSignUpEnabled =
+    allRequiredAgreed &&
+    isEmailVerified &&
+    nickname.trim() !== "" &&
+    pwd.trim() !== "" &&
+    pwd === confirmPw &&
+    phone.trim() !== "";
+
+  // 회원가입 요청
+  const handleSignUp = async () => {
+    if (!isSignUpEnabled) {
+      return Alert.alert("모든 항목을 올바르게 입력하고 인증을 완료해주세요!");
     }
 
     const body = {
@@ -68,9 +125,6 @@ const SignUpPage = () => {
       email: `${emailId}${emailDomain}`,
       phone,
     };
-
-    console.log("요청 URL:", axiosInstance.defaults.baseURL + "/api/users/");
-    console.log("요청 Body:", body);
 
     try {
       const res = await signup(body);
@@ -106,39 +160,49 @@ const SignUpPage = () => {
   return (
     <View className="flex-1 bg-[#F5FCE9]">
       <Stack.Screen options={{ headerShown: false }} />
+      <TopBar showBackButton onBackPress={() => router.push("/LoginPage")} />
 
-      <TopBar
-        showBackButton
-        onBackPress={() => router.push("/LoginPage")}
-      />
-
-      <View className="flex-[0.9] items-center justify-center pt-3">
+      {/* ScrollView */}
+      <View className="flex-1 items-center">
         <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
 
-        {/* 이메일 */}
-        <View className="mt-2">
+        {/* 이메일 입력 */}
+        <View >
           <EmailInputWithSelect
             emailId={emailId}
             onChangeEmailId={setEmailId}
             emailDomain={emailDomain}
             onChangeEmailDomain={setEmailDomain}
-            onPressVerify={() => console.log("본인인증 클릭")}
+            onPressVerify={handleVerify}
           />
         </View>
 
-        {/* 닉네임 */}
-        <InputBox
-          placeholder="닉네임"
-          value={nickname}
-          onChangeText={setNickname}
-        />
+        {/* 인증번호 입력  */}
+        {showCodeInput && (
+          <View className="mb-3" >
+            <InputBoxWithButton
+              placeholder="인증번호"
+              value={certificationCode}
+              onChangeText={setCertificationCode}
+              buttonText="확인"
+              onPressButton={handleCodeConfirm}
+            />
+          </View>
+        )}
 
-        {/* 비밀번호 입력 */}
+        {/* 닉네임 */}
+        <View >
+          <InputBox
+            placeholder="닉네임"
+            value={nickname}
+            onChangeText={setNickname}
+          />
+        </View>
+
+        {/* 비밀번호 */}
         <View
           className="flex-row items-center w-[350px] h-[50px] bg-[#FEFFF5] rounded-[10px] px-6 mt-3"
-          style={{
-            paddingVertical: Platform.OS === "ios" ? 10 : 6,
-          }}
+          style={{ paddingVertical: Platform.OS === "ios" ? 10 : 6 }}
         >
           <TextInput
             placeholder="비밀번호"
@@ -150,15 +214,13 @@ const SignUpPage = () => {
               flex: 1,
               fontSize: 17,
               color: "#1F2D1F",
-              includeFontPadding: false,
-              textAlignVertical: "center",
               paddingVertical: 0,
             }}
             autoCapitalize="none"
             autoCorrect={false}
             autoComplete="off"
             importantForAutofill="no"
-            textContentType="oneTimeCode" // 자동완성 방지
+            textContentType="oneTimeCode"
           />
           <TouchableOpacity onPress={() => setIsSecure1(!isSecure1)}>
             {isSecure1 ? (
@@ -169,12 +231,10 @@ const SignUpPage = () => {
           </TouchableOpacity>
         </View>
 
-        {/* 비밀번호 확인 입력 */}
+        {/* 비밀번호 확인 */}
         <View
           className="flex-row items-center w-[350px] h-[50px] bg-[#FEFFF5] rounded-[10px] px-6 mt-3"
-          style={{
-            paddingVertical: Platform.OS === "ios" ? 10 : 6,
-          }}
+          style={{ paddingVertical: Platform.OS === "ios" ? 10 : 6 }}
         >
           <TextInput
             placeholder="비밀번호 확인"
@@ -186,8 +246,6 @@ const SignUpPage = () => {
               flex: 1,
               fontSize: 17,
               color: "#1F2D1F",
-              includeFontPadding: false,
-              textAlignVertical: "center",
               paddingVertical: 0,
             }}
             autoCapitalize="none"
@@ -215,8 +273,8 @@ const SignUpPage = () => {
         </View>
 
         {/* 안내 문구 */}
-        <View className="w-[350px] mt-2 mb-5">
-          <Text className="text-[12px] text-[#B7B7B7] leading-5 ml-3">
+        <View className="w-[350px] mt-2 mb-2">
+          <Text className="text-[11px] text-[#B7B7B7] leading-5 ml-3">
             • 앱의 모든 기능을 원활하게 사용하기 위해서 정확한 정보를 입력해야 합니다{"\n"}
             • 본인확인 및 보안을 위한 정보이며, 다른 용도로 사용되지 않습니다
           </Text>
@@ -228,10 +286,19 @@ const SignUpPage = () => {
         {/* 회원가입 버튼 */}
         <PrimaryButton
           title="회원가입"
-          variant={allRequiredAgreed ? "primary" : "secondary"}
+          variant={isSignUpEnabled ? "primary" : "secondary"}
           onPress={handleSignUp}
         />
       </View>
+
+      {/* 이메일 발송 모달 */}
+      <Modal
+        visible={modalVisible}
+        title={modalMessage}
+        confirmText="확인"
+        onConfirm={() => setModalVisible(false)}
+        onClose={() => setModalVisible(false)}
+      />
     </View>
   );
 };
