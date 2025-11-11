@@ -57,7 +57,7 @@ export function SavedNewsScreen() {
   }, [savedNews, selectedCategory])
 
   const handleNewsPress = useCallback((articleId: string) => {
-    router.push(`/newsplayer/${articleId}`)
+    router.push(`/newsplayer/${articleId}?from=savednews`)
   }, [router])
 
   // 삭제 버튼 클릭 시 모달을 띄우는 함수
