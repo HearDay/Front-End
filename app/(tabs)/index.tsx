@@ -2,7 +2,9 @@ import { CategoryChipGroup } from "@/components/common";
 import HeroSection from "@/components/screens/HomePage/HeroSection";
 import NewsCardList from "@/components/screens/HomePage/NewsCardList";
 import NewsCardSlider from "@/components/screens/HomePage/NewsCardSlider";
+import { fetchCategoryRecommendNews } from "@/services/api/categoryRecommendNews";
 import { fetchRecommendNews } from "@/services/api/recommendNews";
+import { CategoryArticle } from "@/types/auth/categoryRecommendNews";
 import { RecommendArticle } from "@/types/auth/recommendNews";
 import { usePathname } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -14,22 +16,26 @@ import Animated, {
 } from "react-native-reanimated";
 
 export default function Index() {
-  const categories = [
-    "경제",
-    "방송 / 연예",
-    "IT",
-    "쇼핑",
-    "생활",
-    "해외",
-    "스포츠",
-    "정치",
-  ];
+  // 백엔드 카테고리 매핑 (UI표시: key, 서버전송: value)
+  const categoryMap: Record<string, string> = {
+    "경제": "경제",
+    "방송 / 연예": "방송_연예",
+    "IT": "IT",
+    "쇼핑": "쇼핑",
+    "생활": "생활",
+    "해외": "해외",
+    "스포츠": "스포츠",
+    "정치": "정치",
+  };
+
+  const categories = Object.keys(categoryMap);
 
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [nickname, setNickname] = useState<string>("");
   const [level, setLevel] = useState<number>(1);
   const [updateTime, setUpdateTime] = useState<string>("");
   const [recommendedArticles, setRecommendedArticles] = useState<RecommendArticle[]>([]);
+  const [categoryArticles, setCategoryArticles] = useState<CategoryArticle[]>([]);
 
   const offset = useSharedValue(0);
   const pathname = usePathname();
@@ -66,9 +72,20 @@ export default function Index() {
     loadUserInfo();
   }, [pathname]);
 
-  const handleSelectCategory = (category: string) => {
+  // 카테고리별 뉴스 로드
+  const handleSelectCategory = async (category: string) => {
     setSelectedCategory(category);
     offset.value = withTiming(1, { duration: 600 });
+
+    try {
+      const backendCategory = categoryMap[category] || category;
+      const res = await fetchCategoryRecommendNews(backendCategory);
+      if (res.success) {
+        setCategoryArticles(res.data);
+      }
+    } catch (err) {
+      console.error("카테고리별 뉴스 로드 실패:", err);
+    }
   };
 
   const handleBackToHome = () => {
@@ -107,7 +124,8 @@ export default function Index() {
             />
           </View>
 
-          <NewsCardList background="green" />
+          {/* 카테고리별 뉴스 리스트 */}
+          <NewsCardList background="green" articles={categoryArticles} />
         </Animated.View>
       ) : (
         <>

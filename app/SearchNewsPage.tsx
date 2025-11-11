@@ -1,5 +1,3 @@
-// app/(pages)/SearchNewsPage.tsx
-
 import NewsCardList from "@/components/screens/HomePage/NewsCardList";
 import ScrollButton from "@/components/screens/SearchNews/ScrollButton";
 import SearchBar from "@/components/screens/SearchNews/SearchBar";
