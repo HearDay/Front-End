@@ -15,9 +15,10 @@ import { NewsPlayerHeader } from './NewsPlayerHeader';
 
 interface NewsPlayerScreenProps {
   articleId: string;
+  from?: string;
 }
 
-export const NewsPlayerScreen = ({ articleId }: NewsPlayerScreenProps) => {
+export const NewsPlayerScreen = ({ articleId, from }: NewsPlayerScreenProps) => {
   const router = useRouter();
   const [newsData, setNewsData] = useState<NewsPlayerData | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -123,7 +124,17 @@ export const NewsPlayerScreen = ({ articleId }: NewsPlayerScreenProps) => {
     };
   }, [newsData, loadAudio]);
 
-  const handleBack = useCallback(() => router.back(), [router]);
+  const handleBack = useCallback(() => {
+    if (from === 'savednews') {
+      router.push('/(tabs)/savednews');
+    } else if (from === 'home') {
+      router.push('/(tabs)');
+    } else if (from === 'category') {
+      router.push('/(tabs)');
+    } else {
+      router.back();
+    }
+  }, [router, from]);
 
   const handlePlay = useCallback(async () => {
     if (!soundRef.current) return;
@@ -192,9 +203,14 @@ export const NewsPlayerScreen = ({ articleId }: NewsPlayerScreenProps) => {
 
   const handleDiscussion = useCallback(() => setShowDiscussionModal(true), []);
 
-  const handleDiscussionStart = useCallback(() => {
+  const handleVoiceDiscussion = useCallback(() => {
     setShowDiscussionModal(false);
-    router.push('/(tabs)/AiPage');
+    router.push('/AIVoiceDebatePage');
+  }, [router]);
+
+  const handleChatDiscussion = useCallback(() => {
+    setShowDiscussionModal(false);
+    router.push('/AIChatDebatePage?mode=chat');
   }, [router]);
 
   const handleSave = useCallback(() => {
@@ -272,10 +288,10 @@ export const NewsPlayerScreen = ({ articleId }: NewsPlayerScreenProps) => {
         {/* 토론 모달 */}
         <Modal visible={showDiscussionModal} title="방금 들은 뉴스로 AI와 토론하시겠어요?" onConfirm={() => {}} onClose={() => setShowDiscussionModal(false)}>
           <View className="gap-3 mt-6 mb-[-16px]">
-            <TouchableOpacity className="bg-[#DBFDE0] py-4 rounded-2xl" onPress={handleDiscussionStart} activeOpacity={0.7}>
+            <TouchableOpacity className="bg-[#DBFDE0] py-4 rounded-2xl" onPress={handleVoiceDiscussion} activeOpacity={0.7}>
               <Text className="text-center font-medium">음성으로 토론하러 가기</Text>
             </TouchableOpacity>
-            <TouchableOpacity className="bg-[#DBFDE0] py-4 rounded-2xl" onPress={handleDiscussionStart} activeOpacity={0.7}>
+            <TouchableOpacity className="bg-[#DBFDE0] py-4 rounded-2xl" onPress={handleChatDiscussion} activeOpacity={0.7}>
               <Text className="text-center font-medium">채팅으로 토론하러 가기</Text>
             </TouchableOpacity>
             <TouchableOpacity className="bg-[#DBFDE0] py-4 rounded-2xl" onPress={() => setShowDiscussionModal(false)} activeOpacity={0.7}>
