@@ -1,7 +1,7 @@
 import { Modal } from '@/components/common';
 import { Audio } from 'expo-av';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -20,6 +20,7 @@ interface NewsPlayerScreenProps {
 
 export const NewsPlayerScreen = ({ articleId, from }: NewsPlayerScreenProps) => {
   const router = useRouter();
+  const { category } = useLocalSearchParams<{ category?: string }>();
   const [newsData, setNewsData] = useState<NewsPlayerData | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isCarMode, setIsCarMode] = useState(false);
@@ -130,7 +131,10 @@ export const NewsPlayerScreen = ({ articleId, from }: NewsPlayerScreenProps) => 
     } else if (from === 'home') {
       router.push('/(tabs)');
     } else if (from === 'category') {
-      router.push('/(tabs)');
+      router.push({
+        pathname: '/SearchNewsPage',
+        params: { category: category || '전체' },
+      });
     } else {
       router.back();
     }
