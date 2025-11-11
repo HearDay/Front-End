@@ -1,14 +1,15 @@
-import { Modal } from '@/components/common';
-import TopBar from '@/components/common/TopBar';
-import { wordbookService } from '@/services';
-import { addMonths, subMonths } from 'date-fns';
-import { useCallback, useEffect, useState } from 'react'; // 개선: useCallback 추가
-import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native'; // 추가: ActivityIndicator, ScrollView
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { SavedWord, WordBookCalendarItem } from '../../../types/screens';
-import { WordBookCalendar } from './WordBookCalendar';
-import { WordBookChipList } from './WordBookChipList';
-import { WordBookDateDisplay } from './WordBookDateDisplay';
+import { Modal } from '@/components/common'
+import TopBar from '@/components/common/TopBar'
+import { wordbookService } from '@/services'
+import { useFocusEffect } from '@react-navigation/native'
+import { addMonths, subMonths } from 'date-fns'
+import { useCallback, useEffect, useState } from 'react'
+import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { SavedWord, WordBookCalendarItem } from '../../../types/screens'
+import { WordBookCalendar } from './WordBookCalendar'
+import { WordBookChipList } from './WordBookChipList'
+import { WordBookDateDisplay } from './WordBookDateDisplay'
 
 export const WordBookScreen = () => {
   // 타임존 문제 방지: 초기 날짜를 정오(12:00)로 설정
@@ -73,6 +74,15 @@ export const WordBookScreen = () => {
     }
   }, [selectedDate, fetchWordsByDate]) // fetchWordsByDate 의존성 추가
 
+  // 화면이 포커스될 때마다 초기 상태로 리셋
+  useFocusEffect(
+    useCallback(() => {
+      const todayAtNoon = getDateAtNoon()
+      setCurrentDate(todayAtNoon)
+      setSelectedDate(todayAtNoon)
+    }, [])
+  )
+
   // 개선: useCallback으로 이벤트 핸들러
   // 이유: WordBookChipList에 props로 전달되므로 불필요한 리렌더링 방지
   const handleWordPress = useCallback(async (word: SavedWord) => {
@@ -104,11 +114,39 @@ export const WordBookScreen = () => {
   // 개선: useCallback으로 이벤트 핸들러
   // 이유: WordBookCalendar에 props로 전달
   const handlePrevMonth = useCallback(() => {
-    setCurrentDate(prev => subMonths(prev, 1))
+    setCurrentDate(prev => {
+      const newDate = subMonths(prev, 1)
+
+      // 현재 달인지 확인 후 날짜 선택
+      const today = new Date()
+      if (newDate.getFullYear() === today.getFullYear() && newDate.getMonth() === today.getMonth()) {
+        // 현재 달이면 오늘 날짜로 설정
+        setSelectedDate(getDateAtNoon())
+      } else {
+        // 다른 달이면 1일로 설정
+        setSelectedDate(new Date(newDate.getFullYear(), newDate.getMonth(), 1, 12, 0, 0, 0))
+      }
+
+      return newDate
+    })
   }, [])
 
   const handleNextMonth = useCallback(() => {
-    setCurrentDate(prev => addMonths(prev, 1))
+    setCurrentDate(prev => {
+      const newDate = addMonths(prev, 1)
+
+      // 현재 달인지 확인 후 날짜 선택
+      const today = new Date()
+      if (newDate.getFullYear() === today.getFullYear() && newDate.getMonth() === today.getMonth()) {
+        // 현재 달이면 오늘 날짜로 설정
+        setSelectedDate(getDateAtNoon())
+      } else {
+        // 다른 달이면 1일로 설정
+        setSelectedDate(new Date(newDate.getFullYear(), newDate.getMonth(), 1, 12, 0, 0, 0))
+      }
+
+      return newDate
+    })
   }, [])
 
   const handleDeleteWord = useCallback(async () => {
