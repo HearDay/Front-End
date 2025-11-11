@@ -77,10 +77,10 @@ export const WordBookCalendar = ({
             activeOpacity={0.7}
           >
             <View className={`w-8 h-8 items-center justify-center rounded-full ${
-              isToday ? 'bg-green-600' : ''
+              isSelected ? 'bg-green-600' : ''
             }`}>
               <Text className={`text-sm ${
-                isToday ? 'text-white font-bold' : 
+                isSelected ? 'text-white font-bold' :
                 isCurrentMonth ? 'text-gray-800' : 'text-gray-300'
               }`}>
                 {format(d, 'd')}

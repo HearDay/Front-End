@@ -104,11 +104,39 @@ export const WordBookScreen = () => {
   // 개선: useCallback으로 이벤트 핸들러
   // 이유: WordBookCalendar에 props로 전달
   const handlePrevMonth = useCallback(() => {
-    setCurrentDate(prev => subMonths(prev, 1))
+    setCurrentDate(prev => {
+      const newDate = subMonths(prev, 1)
+
+      // 현재 달인지 확인 후 날짜 선택
+      const today = new Date()
+      if (newDate.getFullYear() === today.getFullYear() && newDate.getMonth() === today.getMonth()) {
+        // 현재 달이면 오늘 날짜로 설정
+        setSelectedDate(getDateAtNoon())
+      } else {
+        // 다른 달이면 1일로 설정
+        setSelectedDate(new Date(newDate.getFullYear(), newDate.getMonth(), 1, 12, 0, 0, 0))
+      }
+
+      return newDate
+    })
   }, [])
 
   const handleNextMonth = useCallback(() => {
-    setCurrentDate(prev => addMonths(prev, 1))
+    setCurrentDate(prev => {
+      const newDate = addMonths(prev, 1)
+
+      // 현재 달인지 확인 후 날짜 선택
+      const today = new Date()
+      if (newDate.getFullYear() === today.getFullYear() && newDate.getMonth() === today.getMonth()) {
+        // 현재 달이면 오늘 날짜로 설정
+        setSelectedDate(getDateAtNoon())
+      } else {
+        // 다른 달이면 1일로 설정
+        setSelectedDate(new Date(newDate.getFullYear(), newDate.getMonth(), 1, 12, 0, 0, 0))
+      }
+
+      return newDate
+    })
   }, [])
 
   const handleDeleteWord = useCallback(async () => {
