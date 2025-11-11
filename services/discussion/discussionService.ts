@@ -26,9 +26,12 @@ export const discussionService = {
       date: string
     }
 
+    // sortBy를 API 형식으로 변환: 'latest' → 'desc', 'oldest' → 'asc'
+    const apiSortBy = sortBy === 'latest' ? 'desc' : 'asc'
+
     const response = await apiClient.get<ApiResponse<{ discussionList: ApiDiscussionItem[] }>>(
       ENDPOINTS.DISCUSSION.LIST,
-      { params: { sort: sortBy } }
+      { params: { sort: apiSortBy } }
     )
 
     return response.data.data.discussionList.map(item => ({
