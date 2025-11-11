@@ -4,45 +4,62 @@ import { DiscussionNewsCardProps } from '../../../types/screens'
 
 export function DiscussionNewsCard({ news, onPress }: DiscussionNewsCardProps) {
   const [imageError, setImageError] = useState(false)
-  
+
+  const imageSource = imageError
+    ? require('../../../my-expo-app/assets/images/DefaultCard.png')
+    : { uri: news.imageUrl }
+
   return (
     <TouchableOpacity
       onPress={onPress}
-      className="bg-white rounded-2xl mx-4 mb-3"
       style={{
         shadowColor: "#000",
         shadowOffset: { width: 2, height: 2 },
         shadowOpacity: 0.15,
         shadowRadius: 6,
         elevation: 4,
+        borderRadius: 16,
       }}
+      className="self-center mb-5"
       activeOpacity={0.7}
     >
-      <View className="pt-4 px-4 pb-1 rounded-xl overflow-hidden">
-        <View className="flex-row gap-3">
-          {/* 이미지 */}
-          {imageError ? (
-            <View className="w-24 h-24 bg-gray-200 items-center justify-center">
-              <Text className="text-gray-400"></Text>
-            </View>
-          ) : (
-            <Image
-              source={{ uri: news.thumbnail }}
-              className="w-40 h-24 rounded-xl"
-              resizeMode="cover"
-              onError={() => setImageError(true)}
-            />
-          )}
+      <View
+        className="flex-row items-center w-[350px] h-[106px] px-4 py-3 rounded-2xl overflow-hidden bg-white"
+      >
+        {/* 이미지 */}
+        <View
+          className="mr-4 rounded-md overflow-hidden"
+          style={{
+            width: 148,
+            aspectRatio: 148 / 83,
+          }}
+        >
+          <Image
+            source={imageSource}
+            resizeMode="cover"
+            style={{
+              width: "100%",
+              height: "100%",
+              borderRadius: 8,
+            }}
+            onError={() => setImageError(true)}
+          />
+        </View>
 
-          {/* 텍스트 */}
-          <View className="flex-1 p-3 justify-center">
-            <Text className="text-base font-bold text-gray-800 mb-1" numberOfLines={2}>
-              {news.title}
-            </Text>
-            <Text className="text-sm text-gray-600" numberOfLines={2}>
-              {news.summary}
-            </Text>
-          </View>
+        {/* 텍스트 */}
+        <View className="flex-1 justify-center">
+          <Text
+            className="text-[15px] font-extrabold text-black mb-[3px]"
+            numberOfLines={2}
+          >
+            {news.title}
+          </Text>
+          <Text
+            className="text-[13px] text-[#4B5563] leading-snug"
+            numberOfLines={2}
+          >
+            {news.summary}
+          </Text>
         </View>
       </View>
     </TouchableOpacity>
