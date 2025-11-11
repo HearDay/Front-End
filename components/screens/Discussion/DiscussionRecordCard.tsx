@@ -10,8 +10,12 @@ export function DiscussionRecordCard({ record }: DiscussionRecordCardProps) {
   const router = useRouter();
 
   const handlePress = () => {
-    router.push("/AIChatDebatePage?mode=view");
+    router.push({
+      pathname: "/AIChatDebatePage",
+      params: { mode: "view", discussionId: record.id },
+    });
   };
+
 
   return (
     <TouchableOpacity

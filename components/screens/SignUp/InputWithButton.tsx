@@ -20,7 +20,7 @@ const InputBoxWithButton = ({
   disabled = false,
 }: InputBoxWithButtonProps) => {
   return (
-    <View className="flex-row items-center w-[350px] h-[50px] gap-3 mb-3">
+    <View className="flex-row items-center w-[350px] h-[50px] gap-3 mb-1">
       {/* 입력창 */}
       <View className="flex-1 w-[260px] h-[50px]">
         <InputBox
