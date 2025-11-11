@@ -5,12 +5,15 @@ import { login } from "@/services/api/login";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { Stack, useRouter } from "expo-router";
-import React, { useState } from "react";
+import { Eye, EyeOff } from "lucide-react-native";
+import React, { useEffect, useState } from "react";
 import {
   Image,
+  Platform,
   SafeAreaView,
   StatusBar,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -24,8 +27,19 @@ const LoginPage = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isSecure, setIsSecure] = useState(true);
+  const [delayedSecure, setDelayedSecure] = useState(isSecure);
 
-  // 이메일 로그인 처리 함수
+  useEffect(() => {
+    if (Platform.OS === "ios") {
+      const t = setTimeout(() => setDelayedSecure(isSecure), 50);
+      return () => clearTimeout(t);
+    } else {
+      setDelayedSecure(isSecure);
+    }
+  }, [isSecure]);
+
+  // 로그인 처리
   const handleLogin = async () => {
     if (!email || !password) {
       setModalMessage("아이디와 비밀번호를 모두 입력해주세요.");
@@ -98,18 +112,49 @@ const LoginPage = () => {
 
           {/* 입력 필드 */}
           <View className="gap-3 mb-3">
+            {/* 이메일 입력 */}
             <InputBox
               placeholder="이메일을 입력해 주세요"
               value={email}
               onChangeText={setEmail}
               variant="transparent"
             />
-            <InputBox
-              placeholder="비밀번호를 입력해 주세요"
-              value={password}
-              onChangeText={setPassword}
-              variant="transparent"
-            />
+
+            {/* 비밀번호 입력*/}
+            <View
+              className="flex-row items-center text-white w-[350px] h-[50px] rounded-[10px] px-6 bg-white/20"
+              style={{
+                paddingVertical: Platform.OS === "ios" ? 10 : 6,
+              }}
+            >
+              <TextInput
+                placeholder="비밀번호를 입력해 주세요"
+                placeholderTextColor="white"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={delayedSecure}
+                style={{
+                  flex: 1,
+                  fontSize: 17,
+                  color: "#FFFFFF",
+                  includeFontPadding: false,
+                  textAlignVertical: "center",
+                  paddingVertical: 0,
+                }}
+                autoCapitalize="none"
+                autoCorrect={false}
+                autoComplete="off"
+                importantForAutofill="no"
+                textContentType="none"
+              />
+              <TouchableOpacity onPress={() => setIsSecure(!isSecure)}>
+                {isSecure ? (
+                  <EyeOff size={22} color="#FFFFFFB3" />
+                ) : (
+                  <Eye size={22} color="#FFFFFFB3" />
+                )}
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* 버튼 */}
@@ -118,7 +163,7 @@ const LoginPage = () => {
             <PrimaryButton
               title="카카오로 시작하기"
               variant="kakao"
-              onPress={() => router.push("/KakaoLoginView")} // 바로 이동
+              onPress={() => router.push("/KakaoLoginView")}
             />
           </View>
 

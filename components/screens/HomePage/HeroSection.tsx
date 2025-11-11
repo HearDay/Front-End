@@ -67,7 +67,7 @@ const HeroSection = ({ offset, userLevel }: HeroSectionProps) => {
   const levelText =
     userLevel === 6 ? "나무가 다 자랐어요!" : "뉴스를 시청하면\n나무가 자라요!";
 
-  // ✅ 나무와 텍스트 애니메이션 (카테고리 선택 시 위로 올라감)
+  // 나무와 텍스트 애니메이션 (카테고리 선택 시 위로 올라감)
   const animatedTreeStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: withTiming(offset.value * -250) }],
     opacity: withTiming(1 - offset.value),
