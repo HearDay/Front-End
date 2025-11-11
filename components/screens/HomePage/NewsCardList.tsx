@@ -31,20 +31,28 @@ const NewsCardList = ({ background = "white", articles = [] }: NewsCardListProps
       contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20 }}
     >
       <View className="mt-4">
-        {articles.map((item) => (
-          <TouchableOpacity
-            key={item.id}
-            onPress={() => handleNewsPress(item.id)}
-            activeOpacity={0.8}
-          >
-            <NewsCard
-              title={item.title}
-              description={item.description}
-              imageUrl={item.imageUrl}
-              background={background}
-            />
-          </TouchableOpacity>
-        ))}
+        {articles.map((item) => {
+          // 필드 통합 처리
+          const imageUrl = item.imageUrl || item.image_url || "";
+          const title = item.title || "(제목 없음)";
+          const description =
+            item.description || item.origin_link || item.originLink || "";
+
+          return (
+            <TouchableOpacity
+              key={item.id}
+              onPress={() => handleNewsPress(item.id)}
+              activeOpacity={0.8}
+            >
+              <NewsCard
+                title={title}
+                description={description}
+                imageUrl={imageUrl}
+                background={background}
+              />
+            </TouchableOpacity>
+          );
+        })}
       </View>
     </ScrollView>
   );
