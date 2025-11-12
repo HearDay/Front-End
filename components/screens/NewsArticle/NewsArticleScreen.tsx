@@ -26,7 +26,6 @@ export function NewsArticleScreen({ articleId }: NewsArticleScreenProps) {
 
   // 하이라이트 관련 상태 추가
   const [highlightMatches, setHighlightMatches] = useState<{start: number, end: number}[]>([])
-  const [currentHighlightIndex, setCurrentHighlightIndex] = useState(0)
 
   // 개선: 로딩/에러 상태 추가
   const [loading, setLoading] = useState(true)
@@ -83,7 +82,6 @@ export function NewsArticleScreen({ articleId }: NewsArticleScreenProps) {
     }
 
     setHighlightMatches(matches)
-    setCurrentHighlightIndex(0)
   }, [newsData?.content])
 
   // 단어 클릭 핸들러 수정
@@ -97,15 +95,6 @@ export function NewsArticleScreen({ articleId }: NewsArticleScreenProps) {
     }
     setShowDictionaryModal(true)
   }, [savedWords])
-
-  // 하이라이트 탐색 핸들러 추가
-  const handlePrevHighlight = useCallback(() => {
-    setCurrentHighlightIndex(prev => (prev > 0 ? prev - 1 : highlightMatches.length - 1))
-  }, [highlightMatches.length])
-
-  const handleNextHighlight = useCallback(() => {
-    setCurrentHighlightIndex(prev => (prev < highlightMatches.length - 1 ? prev + 1 : 0))
-  }, [highlightMatches.length])
 
   // 단어 저장 핸들러 로직 수정
   const handleSaveWord = useCallback(async (definition: string) => {
@@ -183,7 +172,6 @@ export function NewsArticleScreen({ articleId }: NewsArticleScreenProps) {
           highlightWord={highlightWord}
           onWordPress={handleWordPress}
           highlightMatches={highlightMatches}
-          currentHighlightIndex={currentHighlightIndex}
         />
       </ScrollView>
 
@@ -196,11 +184,6 @@ export function NewsArticleScreen({ articleId }: NewsArticleScreenProps) {
         }}
         onSearch={handleSearch}
         onOpen={() => setShowSearchBar(true)} // 개선: onOpen 추가
-        // 하이라이트 탐색 UI를 위한 props 추가
-        matchCount={highlightMatches.length}
-        currentIndex={currentHighlightIndex}
-        onPrev={handlePrevHighlight}
-        onNext={handleNextHighlight}
       />
 
       {/* 단어 뜻 모달 */}

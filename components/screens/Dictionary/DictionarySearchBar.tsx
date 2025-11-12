@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { Animated, Dimensions, Image, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { Animated, Dimensions, Image, TextInput, TouchableOpacity, Text, Keyboard, Platform } from 'react-native'
 import { DictionarySearchBarProps } from '../../../types/screens'
 
 const SCREEN_WIDTH = Dimensions.get('window').width
 const MAGNIFIER_SIZE = 56
 const SCREEN_PADDING = 48
+const DEFAULT_BOTTOM = 32 // bottom-8 = 32px
 
 const ANIMATION_CONFIG = {
   tension: 65,
@@ -12,18 +13,15 @@ const ANIMATION_CONFIG = {
   useNativeDriver: false,
 }
 
-export function DictionarySearchBar({ 
-  visible, 
-  onClose, 
+export function DictionarySearchBar({
+  visible,
+  onClose,
   onSearch,
   onOpen,
-  matchCount = 0,
-  currentIndex = 0,
-  onPrev = () => {},
-  onNext = () => {},
 }: DictionarySearchBarProps) {
   const [searchText, setSearchText] = useState('')
   const widthAnim = useRef(new Animated.Value(MAGNIFIER_SIZE)).current
+  const bottomAnim = useRef(new Animated.Value(DEFAULT_BOTTOM)).current
   const inputRef = useRef<TextInput>(null)
 
   useEffect(() => {
@@ -45,6 +43,34 @@ export function DictionarySearchBar({
     }
   }, [visible])
 
+  // 키보드 이벤트 처리
+  useEffect(() => {
+    const keyboardWillShowListener = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      (event) => {
+        Animated.spring(bottomAnim, {
+          toValue: event.endCoordinates.height + 8,
+          ...ANIMATION_CONFIG,
+        }).start()
+      }
+    )
+
+    const keyboardWillHideListener = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => {
+        Animated.spring(bottomAnim, {
+          toValue: DEFAULT_BOTTOM,
+          ...ANIMATION_CONFIG,
+        }).start()
+      }
+    )
+
+    return () => {
+      keyboardWillShowListener.remove()
+      keyboardWillHideListener.remove()
+    }
+  }, [bottomAnim])
+
   const handleSearch = () => {
     const trimmedText = searchText.trim()
     if (!trimmedText) return
@@ -56,6 +82,7 @@ export function DictionarySearchBar({
     <Animated.View
       style={{
         width: widthAnim,
+        bottom: bottomAnim,
         backgroundColor: visible ? '#E8F5E9' : 'transparent',
         shadowColor: visible ? '#000' : 'transparent',
         shadowOffset: { width: 0, height: 2 },
@@ -63,7 +90,7 @@ export function DictionarySearchBar({
         shadowRadius: visible ? 3.84 : 0,
         elevation: visible ? 5 : 0,
       }}
-      className="absolute bottom-8 right-6 h-14 rounded-full flex-row items-center overflow-hidden"
+      className="absolute right-6 h-14 rounded-full flex-row items-center overflow-hidden"
     >
       {visible ? (
         <>
@@ -77,20 +104,6 @@ export function DictionarySearchBar({
             returnKeyType="search"
             className="flex-1 text-base text-gray-800 px-6"
           />
-          
-          {matchCount > 0 && (
-            <View className="flex-row items-center gap-x-2 mr-2">
-              <Text className="text-sm text-gray-600 font-semibold">
-                {currentIndex + 1} / {matchCount}
-              </Text>
-              <TouchableOpacity onPress={onPrev} hitSlop={{ top: 10, bottom: 10, left: 5, right: 5 }}>
-                <Text className="text-2xl text-gray-600">↑</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={onNext} hitSlop={{ top: 10, bottom: 10, left: 5, right: 5 }}>
-                <Text className="text-2xl text-gray-600">↓</Text>
-              </TouchableOpacity>
-            </View>
-          )}
 
           <TouchableOpacity 
             onPress={onClose} 

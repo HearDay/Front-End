@@ -2,14 +2,13 @@ import { useMemo } from 'react';
 import { ScrollView, Text, TouchableOpacity } from 'react-native';
 import { NewsArticleContentProps } from '../../../types/screens';
 
-export function NewsArticleContent ({ 
-  content, 
+export function NewsArticleContent ({
+  content,
   highlightWord,
   onWordPress,
   highlightMatches = [],
-  currentHighlightIndex = 0,
 }: NewsArticleContentProps) {
-  
+
   // 단어 하이라이트 처리 로직 개선
   const renderContent = useMemo(() => {
     if (!highlightWord || highlightMatches.length === 0) {
@@ -27,15 +26,14 @@ export function NewsArticleContent ({
         );
       }
 
-      const isCurrentHighlight = index === currentHighlightIndex;
       const word = content.substring(match.start, match.end);
 
-      // 하이라이트 텍스트
+      // 하이라이트 텍스트 - 모두 같은 색상 (#FFD700)으로 통일
       parts.push(
         <TouchableOpacity key={`match-${index}`} onPress={() => onWordPress(word)}>
           <Text style={{
-            backgroundColor: isCurrentHighlight ? '#FFD700' : '#FFFF0050', // 현재 하이라이트는 진하게, 나머지는 연하게
-            fontWeight: isCurrentHighlight ? 'bold' : 'normal',
+            backgroundColor: '#FFD700',
+            fontWeight: 'bold',
           }}>
             {word}
           </Text>
@@ -52,7 +50,7 @@ export function NewsArticleContent ({
     }
 
     return <Text className="text-base leading-7 text-gray-800">{parts}</Text>;
-  }, [content, highlightMatches, currentHighlightIndex, onWordPress]);
+  }, [content, highlightWord, highlightMatches, onWordPress]);
 
   return (
     <ScrollView className="flex-1 px-6 py-4">
