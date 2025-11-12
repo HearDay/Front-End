@@ -44,23 +44,28 @@ export function DictionaryModal({
   useEffect(() => {
     if (visible) {
       fetchDefinition()
+    } else {
+      // 모달이 닫힐 때 상태 초기화
+      setDefinition(null)
+      setError(null)
+      setLoading(false)
     }
   }, [visible, fetchDefinition])
 
   const handleSave = () => {
     if (definition) {
-      onSave(definition.definitions.join('\n'));
+      onSave(definition.definitions.join('\n'))
     }
   }
 
   const { buttonText, buttonStyle, disabled } = useMemo(() => {
     switch (saveState) {
       case 'SAVING':
-        return { buttonText: '저장 중...', buttonStyle: 'bg-gray-400', disabled: true };
+        return { buttonText: '저장 중...', buttonStyle: 'bg-gray-400', disabled: true }
       case 'SAVED':
-        return { buttonText: '단어장에 성공적으로 저장했어요!', buttonStyle: 'bg-[#A8E6B8]', disabled: true };
+        return { buttonText: '단어장에 성공적으로 저장했어요!', buttonStyle: 'bg-[#A8E6B8]', disabled: true }
       case 'ALREADY_EXISTS':
-        return { buttonText: '오늘 이미 같은 단어를 저장했어요!', buttonStyle: 'bg-[#A8E6B8]', disabled: true };
+        return { buttonText: '오늘 이미 같은 단어를 저장했어요!', buttonStyle: 'bg-[#A8E6B8]', disabled: true }
       case 'IDLE':
       default:
         // 검색 결과가 없거나(error), 로딩 중이거나, definition이 없으면 비활성화
@@ -69,9 +74,9 @@ export function DictionaryModal({
           buttonText: '단어장에 넣기',
           buttonStyle: isDisabled ? 'bg-gray-400' : 'bg-[#006716]',
           disabled: isDisabled
-        };
+        }
     }
-  }, [saveState, loading, definition, error]);
+  }, [saveState, loading, definition, error])
 
   return (
     <Modal
@@ -111,8 +116,10 @@ export function DictionaryModal({
 
           <TouchableOpacity
             className={`py-4 rounded-xl ${buttonStyle}`}
-            onPress={handleSave}
+            onPress={disabled ? undefined : handleSave}
             disabled={disabled}
+            activeOpacity={disabled ? 1 : 0.7}
+            style={{ opacity: disabled ? 0.5 : 1 }}
           >
             <Text className="text-center text-white font-semibold">
               {buttonText}
