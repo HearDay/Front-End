@@ -11,13 +11,12 @@ import { Stack, useRouter } from "expo-router";
 import { Eye, EyeOff } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import {
-  Alert,
   Platform,
   StatusBar,
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 
 const SignUpPage = () => {
@@ -45,8 +44,11 @@ const SignUpPage = () => {
   const [delayedSecure2, setDelayedSecure2] = useState(isSecure2);
 
   const [showCodeInput, setShowCodeInput] = useState(false);
+
+  // 모달 관련 상태
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
+  const [onConfirmAction, setOnConfirmAction] = useState<() => void>(() => () => {});
 
   useEffect(() => {
     if (Platform.OS === "ios") {
@@ -64,43 +66,54 @@ const SignUpPage = () => {
 
   const allRequiredAgreed = terms.service && terms.privacy;
 
+  // 모달 열기 함수
+  const showModal = (message: string, onConfirm?: () => void) => {
+    setModalMessage(message);
+    setOnConfirmAction(() => onConfirm || (() => setModalVisible(false)));
+    setModalVisible(true);
+  };
+
+  const handleModalConfirm = () => {
+    setModalVisible(false);
+    onConfirmAction();
+  };
+
   // 이메일 인증번호 전송
   const handleVerify = async () => {
     const fullEmail = `${emailId}${emailDomain}`;
-    if (!emailId) return Alert.alert("이메일을 입력해주세요.");
+    if (!emailId) return showModal("이메일을 입력해주세요.");
 
     try {
       const res = await sendCertificationCode(fullEmail);
       if (res.success) {
         setShowCodeInput(true);
-        setModalMessage("이메일로 인증코드를 발송했습니다.\n5분 안에 인증을 완료해주세요.");
-        setModalVisible(true);
+        showModal("이메일로 인증코드를 발송했습니다.\n5분 안에 인증을 완료해주세요.");
       } else {
-        Alert.alert("발송 실패", res.message || "이메일 전송에 실패했습니다.");
+        showModal(res.message || "이메일 전송에 실패했습니다.");
       }
     } catch (err) {
       console.error("이메일 인증 전송 실패:", err);
-      Alert.alert("오류", "서버 요청 중 문제가 발생했습니다.");
+      showModal("서버 요청 중 문제가 발생했습니다.");
     }
   };
 
   // 인증번호 확인
   const handleCodeConfirm = async () => {
     const fullEmail = `${emailId}${emailDomain}`;
-    if (!certificationCode) return Alert.alert("인증번호를 입력해주세요.");
+    if (!certificationCode) return showModal("인증번호를 입력해주세요.");
 
     try {
       const res = await verifyCertificationCode(fullEmail, certificationCode);
       if (res.success) {
         setIsEmailVerified(true);
-        Alert.alert("인증 완료", "이메일 인증이 성공적으로 완료되었습니다!");
+        showModal("이메일 인증이 성공적으로 완료되었습니다!");
       } else {
         setIsEmailVerified(false);
-        Alert.alert("인증 실패", res.message || "잘못된 인증번호입니다.");
+        showModal(res.message || "잘못된 인증번호입니다.");
       }
     } catch (err) {
       console.error("인증번호 확인 실패:", err);
-      Alert.alert("오류", "서버 요청 중 문제가 발생했습니다.");
+      showModal("서버 요청 중 문제가 발생했습니다.");
     }
   };
 
@@ -116,7 +129,7 @@ const SignUpPage = () => {
   // 회원가입 요청
   const handleSignUp = async () => {
     if (!isSignUpEnabled) {
-      return Alert.alert("모든 항목을 올바르게 입력하고 인증을 완료해주세요!");
+      return showModal("모든 항목을 올바르게 입력하고 인증을 완료해주세요!");
     }
 
     const body = {
@@ -130,30 +143,23 @@ const SignUpPage = () => {
       const res = await signup(body);
 
       if (res.success) {
-        Alert.alert("회원가입 성공", "선호 카테고리를 선택해주세요!", [
-          {
-            text: "확인",
-            onPress: () =>
-              router.push({
-                pathname: "/SelectCategoryPage",
-                params: {
-                  nickname,
-                  password: pwd,
-                  email: `${emailId}${emailDomain}`,
-                  phone,
-                },
-              }),
-          },
-        ]);
+        showModal("회원가입이 완료되었습니다!\n선호 카테고리를 선택해주세요.", () =>
+          router.push({
+            pathname: "/SelectCategoryPage",
+            params: {
+              nickname,
+              password: pwd,
+              email: `${emailId}${emailDomain}`,
+              phone,
+            },
+          })
+        );
       } else {
-        Alert.alert("회원가입 실패", res.message || "오류가 발생했습니다.");
+        showModal(res.message || "회원가입 중 오류가 발생했습니다.");
       }
     } catch (err: any) {
       console.error("회원가입 실패:", err.response?.data || err.message);
-      Alert.alert(
-        "회원가입 실패",
-        err.response?.data?.message || "요청 중 오류가 발생했습니다."
-      );
+      showModal(err.response?.data?.message || "요청 중 오류가 발생했습니다.");
     }
   };
 
@@ -167,7 +173,7 @@ const SignUpPage = () => {
         <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
 
         {/* 이메일 입력 */}
-        <View >
+        <View>
           <EmailInputWithSelect
             emailId={emailId}
             onChangeEmailId={setEmailId}
@@ -177,9 +183,9 @@ const SignUpPage = () => {
           />
         </View>
 
-        {/* 인증번호 입력  */}
+        {/* 인증번호 입력 */}
         {showCodeInput && (
-          <View className="mb-3" >
+          <View className="mb-3">
             <InputBoxWithButton
               placeholder="인증번호"
               value={certificationCode}
@@ -191,12 +197,8 @@ const SignUpPage = () => {
         )}
 
         {/* 닉네임 */}
-        <View >
-          <InputBox
-            placeholder="닉네임"
-            value={nickname}
-            onChangeText={setNickname}
-          />
+        <View>
+          <InputBox placeholder="닉네임" value={nickname} onChangeText={setNickname} />
         </View>
 
         {/* 비밀번호 */}
@@ -291,12 +293,11 @@ const SignUpPage = () => {
         />
       </View>
 
-      {/* 이메일 발송 모달 */}
       <Modal
         visible={modalVisible}
         title={modalMessage}
         confirmText="확인"
-        onConfirm={() => setModalVisible(false)}
+        onConfirm={handleModalConfirm}
         onClose={() => setModalVisible(false)}
       />
     </View>
