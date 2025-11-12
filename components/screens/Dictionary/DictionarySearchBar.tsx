@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Animated, Dimensions, Image, Text, TextInput, TouchableOpacity } from 'react-native'
+import { Animated, Dimensions, Image, TextInput, TouchableOpacity, Text } from 'react-native'
 import { DictionarySearchBarProps } from '../../../types/screens'
 
 const SCREEN_WIDTH = Dimensions.get('window').width
@@ -12,15 +12,11 @@ const ANIMATION_CONFIG = {
   useNativeDriver: false,
 }
 
-export function DictionarySearchBar({ 
-  visible, 
-  onClose, 
+export function DictionarySearchBar({
+  visible,
+  onClose,
   onSearch,
   onOpen,
-  matchCount = 0,
-  currentIndex = 0,
-  onPrev = () => {},
-  onNext = () => {},
 }: DictionarySearchBarProps) {
   const [searchText, setSearchText] = useState('')
   const widthAnim = useRef(new Animated.Value(MAGNIFIER_SIZE)).current
@@ -77,21 +73,7 @@ export function DictionarySearchBar({
             returnKeyType="search"
             className="flex-1 text-base text-gray-800 px-6"
           />
-          {/*   사전 단어 위 아래 이동
-          {matchCount > 0 && (
-            <View className="flex-row items-center gap-x-2 mr-2">
-              <Text className="text-sm text-gray-600 font-semibold">
-                {currentIndex + 1} / {matchCount}
-              </Text>
-              <TouchableOpacity onPress={onPrev} hitSlop={{ top: 10, bottom: 10, left: 5, right: 5 }}>
-                <Text className="text-2xl text-gray-600">↑</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={onNext} hitSlop={{ top: 10, bottom: 10, left: 5, right: 5 }}>
-                <Text className="text-2xl text-gray-600">↓</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-          */}
+
           <TouchableOpacity 
             onPress={onClose} 
             className="px-4"

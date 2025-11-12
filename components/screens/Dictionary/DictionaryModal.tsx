@@ -26,9 +26,11 @@ export function DictionaryModal({
     try {
       setLoading(true)
       setError(null)
+      setDefinition(null)
       const response = await dictionaryService.getDefinition(word)
       setDefinition(response)
     } catch (err) {
+      setDefinition(null)
       if (axios.isAxiosError(err) && err.response?.data?.message) {
         setError(err.response.data.message)
       } else {
@@ -61,9 +63,15 @@ export function DictionaryModal({
         return { buttonText: '오늘 이미 같은 단어를 저장했어요!', buttonStyle: 'bg-[#A8E6B8]', disabled: true };
       case 'IDLE':
       default:
-        return { buttonText: '단어장에 넣기', buttonStyle: 'bg-[#006716]', disabled: loading || !definition };
+        // 검색 결과가 없거나(error), 로딩 중이거나, definition이 없으면 비활성화
+        const isDisabled = loading || !definition || !!error;
+        return {
+          buttonText: '단어장에 넣기',
+          buttonStyle: isDisabled ? 'bg-gray-400' : 'bg-[#006716]',
+          disabled: isDisabled
+        };
     }
-  }, [saveState, loading, definition]);
+  }, [saveState, loading, definition, error]);
 
   return (
     <Modal

@@ -157,7 +157,6 @@ export interface NewsArticleContentProps {
   highlightWord?: string
   onWordPress: (word: string) => void
   highlightMatches?: {start: number, end: number}[]
-  currentHighlightIndex?: number
 }
 
 // ========== 단어 사전 관련 ==========
@@ -167,10 +166,6 @@ export interface DictionarySearchBarProps {
   onClose: () => void
   onSearch: (word: string) => void
   onOpen?: () => void
-  matchCount?: number
-  currentIndex?: number
-  onPrev?: () => void
-  onNext?: () => void
 }
 
 export interface DictionaryModalProps {
