@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Animated, Dimensions, Image, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { Animated, Dimensions, Image, Text, TextInput, TouchableOpacity } from 'react-native'
 import { DictionarySearchBarProps } from '../../../types/screens'
 
 const SCREEN_WIDTH = Dimensions.get('window').width
@@ -77,7 +77,7 @@ export function DictionarySearchBar({
             returnKeyType="search"
             className="flex-1 text-base text-gray-800 px-6"
           />
-          
+          {/*   사전 단어 위 아래 이동
           {matchCount > 0 && (
             <View className="flex-row items-center gap-x-2 mr-2">
               <Text className="text-sm text-gray-600 font-semibold">
@@ -91,7 +91,7 @@ export function DictionarySearchBar({
               </TouchableOpacity>
             </View>
           )}
-
+          */}
           <TouchableOpacity 
             onPress={onClose} 
             className="px-4"
