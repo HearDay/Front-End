@@ -8,13 +8,22 @@ type BackgroundVariant = "green" | "white";
 interface NewsCardListProps {
   background?: BackgroundVariant;
   articles?: any[];
+  onPressArticle?: (id: string) => void; // 외부에서 클릭 핸들러 받기
 }
 
-const NewsCardList = ({ background = "white", articles = [] }: NewsCardListProps) => {
+const NewsCardList = ({
+  background = "white",
+  articles = [],
+  onPressArticle,
+}: NewsCardListProps) => {
   const router = useRouter();
 
   const handleNewsPress = (articleId: string) => {
-    router.push(`/newsplayer/${articleId}?from=category`);
+    if (onPressArticle) {
+      onPressArticle(articleId); // 외부 콜백 실행
+    } else {
+      router.push(`/newsplayer/${articleId}`); // 기본 동작 (백업)
+    }
   };
 
   if (!articles || articles.length === 0) {
@@ -32,7 +41,6 @@ const NewsCardList = ({ background = "white", articles = [] }: NewsCardListProps
     >
       <View className="mt-4">
         {articles.map((item) => {
-          // 필드 통합 처리
           const imageUrl = item.imageUrl || item.image_url || "";
           const title = item.title || "(제목 없음)";
           const description =

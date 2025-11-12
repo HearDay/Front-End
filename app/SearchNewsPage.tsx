@@ -3,20 +3,17 @@ import ScrollButton from "@/components/screens/SearchNews/ScrollButton";
 import SearchBar from "@/components/screens/SearchNews/SearchBar";
 import { fetchArticles } from "@/services/api/articles";
 import { LinearGradient } from "expo-linear-gradient";
-import { Stack, useRouter } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import {
-  Image,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const SearchNewsPage = () => {
   const router = useRouter();
+  const { category } = useLocalSearchParams<{ category?: string }>(); // URL에서 카테고리 파라미터 읽기
+
   const [searchText, setSearchText] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("전체");
+  const [selectedCategory, setSelectedCategory] = useState(category || "전체"); // URL 카테고리 복원
   const [articles, setArticles] = useState<any[]>([]);
 
   const categoryMap: Record<string, string> = {
@@ -34,15 +31,15 @@ const SearchNewsPage = () => {
   const categories = Object.keys(categoryMap);
 
   // 기사 조회 함수
-  const handleSearch = async (title?: string, category?: string) => {
-    const backendCategory = categoryMap[category ?? selectedCategory]; // 매핑 적용
+  const handleSearch = async (title?: string, categoryParam?: string) => {
+    const backendCategory = categoryMap[categoryParam ?? selectedCategory];
     const result = await fetchArticles(title ?? searchText, backendCategory);
     setArticles(result);
   };
 
   // 페이지 처음 진입 시 전체 기사 자동 조회
   useEffect(() => {
-    handleSearch("", "전체");
+    handleSearch("", selectedCategory);
   }, []);
 
   // 카테고리 변경 시 자동 갱신
@@ -97,12 +94,26 @@ const SearchNewsPage = () => {
             <ScrollButton
               categories={categories}
               onSelect={(category) => setSelectedCategory(category)}
+              selectedCategory={selectedCategory}
             />
           </View>
 
           {/* 기사 리스트 */}
           <View className="flex-1 mt-2">
-            <NewsCardList background="white" articles={articles} />
+            <NewsCardList
+              background="white"
+              articles={articles}
+              onPressArticle={(id: string) =>
+                router.push({
+                  pathname: `/newsplayer/[id]`,
+                  params: {
+                    id: id.toString(),
+                    from: "category",
+                    category: selectedCategory,
+                  },
+                })
+              }
+            />
           </View>
         </View>
       </LinearGradient>
