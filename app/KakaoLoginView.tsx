@@ -35,7 +35,7 @@ const KakaoLoginView = () => {
           await AsyncStorage.setItem("accessToken", accessToken);
           await AsyncStorage.setItem("refreshToken", refreshToken);
 
-          router.replace("/(tabs)"); // 홈 화면 이동
+          router.replace("/SelectCategoryPage");
         } else {
           console.warn("⚠️ 토큰 추출 실패:", url);
         }

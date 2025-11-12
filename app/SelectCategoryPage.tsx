@@ -1,10 +1,10 @@
+import { Modal } from "@/components/common";
 import { registerUserCategories } from "@/services/api/category";
 import { LinearGradient } from "expo-linear-gradient";
 import { Stack, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -13,7 +13,7 @@ import {
 
 const categories = [
   "경제",
-  "방송/연예",
+  "방송 / 연예",
   "IT",
   "쇼핑",
   "생활",
@@ -25,41 +25,63 @@ const categories = [
 const SelectCategoryPage = () => {
   const [selected, setSelected] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+  const [onConfirmAction, setOnConfirmAction] = useState<() => void>(() => () => {});
   const router = useRouter();
 
+  // 카테고리 선택 (최대 3개 제한)
   const toggleSelect = (category: string) => {
-    setSelected((prev) =>
-      prev.includes(category)
-        ? prev.filter((p) => p !== category)
-        : [...prev, category]
-    );
+    setSelected((prev) => {
+      if (prev.includes(category)) {
+        return prev.filter((p) => p !== category);
+      }
+
+      if (prev.length >= 3) {
+        showModal("최대 3개까지만 선택할 수 있습니다!");
+        return prev;
+      }
+
+      return [...prev, category];
+    });
   };
 
+  // 모달 호출 함수
+  const showModal = (message: string, onConfirm?: () => void) => {
+    setModalMessage(message);
+    setIsModalVisible(true);
+    setOnConfirmAction(() => onConfirm || (() => setIsModalVisible(false)));
+  };
+
+  // 확인 버튼 클릭 시 동작
+  const handleModalConfirm = () => {
+    setIsModalVisible(false);
+    onConfirmAction();
+  };
+
+  // 제출 처리
   const handleSubmit = async () => {
     if (selected.length === 0) {
-      return Alert.alert("카테고리를 하나 이상 선택해주세요!");
+      return showModal("카테고리를 하나 이상 선택해주세요.");
     }
 
     try {
       setLoading(true);
-      const res = await registerUserCategories(selected); 
+      const res = await registerUserCategories(selected);
 
       if (res?.success) {
-        Alert.alert("완료", "관심 카테고리가 등록되었습니다!");
-        router.replace("/(tabs)");
+        showModal("관심 카테고리가 등록되었습니다!", () => {
+          router.replace("/(tabs)");
+        });
       } else {
         console.error("카테고리 등록 실패 응답:", res);
-        Alert.alert(
-          "카테고리 등록 실패",
-          res?.errorCode || res?.message || "오류가 발생했습니다."
+        showModal(
+          res?.errorCode || res?.message || "카테고리 등록 중 오류가 발생했습니다."
         );
       }
     } catch (err: any) {
       console.error("카테고리 등록 오류:", err.response?.data || err.message);
-      Alert.alert(
-        "오류",
-        err.response?.data?.errorCode || err.message || "카테고리 등록 실패"
-      );
+      showModal(err.response?.data?.errorCode || err.message || "카테고리 등록 실패");
     } finally {
       setLoading(false);
     }
@@ -68,6 +90,16 @@ const SelectCategoryPage = () => {
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
+
+      {/* 모달 컴포넌트 */}
+      <Modal
+        visible={isModalVisible}
+        title={modalMessage}
+        confirmText="확인"
+        onConfirm={handleModalConfirm}
+        onClose={() => setIsModalVisible(false)}
+      />
+
       <LinearGradient
         colors={["#006716", "#428F48", "#85B77A", "#FBFFD3"]}
         locations={[0, 0.22, 0.54, 0.85]}
