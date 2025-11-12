@@ -1,7 +1,7 @@
-import { addDays, endOfMonth, endOfWeek, format, isSameDay, startOfMonth, startOfWeek } from 'date-fns'
+import { addDays, endOfMonth, endOfWeek, format, isSameDay, startOfMonth, startOfWeek } from 'date-fns';
 import { useMemo } from 'react'; // 추가: 성능 최적화를 위한 useMemo
-import { Text, TouchableOpacity, View } from 'react-native'
-import { WordBookCalendarProps } from '../../../types/screens'
+import { Text, TouchableOpacity, View } from 'react-native';
+import { WordBookCalendarProps } from '../../../types/screens';
 
 // 추가: 요일 배열 상수화
 // 이유: 매번 새로운 배열을 만들지 않고 재사용 (메모리 최적화)
