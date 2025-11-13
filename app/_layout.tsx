@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Slot, usePathname } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
+import { AudioProvider } from "../contexts/AudioContext";
 import "../global.css";
 import LoginPage from "./LoginPage";
 
@@ -48,5 +49,9 @@ export default function RootLayout() {
   }
 
   // 인증 여부 확인 후 Slot 렌더링
-  return <Slot />;
+  return (
+    <AudioProvider>
+      <Slot />
+    </AudioProvider>
+  );
 }

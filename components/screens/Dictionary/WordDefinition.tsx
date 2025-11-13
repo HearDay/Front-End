@@ -24,4 +24,4 @@ export const WordDefinition = (
       ))}
     </View>
   </ScrollView>
-);
+)

@@ -103,6 +103,12 @@ export function DictionarySearchBar({
             onSubmitEditing={handleSearch}
             returnKeyType="search"
             className="flex-1 text-base text-gray-800 px-6"
+            style={{
+              textAlignVertical: 'center',
+              paddingVertical: 0,
+              height: 56,
+              lineHeight: 20,
+            }}
           />
 
           <TouchableOpacity 

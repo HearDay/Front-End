@@ -1,4 +1,5 @@
 import { Modal } from '@/components/common';
+import { useAudio } from '@/contexts/AudioContext';
 import { Audio } from 'expo-av';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -21,14 +22,13 @@ interface NewsPlayerScreenProps {
 export const NewsPlayerScreen = ({ articleId, from }: NewsPlayerScreenProps) => {
   const router = useRouter();
   const { category } = useLocalSearchParams<{ category?: string }>();
+  const { isPlaying, loadAudio, play, pause } = useAudio();
   const [newsData, setNewsData] = useState<NewsPlayerData | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [isCarMode, setIsCarMode] = useState(false);
   const [showDiscussionModal, setShowDiscussionModal] = useState(false);
   const [currentLines, setCurrentLines] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const soundRef = useRef<Audio.Sound | null>(null);
 
   // 최근 본 기사 목록
   const [recentArticles, setRecentArticles] = useState<number[]>([]);
@@ -98,32 +98,12 @@ export const NewsPlayerScreen = ({ articleId, from }: NewsPlayerScreenProps) => 
     setCurrentLines([newsData.fullText]);
   }, [newsData]);
 
-  const loadAudio = useCallback(async () => {
-    if (!newsData?.audioUrl) return;
-    try {
-      const { sound } = await Audio.Sound.createAsync(
-        { uri: newsData.audioUrl },
-        { shouldPlay: true }
-      );
-      soundRef.current = sound;
-      sound.setOnPlaybackStatusUpdate((status) => {
-        if (status.isLoaded) {
-          setIsPlaying(status.isPlaying);
-        }
-      });
-    } catch (err) {
-      // 오디오 로드 실패 시 무음 처리
-    }
-  }, [newsData]);
-
+  // 뉴스 데이터가 로드되면 오디오 로드
   useEffect(() => {
-    if (newsData) {
-      loadAudio();
+    if (newsData?.audioUrl) {
+      loadAudio(newsData.audioUrl, articleId);
     }
-    return () => {
-      soundRef.current?.unloadAsync();
-    };
-  }, [newsData, loadAudio]);
+  }, [newsData, articleId, loadAudio]);
 
   const handleBack = useCallback(() => {
     if (from === 'savednews') {
@@ -141,35 +121,19 @@ export const NewsPlayerScreen = ({ articleId, from }: NewsPlayerScreenProps) => 
   }, [router, from]);
 
   const handlePlay = useCallback(async () => {
-    if (!soundRef.current) return;
-    try {
-      await soundRef.current.playAsync();
-      setIsPlaying(true);
-    } catch (err) {
-      // 재생 실패 시 무시
-    }
-  }, []);
+    await play();
+  }, [play]);
 
   const handlePause = useCallback(async () => {
-    if (!soundRef.current) return;
-    try {
-      await soundRef.current.pauseAsync();
-      setIsPlaying(false);
-    } catch (err) {
-      // 일시정지 실패 시 무시
-    }
-  }, []);
+    await pause();
+  }, [pause]);
 
   const handleNext = useCallback(async () => {
     if (currentIndex === -1 || currentIndex >= recentArticles.length - 1) {
       return;
     }
 
-    // 오디오 정리
-    await soundRef.current?.unloadAsync();
-    soundRef.current = null;
-
-    // 다음 기사로 이동
+    // 다음 기사로 이동 (오디오는 Context에서 자동으로 관리)
     const nextArticleId = recentArticles[currentIndex + 1];
     router.replace(`/newsplayer/${nextArticleId}`);
   }, [currentIndex, recentArticles, router]);
@@ -179,11 +143,7 @@ export const NewsPlayerScreen = ({ articleId, from }: NewsPlayerScreenProps) => 
       return;
     }
 
-    // 오디오 정리
-    await soundRef.current?.unloadAsync();
-    soundRef.current = null;
-
-    // 이전 기사로 이동
+    // 이전 기사로 이동 (오디오는 Context에서 자동으로 관리)
     const prevArticleId = recentArticles[currentIndex - 1];
     router.replace(`/newsplayer/${prevArticleId}`);
   }, [currentIndex, recentArticles, router]);
