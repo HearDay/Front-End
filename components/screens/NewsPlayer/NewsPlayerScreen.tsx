@@ -73,25 +73,6 @@ export const NewsPlayerScreen = ({ articleId, from }: NewsPlayerScreenProps) => 
     fetchRecentArticles();
   }, [fetchNewsData, fetchRecentArticles]);
 
-  // 초기 오디오 모드 설정 (무음 모드에서도 재생)
-  useEffect(() => {
-    const setupAudioMode = async () => {
-      try {
-        await Audio.setAudioModeAsync({
-          allowsRecordingIOS: false,
-          playsInSilentModeIOS: true,
-          staysActiveInBackground: false,
-          interruptionModeIOS: 0,
-          shouldDuckAndroid: false,
-          playThroughEarpieceAndroid: false,
-        });
-      } catch {
-        // 오디오 모드 설정 실패 시 무시
-      }
-    };
-    setupAudioMode();
-  }, []);
-
   useEffect(() => {
     if (!newsData) return;
     // 전체 텍스트를 currentLines에 배열로 설정 (LyricsDisplay에서 join으로 합침)
@@ -155,9 +136,9 @@ export const NewsPlayerScreen = ({ articleId, from }: NewsPlayerScreenProps) => 
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: false,
         playsInSilentModeIOS: true,
-        staysActiveInBackground: newCarMode,
+        staysActiveInBackground: newCarMode, // ON: 백그라운드 허용, OFF: 백그라운드 안됨
         interruptionModeIOS: newCarMode ? 1 : 0,
-        shouldDuckAndroid: newCarMode,
+        shouldDuckAndroid: false, // 다른 앱 오디오와 겹치면 이 앱 오디오 끔
         playThroughEarpieceAndroid: false,
       });
     } catch {
