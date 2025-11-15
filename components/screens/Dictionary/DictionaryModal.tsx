@@ -103,8 +103,8 @@ export function DictionaryModal({
         style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)' }}
         onPress={onClose}
       >
-        <Pressable 
-          className="bg-white rounded-3xl p-6 mx-8 w-full max-w-md"
+        <Pressable
+          className="bg-white rounded-3xl p-6 mx-10 w-full max-w-sm"
           onPress={(e) => e.stopPropagation()}
         >
           <Text className="text-2xl font-bold text-center mb-4">{word}</Text>
