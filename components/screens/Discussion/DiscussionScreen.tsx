@@ -138,7 +138,7 @@ export function DiscussionScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-[#F5FCE9]" edges={['bottom', 'left', 'right']}>
+    <SafeAreaView className="flex-1 bg-[#F5FCE9]" edges={['left', 'right']}>
       <TopBar showBackButton={false} />
 
       <DiscussionHeader />

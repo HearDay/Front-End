@@ -67,7 +67,7 @@ export function DiscussionNewsList({
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 20 }}
+        contentContainerStyle={{ paddingBottom: 0 }}
       >
         {news.length === 0 ? (
           <View className="flex-1 items-center justify-center py-20">
