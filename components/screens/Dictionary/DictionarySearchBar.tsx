@@ -102,11 +102,17 @@ export function DictionarySearchBar({
             onChangeText={setSearchText}
             onSubmitEditing={handleSearch}
             returnKeyType="search"
-            className="flex-1 text-base text-gray-800 px-6"
+            className="flex-1 text-gray-800 px-6"
+            style={{
+              fontSize: 16,
+              lineHeight: 20,
+              paddingTop: 0,
+              paddingBottom: 0,
+            }}
           />
 
-          <TouchableOpacity 
-            onPress={onClose} 
+          <TouchableOpacity
+            onPress={onClose}
             className="px-4"
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >

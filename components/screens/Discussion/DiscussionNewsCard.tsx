@@ -20,7 +20,7 @@ export function DiscussionNewsCard({ news, onPress }: DiscussionNewsCardProps) {
         elevation: 4,
         borderRadius: 16,
       }}
-      className="self-center mb-5"
+      className="self-center mb-3"
       activeOpacity={0.7}
     >
       <View

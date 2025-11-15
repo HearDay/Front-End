@@ -198,11 +198,11 @@ export function NewsArticleScreen({ articleId }: NewsArticleScreenProps) {
       {/* 검색 결과 없음 모달 */}
       <Modal
         visible={showSearchErrorModal}
-        title="기사 본문에서 해당 단어를 찾을 수 없습니다."
+        title="해당 단어를 찾을 수 없습니다."
         onConfirm={() => setShowSearchErrorModal(false)}
         onClose={() => setShowSearchErrorModal(false)}
       >
-        <View className="mt-6 mb-[-16px]">
+        <View className="mt-4 mb-[-16px]">
           <TouchableOpacity
             className="bg-[#006716] py-3 rounded-xl"
             onPress={() => setShowSearchErrorModal(false)}
