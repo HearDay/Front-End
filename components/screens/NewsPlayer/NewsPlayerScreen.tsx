@@ -91,6 +91,8 @@ export const NewsPlayerScreen = ({ articleId, from }: NewsPlayerScreenProps) => 
       router.push('/(tabs)/savednews');
     } else if (from === 'home') {
       router.push('/(tabs)');
+    } else if (from === 'todaynews') {
+      router.push(`/(tabs)?showTodayNews=true&newsId=${articleId}`);
     } else if (from === 'category') {
       router.push({
         pathname: '/SearchNewsPage',
@@ -99,7 +101,7 @@ export const NewsPlayerScreen = ({ articleId, from }: NewsPlayerScreenProps) => 
     } else {
       router.back();
     }
-  }, [router, from]);
+  }, [router, from, articleId]);
 
   const handlePlay = useCallback(async () => {
     await play();

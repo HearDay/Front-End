@@ -2,12 +2,15 @@ import { CategoryChipGroup } from "@/components/common";
 import HeroSection from "@/components/screens/HomePage/HeroSection";
 import NewsCardList from "@/components/screens/HomePage/NewsCardList";
 import NewsCardSlider from "@/components/screens/HomePage/NewsCardSlider";
+import { DUMMY_TODAY_NEWS } from "@/components/screens/HomePage/TodayNewsDummy";
+import { TodayNewsModal } from "@/components/screens/HomePage/TodayNewsModal";
+import { newsService } from "@/services";
 import { fetchCategoryRecommendNews } from "@/services/api/categoryRecommendNews";
 import { fetchRecommendNews } from "@/services/api/recommendNews";
 import { CategoryArticle } from "@/types/auth/categoryRecommendNews";
 import { RecommendArticle } from "@/types/auth/recommendNews";
-import { usePathname } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { useLocalSearchParams, usePathname } from "expo-router";
+import React, { useEffect, useRef, useState } from "react";
 import { Text, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -36,9 +39,14 @@ export default function Index() {
   const [updateTime, setUpdateTime] = useState<string>("");
   const [recommendedArticles, setRecommendedArticles] = useState<RecommendArticle[]>([]);
   const [categoryArticles, setCategoryArticles] = useState<CategoryArticle[]>([]);
+  const [showTodayNewsModal, setShowTodayNewsModal] = useState(false);
+  const [todayNewsItems, setTodayNewsItems] = useState<any[]>([]);
+  const [completedNewsId, setCompletedNewsId] = useState<string | null>(null);
+  const hasShownModal = useRef(false);
 
   const offset = useSharedValue(0);
   const pathname = usePathname();
+  const { showTodayNews, newsId } = useLocalSearchParams<{ showTodayNews?: string; newsId?: string }>();
 
   useEffect(() => {
     const publicRoutes = [
@@ -72,6 +80,54 @@ export default function Index() {
     loadUserInfo();
   }, [pathname]);
 
+  useEffect(() => {
+    const loadTodayNews = async () => {
+      try {
+        const articles = await newsService.getArticles(0, 5);
+        const news = articles.map((article) => ({
+          id: article.id.toString(),
+          title: article.title,
+          imageUrl: article.imageUrl,
+          summary: article.description,
+          category: article.category,
+        }));
+        setTodayNewsItems(news);
+      } catch (error) {
+        console.error("오늘의 뉴스 로드 실패:", error);
+        setTodayNewsItems(DUMMY_TODAY_NEWS);
+      }
+    };
+
+    loadTodayNews();
+  }, []);
+
+  // 초기 진입 시 또는 오늘의 뉴스에서 돌아올 때만 모달 표시
+  useEffect(() => {
+    const publicRoutes = [
+      "/LoginPage",
+      "/SignUpPage",
+      "/CertificationPage",
+      "/ResetPasswordPage",
+      "/SelectCategoryPage",
+      "/KakaoLoginView",
+    ];
+
+    // 오늘의 뉴스에서 돌아온 경우 (from=todaynews에서 백버튼)
+    if (showTodayNews === 'true') {
+      setShowTodayNewsModal(true);
+      if (newsId) {
+        setCompletedNewsId(newsId);
+      }
+    }
+    // 맨 처음 앱 진입 시에만 (한 번도 모달을 보여주지 않았을 때만)
+    else if (!publicRoutes.includes(pathname) && pathname === "/" && !hasShownModal.current) {
+      setTimeout(() => {
+        setShowTodayNewsModal(true);
+        hasShownModal.current = true;
+      }, 500);
+    }
+  }, [pathname, showTodayNews, newsId]);
+
   // 카테고리별 뉴스 로드
   const handleSelectCategory = async (category: string) => {
     setSelectedCategory(category);
@@ -101,6 +157,17 @@ export default function Index() {
   return (
     <View className="flex-1 bg-white">
       <HeroSection offset={offset} userLevel={level} />
+
+      <TodayNewsModal
+        visible={showTodayNewsModal}
+        onClose={() => {
+          setShowTodayNewsModal(false);
+          setCompletedNewsId(null);
+        }}
+        newsItems={todayNewsItems.length > 0 ? todayNewsItems : DUMMY_TODAY_NEWS}
+        userInfo={{ age: "20", gender: "여성" }}
+        completedNewsId={completedNewsId}
+      />
 
       {selectedCategory ? (
         <Animated.View style={listStyle}>
