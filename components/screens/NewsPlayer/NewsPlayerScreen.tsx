@@ -162,6 +162,10 @@ export const NewsPlayerScreen = ({ articleId, from }: NewsPlayerScreenProps) => 
     setShowSaveConfirmModal(true);
   }, []);
 
+  const handleQuiz = useCallback(() => {
+    router.push(`/quiz/${articleId}`);
+  }, [router, articleId]);
+
   const handleConfirmSave = useCallback(async () => {
     setShowSaveConfirmModal(false);
     try {
@@ -211,7 +215,7 @@ export const NewsPlayerScreen = ({ articleId, from }: NewsPlayerScreenProps) => 
   return (
     <LinearGradient colors={['#FFFEF0', '#E8F5E9', '#C8E6C9']} style={{ flex: 1 }}>
       <SafeAreaView className="flex-1">
-        <NewsPlayerHeader title={newsData.title} onBack={handleBack} />
+        <NewsPlayerHeader title={newsData.title} onBack={handleBack} onQuizPress={handleQuiz} />
         
         {/* 이미지와 가사를 포함하는 클릭 가능한 컨테이너 */}
         <TouchableOpacity
