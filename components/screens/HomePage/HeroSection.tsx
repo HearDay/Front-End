@@ -1,10 +1,11 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React from "react";
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import { Image, Platform, Text, TouchableOpacity, View } from "react-native";
 import Animated, {
   interpolate,
   useAnimatedStyle,
+  useSharedValue,
   withTiming,
 } from "react-native-reanimated";
 
@@ -16,64 +17,46 @@ interface HeroSectionProps {
 const HeroSection = ({ offset, userLevel }: HeroSectionProps) => {
   const router = useRouter();
 
-  // 높이 애니메이션 (440 → 104)
-  const animatedContainerStyle = useAnimatedStyle(() => {
-    const height = interpolate(offset.value, [0, 1], [440, 104]);
-    return {
-      height: withTiming(height, { duration: 500 }),
-    };
-  });
+  const pressAnim = useSharedValue(1);
+  const hoverAnim = useSharedValue(1);
 
-  // 레벨별 이미지 선택
-  const treeImage = (() => {
-    switch (userLevel) {
-      case 1:
-        return require("../../../my-expo-app/assets/images/Lv1.png");
-      case 2:
-        return require("../../../my-expo-app/assets/images/Lv2.png");
-      case 3:
-        return require("../../../my-expo-app/assets/images/Lv3.png");
-      case 4:
-        return require("../../../my-expo-app/assets/images/Lv4.png");
-      case 5:
-        return require("../../../my-expo-app/assets/images/Lv5.png");
-      case 6:
-        return require("../../../my-expo-app/assets/images/Lv6.png");
-      default:
-        return require("../../../my-expo-app/assets/images/Lv1.png");
-    }
-  })();
-
-  // 레벨별 크기
-  const treeSize = (() => {
-    switch (userLevel) {
-      case 1:
-        return { width: 100, height: 80 };
-      case 2:
-        return { width: 180, height: 148 };
-      case 3:
-        return { width: 300, height: 249 };
-      case 4:
-        return { width: 359, height: 324 };
-      case 5:
-        return { width: 359, height: 327 };
-      case 6:
-        return { width: 402, height: 337 };
-      default:
-        return { width: 300, height: 249 };
-    }
-  })();
-
-  const levelText =
-    userLevel === 6 ? "나무가 다 자랐어요!" : "뉴스를 시청하면\n나무가 자라요!";
-
-  // 나무와 텍스트 애니메이션 (카테고리 선택 시 위로 올라감)
-  const animatedTreeStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: withTiming(offset.value * -250) }],
-    opacity: withTiming(1 - offset.value),
+  // 스크롤에 따른 높이 애니메이션
+  const animatedContainerStyle = useAnimatedStyle(() => ({
+    height: withTiming(interpolate(offset.value, [0, 1], [440, 104]), {
+      duration: 500,
+    }),
   }));
 
-  // 돋보기 아이콘 전환 애니메이션
+  // 해 버튼 스크롤 애니메이션
+  const sunStyle = useAnimatedStyle(() => ({
+    opacity: withTiming(1 - offset.value, { duration: 400 }),
+    transform: [
+      { translateY: withTiming(offset.value * -40) }, 
+      { scale: hoverAnim.value }, 
+    ],
+  }));
+
+  const pressStyle = useAnimatedStyle(() => ({
+    opacity: pressAnim.value,
+  }));
+
+  const handlePressSun = () => {
+    pressAnim.value = withTiming(0.4, { duration: 120 }, () => {
+      pressAnim.value = withTiming(1, { duration: 120 });
+    });
+    router.push("");
+  };
+
+  // Hover-like 효과
+  const handleHoverIn = () => {
+    hoverAnim.value = withTiming(1.05, { duration: 120 });
+  };
+
+  const handleHoverOut = () => {
+    hoverAnim.value = withTiming(1, { duration: 120 });
+  };
+
+  // 검색 애니메이션
   const search1Style = useAnimatedStyle(() => ({
     opacity: withTiming(1 - offset.value, { duration: 400 }),
   }));
@@ -82,6 +65,40 @@ const HeroSection = ({ offset, userLevel }: HeroSectionProps) => {
     opacity: withTiming(offset.value, { duration: 400 }),
     position: "absolute",
   }));
+
+  // 나무 애니메이션
+  const animatedTreeStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: withTiming(offset.value * -250) }],
+    opacity: withTiming(1 - offset.value),
+  }));
+
+  // 나무 이미지
+  const treeImage = (() => {
+    switch (userLevel) {
+      case 1: return require("../../../my-expo-app/assets/images/Lv1.png");
+      case 2: return require("../../../my-expo-app/assets/images/Lv2.png");
+      case 3: return require("../../../my-expo-app/assets/images/Lv3.png");
+      case 4: return require("../../../my-expo-app/assets/images/Lv4.png");
+      case 5: return require("../../../my-expo-app/assets/images/Lv5.png");
+      case 6: return require("../../../my-expo-app/assets/images/Lv6.png");
+      default: return require("../../../my-expo-app/assets/images/Lv1.png");
+    }
+  })();
+
+  const treeSize = (() => {
+    switch (userLevel) {
+      case 1: return { width: 100, height: 80 };
+      case 2: return { width: 180, height: 148 };
+      case 3: return { width: 300, height: 249 };
+      case 4: return { width: 359, height: 324 };
+      case 5: return { width: 359, height: 327 };
+      case 6: return { width: 402, height: 337 };
+      default: return { width: 300, height: 249 };
+    }
+  })();
+
+  const levelText =
+    userLevel === 6 ? "나무가 다 자랐어요!" : "뉴스를 시청하면\n나무가 자라요!";
 
   return (
     <Animated.View style={[animatedContainerStyle]}>
@@ -92,36 +109,62 @@ const HeroSection = ({ offset, userLevel }: HeroSectionProps) => {
         className="w-full rounded-b-[24px] overflow-hidden"
         style={{ flex: 1 }}
       >
-        {/* 로고 & 검색 버튼 */}
-        <View className="flex-row justify-between items-center px-6 pt-12">
+        <View className="flex-row justify-between items-start px-1 pt-12 mt-2">
           <Image
-            className="w-[130px] h-[40px] mt-4"
+            className="w-[130px] h-[40px] mt-3 ml-4"
             style={{ resizeMode: "contain" }}
             source={require("../../../my-expo-app/assets/images/HEARDAY.png")}
           />
 
-          <TouchableOpacity
-            className="w-[24px] h-[24px] mt-4 relative"
-            onPress={() => router.push("/SearchNewsPage")}
-          >
-            <Animated.Image
-              source={require("../../../my-expo-app/assets/images/Search1.png")}
-              style={[
-                { width: 24, height: 24, resizeMode: "contain" },
-                search1Style,
-              ]}
-            />
-            <Animated.Image
-              source={require("../../../my-expo-app/assets/images/Search2.png")}
-              style={[
-                { width: 24, height: 24, resizeMode: "contain" },
-                search2Style,
-              ]}
-            />
-          </TouchableOpacity>
+   
+          <View className="flex-col items-center mt-1 ml-auto">
+            <TouchableOpacity
+              className="w-[24px] h-[24px] mt-4 ml-3"
+              onPress={() => router.push("/SearchNewsPage")}
+            >
+              <Animated.Image
+                source={require("../../../my-expo-app/assets/images/Search1.png")}
+                style={[
+                  { width: 24, height: 24, resizeMode: "contain" },
+                  search1Style,
+                ]}
+              />
+              <Animated.Image
+                source={require("../../../my-expo-app/assets/images/Search2.png")}
+                style={[
+                  { width: 24, height: 24, resizeMode: "contain" },
+                  search2Style,
+                ]}
+              />
+            </TouchableOpacity>
+
+            <Animated.View style={[sunStyle, pressStyle]}>
+              <TouchableOpacity
+                className="items-center mt-7 mr-5"
+                onPress={handlePressSun}
+                onPressIn={handleHoverIn}
+                onPressOut={handleHoverOut}
+                {...(Platform.OS === "web"
+                  ? {
+                      onMouseEnter: handleHoverIn,
+                      onMouseLeave: handleHoverOut,
+                    }
+                  : {})}
+              >
+                <Image
+                  source={require("../../../my-expo-app/assets/images/Sun.png")}
+                  style={{ width: 60, height: 60, resizeMode: "contain" }}
+                />
+                <Text className="text-[8px] text-[#FBFFD3] font-semibold">
+                  TODAY'S NEWS
+                </Text>
+              </TouchableOpacity>
+            </Animated.View>
+
+          </View>
         </View>
 
-        {/* 나무 이미지 (항상 하단 정렬 + 애니메이션 적용) */}
+        {/* 나무 + 텍스트 */}
         <Animated.View
           style={animatedTreeStyle}
           className="flex-1 justify-end items-center pb-1"
