@@ -23,12 +23,21 @@ export function DictionaryModal({
 
   const fetchDefinition = useCallback(async () => {
     if (!word) return;
+    console.log('DictionaryModal 검색 시작:', word)
     try {
       setLoading(true)
       setError(null)
+      setDefinition(null)
       const response = await dictionaryService.getDefinition(word)
+      console.log('DictionaryModal 검색 결과:', {
+        word,
+        definitionsCount: response.definitions.length,
+        definitions: response.definitions
+      });
       setDefinition(response)
     } catch (err) {
+      console.log('DictionaryModal 검색 에러:', word);
+      setDefinition(null)
       if (axios.isAxiosError(err) && err.response?.data?.message) {
         setError(err.response.data.message)
       } else {
@@ -40,30 +49,47 @@ export function DictionaryModal({
   }, [word])
 
   useEffect(() => {
-    if (visible) {
+    if (visible && word) {
       fetchDefinition()
+    } else if (!visible) {
+      // 모달이 닫힐 때 상태 초기화
+      setDefinition(null)
+      setError(null)
+      setLoading(false)
     }
-  }, [visible, fetchDefinition])
+  }, [visible, word, fetchDefinition])
 
   const handleSave = () => {
     if (definition) {
-      onSave(definition.definitions.join('\n'));
+      onSave(definition.definitions.join('\n'))
     }
   }
 
-  const { buttonText, buttonStyle, disabled } = useMemo(() => {
+  const { buttonText, buttonColor, disabled } = useMemo(() => {
     switch (saveState) {
       case 'SAVING':
-        return { buttonText: '저장 중...', buttonStyle: 'bg-gray-400', disabled: true };
+        return { buttonText: '저장 중...', buttonColor: '#9CA3AF', disabled: true }
       case 'SAVED':
-        return { buttonText: '단어장에 성공적으로 저장했어요!', buttonStyle: 'bg-[#A8E6B8]', disabled: true };
+        return { buttonText: '단어장에 성공적으로 저장했어요!', buttonColor: '#A8E6B8', disabled: true }
       case 'ALREADY_EXISTS':
-        return { buttonText: '오늘 이미 같은 단어를 저장했어요!', buttonStyle: 'bg-[#A8E6B8]', disabled: true };
+        return { buttonText: '오늘 이미 같은 단어를 저장했어요!', buttonColor: '#A8E6B8', disabled: true }
       case 'IDLE':
       default:
-        return { buttonText: '단어장에 넣기', buttonStyle: 'bg-[#006716]', disabled: loading || !definition };
+        // 검색 결과가 없거나(error), 로딩 중이거나, definition이 없거나, definitions 배열이 비어있거나, "검색 결과가 없습니다" 메시지면 비활성화
+        const hasNoResult = definition && (
+          definition.definitions.length === 0 ||
+          definition.definitions[0] === "검색 결과가 없습니다." ||
+          definition.definitions[0].includes("검색 결과가 없습니다")
+        );
+        const isDisabled = loading || !definition || !!error || hasNoResult;
+        console.log('DictionaryModal 버튼 상태:', { loading, definition: !!definition, definitionsLength: definition?.definitions.length, error, hasNoResult, isDisabled })
+        return {
+          buttonText: '단어장에 넣기',
+          buttonColor: isDisabled ? '#9CA3AF' : '#006716',
+          disabled: isDisabled
+        }
     }
-  }, [saveState, loading, definition]);
+  }, [saveState, loading, definition, error])
 
   return (
     <Modal
@@ -77,8 +103,8 @@ export function DictionaryModal({
         style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)' }}
         onPress={onClose}
       >
-        <Pressable 
-          className="bg-white rounded-3xl p-6 mx-8 w-full max-w-md"
+        <Pressable
+          className="bg-white rounded-3xl p-6 mx-10 w-full max-w-sm"
           onPress={(e) => e.stopPropagation()}
         >
           <Text className="text-2xl font-bold text-center mb-4">{word}</Text>
@@ -88,12 +114,19 @@ export function DictionaryModal({
               <ActivityIndicator size="large" color="#006716" />
             ) : error ? (
               <Text className="text-base text-red-500 text-center">{error}</Text>
-            ) : definition ? (
-              definition.definitions.map((def, index) => (
-                <Text key={index} className="text-base leading-6 mb-2">
-                  {def}
-                </Text>
-              ))
+            ) : definition && definition.definitions.length > 0 ? (
+              // "검색 결과가 없습니다." 메시지인지 확인
+              definition.definitions[0] === "검색 결과가 없습니다." || definition.definitions[0].includes("검색 결과가 없습니다") ? (
+                <Text className="text-base leading-6 mb-2">검색 결과가 없습니다.</Text>
+              ) : (
+                definition.definitions.map((def, index) => (
+                  <Text key={index} className="text-base leading-6 mb-2">
+                    {def}
+                  </Text>
+                ))
+              )
+            ) : definition && definition.definitions.length === 0 ? (
+              <Text className="text-base leading-6 mb-2">검색 결과가 없습니다.</Text>
             ) : (
               <Text className="text-base text-gray-500 text-center">
                 단어 뜻을 불러오는 중..
@@ -102,9 +135,15 @@ export function DictionaryModal({
           </View>
 
           <TouchableOpacity
-            className={`py-4 rounded-xl ${buttonStyle}`}
-            onPress={handleSave}
+            onPress={disabled ? undefined : handleSave}
             disabled={disabled}
+            activeOpacity={disabled ? 1 : 0.7}
+            style={{
+              paddingVertical: 16,
+              borderRadius: 12,
+              backgroundColor: buttonColor,
+              opacity: disabled ? 0.5 : 1,
+            }}
           >
             <Text className="text-center text-white font-semibold">
               {buttonText}

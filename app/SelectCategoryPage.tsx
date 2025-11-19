@@ -70,7 +70,7 @@ const SelectCategoryPage = () => {
       const res = await registerUserCategories(selected);
 
       if (res?.success) {
-        showModal("관심 카테고리가 등록되었습니다!", () => {
+        showModal("관심 카테고리가 등록되었습니다.", () => {
           router.replace("/(tabs)");
         });
       } else {

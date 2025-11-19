@@ -1,5 +1,5 @@
 import { CategoryChip } from '@/components/common'
-import { Text, View } from 'react-native'
+import { Platform, Text, View } from 'react-native'
 import { WordBookChipListProps } from '../../../types/screens'
 
 export const WordBookChipList = ({
@@ -16,15 +16,24 @@ export const WordBookChipList = ({
     )
   }
 
+  const chipMargin = Platform.OS === 'android' ? 12 : 4;
+
   return (
-    <View className="flex-row flex-wrap justify-start gap-2 px-4 py-2">
+    <View className="flex-row flex-wrap justify-center px-4 py-2">
       {words.map((word) => (
-        <CategoryChip
+        <View
           key={word.id}
-          label={word.word}
-          isSelected={selectedWord?.id === word.id}
-          onPress={() => onWordPress(word)}
-        />
+          style={{
+            marginRight: chipMargin,
+            marginBottom: chipMargin,
+          }}
+        >
+          <CategoryChip
+            label={word.word}
+            isSelected={selectedWord?.id === word.id}
+            onPress={() => onWordPress(word)}
+          />
+        </View>
       ))}
     </View>
   )

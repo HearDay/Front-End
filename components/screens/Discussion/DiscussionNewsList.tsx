@@ -13,7 +13,7 @@ export function DiscussionNewsList({
 
   const sortOptions = [
     { value: 'latest', label: '최신순' },
-    { value: 'oldest', label: '날짜순' },
+    { value: 'oldest', label: '오래된순' },
   ] as const
 
   const currentLabel = sortOptions.find(opt => opt.value === sortBy)?.label || '최신순'
@@ -67,7 +67,7 @@ export function DiscussionNewsList({
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 20 }}
+        contentContainerStyle={{ paddingBottom: 0 }}
       >
         {news.length === 0 ? (
           <View className="flex-1 items-center justify-center py-20">

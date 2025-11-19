@@ -235,8 +235,14 @@ export const WordBookScreen = () => {
         <Modal
           visible={showModal}
           title={selectedWord.word}
-          onConfirm={() => setShowModal(false)}
-          onClose={() => setShowModal(false)}
+          onConfirm={() => {
+            setShowModal(false);
+            setSelectedWord(null);
+          }}
+          onClose={() => {
+            setShowModal(false);
+            setSelectedWord(null);
+          }}
         >
           <View className="bg-green-50 rounded-2xl p-4 mb-6 mt-4 min-h-24 justify-center">
             {definitionLoading ? (
@@ -247,7 +253,10 @@ export const WordBookScreen = () => {
           </View>
 
           <TouchableOpacity
-            onPress={() => setShowModal(false)}
+            onPress={() => {
+              setShowModal(false);
+              setSelectedWord(null);
+            }}
             className="bg-[#006716] py-3 rounded-xl mb-[-16px]"
             activeOpacity={0.7}
           >

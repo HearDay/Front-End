@@ -13,7 +13,7 @@ export function DiscussionRecordList({
 
   const sortOptions = [
     { value: 'latest', label: '최신순' },
-    { value: 'oldest', label: '날짜순' },
+    { value: 'oldest', label: '오래된순' },
   ] as const;
 
   const currentLabel = sortOptions.find(opt => opt.value === sortBy)?.label || '최신순';
@@ -64,7 +64,11 @@ export function DiscussionRecordList({
       </View>
 
       {/* 기록 리스트 */}
-      <ScrollView className="flex-1">
+      <ScrollView
+        className="flex-1"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 0 }}
+      >
         {records.length === 0 ? (
           <View className="flex-1 items-center justify-center py-20">
             <Text className="text-gray-400 text-base">토론 기록이 없습니다</Text>
