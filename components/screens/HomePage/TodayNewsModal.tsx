@@ -1,9 +1,10 @@
 import { useRouter } from 'expo-router'
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   Animated,
   Dimensions,
   Image,
+  InteractionManager,
   Modal,
   PanResponder,
   Pressable,
@@ -52,25 +53,34 @@ export const TodayNewsModal = ({
   }, [newsItems])
 
   useEffect(() => {
-    if (completedNewsId) {
-      const index = newsItems.findIndex(item => item.id === completedNewsId)
-      if (index !== -1) {
-        setCurrentIndex(index)
+    if (visible) {
+      if (completedNewsId) {
+        const index = newsItems.findIndex(item => item.id === completedNewsId)
+        if (index !== -1) {
+          setCurrentIndex(index)
+        } else {
+          setCurrentIndex(0)
+        }
+      } else {
+        setCurrentIndex(0)
       }
+      position.setValue(0)
     }
-  }, [completedNewsId, newsItems])
+  }, [visible, completedNewsId, newsItems])
 
-  const handleCardPress = useCallback((newsId: string) => {
-    router.push(`/(tabs)?showTodayNews=true&newsId=${newsId}&from=todaynews`)
-    router.push(`/newsplayer/${newsId}?from=todaynews`)
-    onClose()
-  }, [router, onClose])
+  const handleCardPress = useCallback(
+    (newsId: string) => {
+      router.push(`/(tabs)?showTodayNews=true&newsId=${newsId}&from=todaynews`)
+      router.push(`/newsplayer/${newsId}?from=todaynews`)
+      onClose()
+    },
+    [router, onClose]
+  )
 
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: (_, gesture) => {
-        // 수평 이동이 수직 이동보다 크면 팬 제스처로 인식
         return Math.abs(gesture.dx) > 5
       },
       onPanResponderMove: (_, gesture) => {
@@ -79,21 +89,22 @@ export const TodayNewsModal = ({
         }
       },
       onPanResponderRelease: (_, gesture) => {
-        // 스와이프 처리
         if (gesture.dx < SWIPE_THRESHOLD) {
           Animated.timing(position, {
             toValue: -SCREEN_WIDTH,
             duration: 250,
             useNativeDriver: true,
           }).start(() => {
-            setCurrentIndex((prevIndex) => {
-              if (prevIndex < newsItemsRef.current.length - 1) {
-                position.setValue(0)
-                return prevIndex + 1
-              } else {
-                onClose()
+            setCurrentIndex(prevIndex => {
+              const newIndex = prevIndex + 1
+              if (newIndex >= newsItemsRef.current.length) {
+                InteractionManager.runAfterInteractions(() => {
+                  onClose()
+                })
                 return prevIndex
               }
+              position.setValue(0)
+              return newIndex
             })
           })
         } else {
@@ -118,22 +129,14 @@ export const TodayNewsModal = ({
 
     const animatedStyle = isCurrentCard
       ? {
-          transform: [
-            { translateX: position },
-            { translateY },
-            { scale },
-          ],
+          transform: [{ translateX: position }, { translateY }, { scale }],
           opacity: position.interpolate({
             inputRange: [-SCREEN_WIDTH, 0],
             outputRange: [0, 1],
           }),
         }
       : {
-          transform: [
-            { translateX },
-            { translateY },
-            { scale },
-          ],
+          transform: [{ translateX }, { translateY }, { scale }],
           opacity: 1,
         }
 
@@ -148,7 +151,7 @@ export const TodayNewsModal = ({
             shadowColor: '#000',
             shadowOffset: { width: 0, height: offset * 2 },
             shadowOpacity: 0.1 + offset * 0.05,
-            shadowRadius: 10,
+            shadowRadius: 5,
             elevation: newsItems.length - index,
           },
           animatedStyle,
@@ -168,11 +171,14 @@ export const TodayNewsModal = ({
                 오늘의 뉴스
               </Text>
               <Text className="text-[11px] text-[#006716] mb-2">
-                최근 {userInfo?.age || '20'}대 {userInfo?.gender || '여성'}이 가장 많이 본 뉴스
+                최근 {userInfo?.age || '20'}대 {userInfo?.gender || '여성'}이
+                가장 많이 본 뉴스
               </Text>
               <View className="h-[1px] bg-gray-200 mb-3" />
 
-              <Text className="text-[16px] font-bold text-[#002C14] mb-2 leading-5">
+              <Text
+                className="text-[16px] font-bold text-[#002C14] mb-2 leading-5"
+              >
                 {item.title}
               </Text>
               <View className="h-[1px] bg-gray-200 mb-3" />
@@ -187,13 +193,15 @@ export const TodayNewsModal = ({
                 <Text className="text-[11px] font-semibold text-gray-600 mb-1">
                   간단 요약
                 </Text>
-                <Text className="text-[13px] text-[#7B7B7B] leading-4" numberOfLines={3}>
+                <Text
+                  className="text-[13px] text-[#7B7B7B] leading-4"
+                  numberOfLines={3}
+                >
                   {item.summary}
                 </Text>
               </View>
             </View>
 
-            {/* 완료 오버레이 */}
             {isCompleted && (
               <View
                 style={{
@@ -231,15 +239,13 @@ export const TodayNewsModal = ({
       animationType="slide"
       onRequestClose={onClose}
     >
-      <View className="flex-1 bg-black/50 justify-center" style={{ paddingBottom: 80 }}>
-        <Pressable
-          className="absolute top-12 right-6 z-50"
-          onPress={onClose}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-        >
-          <Text className="text-white text-[28px] font-bold">✕</Text>
-        </Pressable>
-
+      <View
+        className="flex-1 bg-black/50 justify-center"
+        style={{ paddingBottom: 80 }}
+      >
+        <Text className="text-white text-center text-[12px] mb-8 px-8">
+          옆으로 스크롤하여 다음 뉴스를 확인해보세요!
+        </Text>
         <View className="items-center">
           {newsItems.map((item, index) => renderCard(item, index))}
         </View>
@@ -247,4 +253,3 @@ export const TodayNewsModal = ({
     </Modal>
   )
 }
-

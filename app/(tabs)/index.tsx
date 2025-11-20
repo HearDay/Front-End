@@ -9,7 +9,7 @@ import { fetchCategoryRecommendNews } from "@/services/api/categoryRecommendNews
 import { fetchRecommendNews } from "@/services/api/recommendNews";
 import { CategoryArticle } from "@/types/auth/categoryRecommendNews";
 import { RecommendArticle } from "@/types/auth/recommendNews";
-import { useLocalSearchParams, usePathname, useFocusEffect } from "expo-router";
+import { useLocalSearchParams, usePathname, useFocusEffect, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { Text, View } from "react-native";
 import Animated, {
@@ -47,6 +47,7 @@ export default function Index() {
 
   const offset = useSharedValue(0);
   const pathname = usePathname();
+  const router = useRouter();
   const { showTodayNews, newsId, from } = useLocalSearchParams<{ showTodayNews?: string; newsId?: string; from?: string }>();
 
   useEffect(() => {
@@ -110,8 +111,10 @@ export default function Index() {
       if (newsId) {
         setCompletedNewsId(newsId);
       }
+      // 모달을 띄운 후에는 파라미터를 제거하여, 다른 화면에서 돌아올 때 다시 뜨지 않도록 함
+      router.setParams({ showTodayNews: undefined, from: undefined });
     }
-  }, [showTodayNews, newsId, from]);
+  }, [showTodayNews, newsId, from, router]);
 
   // 맨 처음 앱 진입 시에만 모달 표시 (화면 포커스 시)
   useFocusEffect(
@@ -174,8 +177,10 @@ export default function Index() {
       <TodayNewsModal
         visible={showTodayNewsModal}
         onClose={() => {
-          setShowTodayNewsModal(false);
-          setCompletedNewsId(null);
+          setTimeout(() => {
+            setShowTodayNewsModal(false);
+            setCompletedNewsId(null);
+          }, 0);
         }}
         newsItems={todayNewsItems.length > 0 ? todayNewsItems : DUMMY_TODAY_NEWS}
         userInfo={{ age: "20", gender: "여성" }}
