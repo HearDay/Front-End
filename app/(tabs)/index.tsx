@@ -9,8 +9,8 @@ import { fetchCategoryRecommendNews } from "@/services/api/categoryRecommendNews
 import { fetchRecommendNews } from "@/services/api/recommendNews";
 import { CategoryArticle } from "@/types/auth/categoryRecommendNews";
 import { RecommendArticle } from "@/types/auth/recommendNews";
-import { useLocalSearchParams, usePathname } from "expo-router";
-import React, { useEffect, useRef, useState } from "react";
+import { useLocalSearchParams, usePathname, useFocusEffect } from "expo-router";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { Text, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -43,10 +43,11 @@ export default function Index() {
   const [todayNewsItems, setTodayNewsItems] = useState<any[]>([]);
   const [completedNewsId, setCompletedNewsId] = useState<string | null>(null);
   const hasShownModal = useRef(false);
+  const isFirstMount = useRef(true);
 
   const offset = useSharedValue(0);
   const pathname = usePathname();
-  const { showTodayNews, newsId } = useLocalSearchParams<{ showTodayNews?: string; newsId?: string }>();
+  const { showTodayNews, newsId, from } = useLocalSearchParams<{ showTodayNews?: string; newsId?: string; from?: string }>();
 
   useEffect(() => {
     const publicRoutes = [
@@ -101,32 +102,44 @@ export default function Index() {
     loadTodayNews();
   }, []);
 
-  // 초기 진입 시 또는 오늘의 뉴스에서 돌아올 때만 모달 표시
+  // 오늘의 뉴스에서 돌아올 때만 모달 표시 (파라미터 변경 감지)
   useEffect(() => {
-    const publicRoutes = [
-      "/LoginPage",
-      "/SignUpPage",
-      "/CertificationPage",
-      "/ResetPasswordPage",
-      "/SelectCategoryPage",
-      "/KakaoLoginView",
-    ];
-
-    // 오늘의 뉴스에서 돌아온 경우 (from=todaynews에서 백버튼)
-    if (showTodayNews === 'true') {
+    // 오늘의 뉴스 카드를 통해 뉴스를 보고 돌아온 경우만 (from=todaynews에서 백버튼)
+    if (showTodayNews === 'true' && from === 'todaynews') {
       setShowTodayNewsModal(true);
       if (newsId) {
         setCompletedNewsId(newsId);
       }
     }
-    // 맨 처음 앱 진입 시에만 (한 번도 모달을 보여주지 않았을 때만)
-    else if (!publicRoutes.includes(pathname) && pathname === "/" && !hasShownModal.current) {
-      setTimeout(() => {
-        setShowTodayNewsModal(true);
-        hasShownModal.current = true;
-      }, 500);
-    }
-  }, [pathname, showTodayNews, newsId]);
+  }, [showTodayNews, newsId, from]);
+
+  // 맨 처음 앱 진입 시에만 모달 표시 (화면 포커스 시)
+  useFocusEffect(
+    useCallback(() => {
+      const publicRoutes = [
+        "/LoginPage",
+        "/SignUpPage",
+        "/CertificationPage",
+        "/ResetPasswordPage",
+        "/SelectCategoryPage",
+        "/KakaoLoginView",
+      ];
+
+      // 이미 모달을 보여줬거나, 파라미터가 있는 경우는 실행하지 않음
+      if (hasShownModal.current || showTodayNews || publicRoutes.includes(pathname)) {
+        return;
+      }
+
+      // 맨 처음 한 번만 실행
+      if (isFirstMount.current && pathname === "/") {
+        isFirstMount.current = false;
+        setTimeout(() => {
+          setShowTodayNewsModal(true);
+          hasShownModal.current = true;
+        }, 500);
+      }
+    }, [showTodayNews, pathname])
+  );
 
   // 카테고리별 뉴스 로드
   const handleSelectCategory = async (category: string) => {

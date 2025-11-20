@@ -1,13 +1,13 @@
 import { useRouter } from 'expo-router'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import {
   Animated,
   Dimensions,
   Image,
   Modal,
   PanResponder,
+  Pressable,
   Text,
-  TouchableOpacity,
   View,
 } from 'react-native'
 
@@ -44,6 +44,12 @@ export const TodayNewsModal = ({
   const router = useRouter()
   const [currentIndex, setCurrentIndex] = useState(0)
   const position = useRef(new Animated.Value(0)).current
+  const newsItemsRef = useRef(newsItems)
+
+  // newsItems가 변경될 때마다 ref 업데이트
+  useEffect(() => {
+    newsItemsRef.current = newsItems
+  }, [newsItems])
 
   useEffect(() => {
     if (completedNewsId) {
@@ -54,27 +60,41 @@ export const TodayNewsModal = ({
     }
   }, [completedNewsId, newsItems])
 
+  const handleCardPress = useCallback((newsId: string) => {
+    router.push(`/(tabs)?showTodayNews=true&newsId=${newsId}&from=todaynews`)
+    router.push(`/newsplayer/${newsId}?from=todaynews`)
+    onClose()
+  }, [router, onClose])
+
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_, gesture) => {
+        // 수평 이동이 수직 이동보다 크면 팬 제스처로 인식
+        return Math.abs(gesture.dx) > 5
+      },
       onPanResponderMove: (_, gesture) => {
         if (gesture.dx < 0) {
           position.setValue(gesture.dx)
         }
       },
       onPanResponderRelease: (_, gesture) => {
+        // 스와이프 처리
         if (gesture.dx < SWIPE_THRESHOLD) {
           Animated.timing(position, {
             toValue: -SCREEN_WIDTH,
             duration: 250,
             useNativeDriver: true,
           }).start(() => {
-            if (currentIndex < newsItems.length - 1) {
-              setCurrentIndex(currentIndex + 1)
-              position.setValue(0)
-            } else {
-              onClose()
-            }
+            setCurrentIndex((prevIndex) => {
+              if (prevIndex < newsItemsRef.current.length - 1) {
+                position.setValue(0)
+                return prevIndex + 1
+              } else {
+                onClose()
+                return prevIndex
+              }
+            })
           })
         } else {
           Animated.spring(position, {
@@ -85,11 +105,6 @@ export const TodayNewsModal = ({
       },
     })
   ).current
-
-  const handleCardPress = (newsId: string) => {
-    router.push(`/newsplayer/${newsId}?from=todaynews`)
-    onClose()
-  }
 
   const renderCard = (item: TodayNewsItem, index: number) => {
     if (index < currentIndex) return null
@@ -138,73 +153,73 @@ export const TodayNewsModal = ({
           },
           animatedStyle,
         ]}
-        {...(isCurrentCard ? panResponder.panHandlers : {})}
+        {...panResponder.panHandlers}
       >
-        <TouchableOpacity
-          activeOpacity={0.9}
-          onPress={() => handleCardPress(item.id)}
-          className="bg-white rounded-3xl overflow-hidden"
-          style={{
-            borderWidth: 1,
-            borderColor: 'rgba(0, 0, 0, 0.05)',
-          }}
-        >
-          <View className="p-5">
-            <Text className="text-[18px] font-bold text-[#002C14] mb-2">
-              오늘의 뉴스
-            </Text>
-            <Text className="text-[11px] text-[#006716] mb-2">
-              최근 {userInfo?.age || '20'}대 {userInfo?.gender || '여성'}이 가장 많이 본 뉴스
-            </Text>
-            <View className="h-[1px] bg-gray-200 mb-3" />
-
-            <Text className="text-[16px] font-bold text-[#002C14] mb-2 leading-5">
-              {item.title}
-            </Text>
-            <View className="h-[1px] bg-gray-200 mb-3" />
-
-            <Image
-              source={{ uri: item.imageUrl }}
-              className="w-full h-[160px] rounded-2xl mb-3"
-              resizeMode="cover"
-            />
-
-            <View className="bg-gray-50 rounded-2xl p-3">
-              <Text className="text-[11px] font-semibold text-gray-600 mb-1">
-                간단 요약
+        <Pressable onPress={() => isCurrentCard && handleCardPress(item.id)}>
+          <View
+            className="bg-white rounded-3xl overflow-hidden"
+            style={{
+              borderWidth: 1,
+              borderColor: 'rgba(0, 0, 0, 0.05)',
+            }}
+          >
+            <View className="p-5">
+              <Text className="text-[18px] font-bold text-[#002C14] mb-2">
+                오늘의 뉴스
               </Text>
-              <Text className="text-[13px] text-[#7B7B7B] leading-4" numberOfLines={3}>
-                {item.summary}
+              <Text className="text-[11px] text-[#006716] mb-2">
+                최근 {userInfo?.age || '20'}대 {userInfo?.gender || '여성'}이 가장 많이 본 뉴스
               </Text>
-            </View>
-          </View>
+              <View className="h-[1px] bg-gray-200 mb-3" />
 
-          {/* 완료 오버레이 */}
-          {isCompleted && (
-            <View
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                justifyContent: 'center',
-                alignItems: 'center',
-                backgroundColor: 'rgba(255, 255, 255, 0.3)',
-              }}
-            >
+              <Text className="text-[16px] font-bold text-[#002C14] mb-2 leading-5">
+                {item.title}
+              </Text>
+              <View className="h-[1px] bg-gray-200 mb-3" />
+
               <Image
-                source={require('../../../my-expo-app/assets/images/read.png')}
-                style={{
-                  width: 200,
-                  height: 200,
-                  transform: [{ rotate: '-15deg' }],
-                }}
-                resizeMode="contain"
+                source={{ uri: item.imageUrl }}
+                className="w-full h-[160px] rounded-2xl mb-3"
+                resizeMode="cover"
               />
+
+              <View className="bg-gray-50 rounded-2xl p-3">
+                <Text className="text-[11px] font-semibold text-gray-600 mb-1">
+                  간단 요약
+                </Text>
+                <Text className="text-[13px] text-[#7B7B7B] leading-4" numberOfLines={3}>
+                  {item.summary}
+                </Text>
+              </View>
             </View>
-          )}
-        </TouchableOpacity>
+
+            {/* 완료 오버레이 */}
+            {isCompleted && (
+              <View
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  backgroundColor: 'rgba(255, 255, 255, 0.3)',
+                }}
+              >
+                <Image
+                  source={require('../../../my-expo-app/assets/images/read.png')}
+                  style={{
+                    width: 200,
+                    height: 200,
+                    transform: [{ rotate: '-15deg' }],
+                  }}
+                  resizeMode="contain"
+                />
+              </View>
+            )}
+          </View>
+        </Pressable>
       </Animated.View>
     )
   }
@@ -216,14 +231,14 @@ export const TodayNewsModal = ({
       animationType="slide"
       onRequestClose={onClose}
     >
-      <View className="flex-1 bg-black/50 justify-center ">
-        <TouchableOpacity
+      <View className="flex-1 bg-black/50 justify-center" style={{ paddingBottom: 80 }}>
+        <Pressable
           className="absolute top-12 right-6 z-50"
           onPress={onClose}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <Text className="text-white text-[28px] font-bold">✕</Text>
-        </TouchableOpacity>
+        </Pressable>
 
         <View className="items-center">
           {newsItems.map((item, index) => renderCard(item, index))}
@@ -232,3 +247,4 @@ export const TodayNewsModal = ({
     </Modal>
   )
 }
+
