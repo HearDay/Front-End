@@ -44,7 +44,7 @@ const NewsCardSlider = ({ updateTime, articles = [] }: NewsCardSliderProps) => {
             onScroll={handleScroll}
             scrollEventThrottle={16}
           >
-            {articles.map((item, index) => (
+            {articles.map((item) => (
               <View key={item.id} style={{ width }}>
                 <TouchableOpacity
                   onPress={() => handleNewsPress(item.id)}
@@ -61,26 +61,34 @@ const NewsCardSlider = ({ updateTime, articles = [] }: NewsCardSliderProps) => {
             ))}
           </ScrollView>
 
-          <View className="flex-row justify-center mt-2">
-            {articles.map((_, index) => (
-              <View
-                key={index}
-                className={`w-2 h-2 mx-1 rounded-full ${
-                  index === activeIndex ? "bg-green-700" : "bg-[#B3D7BB]"
-                }`}
-              />
-            ))}
+          <View className="relative w-full">
+            <View className="absolute left-0 mt-1 right-0 items-center">
+              <View className="flex-row">
+                {articles.map((_, index) => (
+                  <View
+                    key={index}
+                    className={`w-2 h-2 mx-1 rounded-full ${
+                      index === activeIndex ? "bg-green-700" : "bg-[#B3D7BB]"
+                    }`}
+                  />
+                ))}
+              </View>
+            </View>
+            {updateTime && (
+              <Text className="absolute right-8 text-gray-500 text-xs whitespace-nowrap">
+                {updateTime} 업데이트
+              </Text>
+            )}
+            <View style={{ height: 30 }} />
           </View>
+
+
         </>
       ) : (
         <Text className="text-gray-500 text-sm mt-10">
           추천 뉴스가 없습니다.
         </Text>
       )}
-
-      <Text className="text-gray-500 text-xs self-end pr-8 mt-1">
-        {updateTime ? `${updateTime} 업데이트` : "업데이트 정보 없음"}
-      </Text>
     </View>
   );
 };
