@@ -1,14 +1,14 @@
 import NewsCard from "@/components/common/NewsCard";
 import { useRouter } from "expo-router";
 import React from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 
 type BackgroundVariant = "green" | "white";
 
 interface NewsCardListProps {
   background?: BackgroundVariant;
   articles?: any[];
-  onPressArticle?: (id: string) => void; // 외부에서 클릭 핸들러 받기
+  onPressArticle?: (id: string) => void;
 }
 
 const NewsCardList = ({
@@ -20,9 +20,9 @@ const NewsCardList = ({
 
   const handleNewsPress = (articleId: string) => {
     if (onPressArticle) {
-      onPressArticle(articleId); // 외부 콜백 실행
+      onPressArticle(articleId);
     } else {
-      router.push(`/newsplayer/${articleId}`); // 기본 동작 (백업)
+      router.push(`/newsplayer/${articleId}`);
     }
   };
 
@@ -35,34 +35,29 @@ const NewsCardList = ({
   }
 
   return (
-    <ScrollView
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20 }}
-    >
-      <View className="mt-4">
-        {articles.map((item) => {
-          const imageUrl = item.imageUrl || item.image_url || "";
-          const title = item.title || "(제목 없음)";
-          const description =
-            item.description || item.origin_link || item.originLink || "";
+    <View style={{ paddingHorizontal: 20, paddingBottom: 20, marginTop: 16 }}>
+      {articles.map((item) => {
+        const imageUrl = item.imageUrl || item.image_url || "";
+        const title = item.title || "(제목 없음)";
+        const description =
+          item.description || item.origin_link || item.originLink || "";
 
-          return (
-            <TouchableOpacity
-              key={item.id}
-              onPress={() => handleNewsPress(item.id)}
-              activeOpacity={0.8}
-            >
-              <NewsCard
-                title={title}
-                description={description}
-                imageUrl={imageUrl}
-                background={background}
-              />
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-    </ScrollView>
+        return (
+          <TouchableOpacity
+            key={item.id}
+            onPress={() => handleNewsPress(item.id)}
+            activeOpacity={0.8}
+          >
+            <NewsCard
+              title={title}
+              description={description}
+              imageUrl={imageUrl}
+              background={background}
+            />
+          </TouchableOpacity>
+        );
+      })}
+    </View>
   );
 };
 

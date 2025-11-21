@@ -40,14 +40,18 @@ const HeroSection = ({ offset, userLevel }: HeroSectionProps) => {
     opacity: pressAnim.value,
   }));
 
+  //  TODAY'S NEWS 버튼 클릭 시 동작
   const handlePressSun = () => {
     pressAnim.value = withTiming(0.4, { duration: 120 }, () => {
       pressAnim.value = withTiming(1, { duration: 120 });
     });
-    router.push("");
+
+    // 오늘의 뉴스 모달 연결 필요
+    // 현재 라우팅은 빈값으로 처리해뒀습니당!!
+    router.push(""); 
   };
 
-  // Hover-like 효과
+
   const handleHoverIn = () => {
     hoverAnim.value = withTiming(1.05, { duration: 120 });
   };
@@ -56,7 +60,6 @@ const HeroSection = ({ offset, userLevel }: HeroSectionProps) => {
     hoverAnim.value = withTiming(1, { duration: 120 });
   };
 
-  // 검색 애니메이션
   const search1Style = useAnimatedStyle(() => ({
     opacity: withTiming(1 - offset.value, { duration: 400 }),
   }));
@@ -120,7 +123,7 @@ const HeroSection = ({ offset, userLevel }: HeroSectionProps) => {
           <View className="flex-col items-center mt-1 ml-auto">
             <TouchableOpacity
               className="w-[24px] h-[24px] mt-4 ml-3"
-              onPress={() => router.push("/SearchNewsPage")}
+              onPress={() => router.push("/search")}
             >
               <Animated.Image
                 source={require("../../../my-expo-app/assets/images/Search1.png")}
