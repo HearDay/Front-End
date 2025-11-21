@@ -8,7 +8,7 @@ import { useCategoryStore } from "@/services/utils/categoryStore";
 import { RecommendArticle } from "@/types/auth/recommendNews";
 import { router, usePathname } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -16,16 +16,18 @@ import Animated, {
 } from "react-native-reanimated";
 
 export default function Index() {
-  // ✨ Zustand
+  // Zustand
   const {
     selectedCategory,
     categoryArticles,
+    scrollX,
     setSelectedCategory,
     setCategoryArticles,
+    setScrollX,
     clearCategory,
   } = useCategoryStore();
 
-  // ⭐ 카테고리 매핑
+  // 카테고리 매핑
   const categoryMap: Record<string, string> = {
     "경제": "경제",
     "방송 / 연예": "방송_연예",
@@ -39,10 +41,10 @@ export default function Index() {
 
   const categories = Object.keys(categoryMap);
 
-  // ✨ 로컬 상태 (유저정보, 애니메이션)
-  const [nickname, setNickname] = useState<string>("");
-  const [level, setLevel] = useState<number>(1);
-  const [updateTime, setUpdateTime] = useState<string>("");
+  // 유저 정보
+  const [nickname, setNickname] = useState("");
+  const [level, setLevel] = useState(1);
+  const [updateTime, setUpdateTime] = useState("");
   const [recommendedArticles, setRecommendedArticles] = useState<
     RecommendArticle[]
   >([]);
@@ -50,6 +52,7 @@ export default function Index() {
   const offset = useSharedValue(selectedCategory ? 1 : 0);
   const pathname = usePathname();
 
+  // 유저 정보 로드
   useEffect(() => {
     const publicRoutes = [
       "/LoginPage",
@@ -59,7 +62,6 @@ export default function Index() {
       "/SelectCategoryPage",
       "/KakaoLoginView",
     ];
-
     if (publicRoutes.includes(pathname)) return;
 
     const loadUserInfo = async () => {
@@ -79,6 +81,7 @@ export default function Index() {
     loadUserInfo();
   }, [pathname]);
 
+  // 카테고리 선택 시
   const handleSelectCategory = async (category: string) => {
     setSelectedCategory(category);
     offset.value = withTiming(1, { duration: 600 });
@@ -86,19 +89,22 @@ export default function Index() {
     try {
       const backendCategory = categoryMap[category] || category;
       const res = await fetchCategoryRecommendNews(backendCategory);
+
       if (res.success) {
-        setCategoryArticles(res.data); // Zustand 저장
+        setCategoryArticles(res.data);
       }
     } catch (err) {
       console.error("카테고리별 뉴스 로드 실패:", err);
     }
   };
 
+  // 뒤로가기 (홈으로)
   const handleBackToHome = () => {
     clearCategory();
     offset.value = withTiming(0, { duration: 600 });
   };
 
+  // 애니메이션 스타일
   const listStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: withTiming((1 - offset.value) * 50) }],
     opacity: withTiming(offset.value),
@@ -109,11 +115,12 @@ export default function Index() {
       <HeroSection offset={offset} userLevel={level} />
 
       {selectedCategory ? (
-        <Animated.View style={listStyle}>
+        <Animated.View style={[{ flex: 1 }, listStyle]}>
           <View className="flex-row justify-between items-center px-6 mt-7 mb-2">
             <Text className="text-[17px] font-extrabold text-[#002C14]">
               {selectedCategory} 관련 추천 뉴스
             </Text>
+
             <Text
               className="text-[14px] text-gray-600 pr-2"
               onPress={handleBackToHome}
@@ -127,14 +134,26 @@ export default function Index() {
               categories={categories}
               selectedCategory={selectedCategory}
               onSelectCategory={handleSelectCategory}
+              scrollX={scrollX}
+              onScrollXChange={setScrollX}
             />
           </View>
 
-          <NewsCardList
-            background="green"
-            articles={categoryArticles}
-            onPressArticle={(id) => router.push(`/newsplayer/${id}?from=home`)}
-          />
+          <View style={{ flex: 1 }}>
+            <ScrollView
+              scrollEventThrottle={16}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ paddingBottom: 50 }}
+            >
+              <NewsCardList
+                background="green"
+                articles={categoryArticles}
+                onPressArticle={(id) =>
+                  router.push(`/newsplayer/${id}?from=home`)
+                }
+              />
+            </ScrollView>
+          </View>
         </Animated.View>
       ) : (
         <>
@@ -146,10 +165,7 @@ export default function Index() {
             </Text>
           </View>
 
-          <NewsCardSlider
-            updateTime={updateTime}
-            articles={recommendedArticles}
-          />
+          <NewsCardSlider updateTime={updateTime} articles={recommendedArticles} />
 
           <View className="px-6 mt-4">
             <Text className="text-[16px] text-right font-extrabold text-[#002C14] mt-2 mb-4 mr-2">
@@ -161,6 +177,8 @@ export default function Index() {
             categories={categories}
             selectedCategory={selectedCategory}
             onSelectCategory={handleSelectCategory}
+            scrollX={scrollX}
+            onScrollXChange={setScrollX}
           />
         </>
       )}

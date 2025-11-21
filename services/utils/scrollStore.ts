@@ -33,3 +33,17 @@ export const getSelectedCategory = async (path: string) => {
   const v = await AsyncStorage.getItem(KEY_CAT + path);
   return v ?? "전체";
 };
+
+
+export const resetScrollStorage = async () => {
+  try {
+    await AsyncStorage.multiRemove([
+      KEY_Y,
+      KEY_X,
+      KEY_CAT
+    ]);
+    console.log("스크롤/카테고리 저장 삭제 완료");
+  } catch (err) {
+    console.error("스크롤 초기화 실패:", err);
+  }
+};

@@ -123,7 +123,7 @@ const HeroSection = ({ offset, userLevel }: HeroSectionProps) => {
           <View className="flex-col items-center mt-1 ml-auto">
             <TouchableOpacity
               className="w-[24px] h-[24px] mt-4 ml-3"
-              onPress={() => router.push("/search")}
+              onPress={() => router.push("/SearchNewsPage")}
             >
               <Animated.Image
                 source={require("../../../my-expo-app/assets/images/Search1.png")}

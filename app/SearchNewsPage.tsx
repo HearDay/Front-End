@@ -2,10 +2,9 @@ import NewsCardList from "@/components/screens/HomePage/NewsCardList";
 import ScrollButton from "@/components/screens/SearchNews/ScrollButton";
 import SearchBar from "@/components/screens/SearchNews/SearchBar";
 import { fetchArticles } from "@/services/api/articles";
+import { useFocusEffect } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Stack, useLocalSearchParams, usePathname, useRouter } from "expo-router";
-
-import { useFocusEffect } from "@react-navigation/native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Image,
@@ -28,7 +27,7 @@ import {
 export default function SearchNewsPage() {
   const router = useRouter();
   const pathname = usePathname();
-  const scrollRef = useRef<ScrollView>(null);
+  const listScrollRef = useRef<ScrollView>(null);
 
   const { category } = useLocalSearchParams<{ category?: string }>();
 
@@ -51,7 +50,6 @@ export default function SearchNewsPage() {
 
   const categories = Object.keys(categoryMap);
 
-  // 초기 데이터 로드 + 저장된 상태 복구
   useEffect(() => {
     (async () => {
       const savedCat = await getSelectedCategory(pathname);
@@ -78,7 +76,7 @@ export default function SearchNewsPage() {
     await saveSelectedCategory(pathname, selectedCategory);
   };
 
-  const handleScroll = (e: any) => {
+  const handleScrollListY = (e: any) => {
     const y = e.nativeEvent.contentOffset.y;
     saveScrollY(pathname, y);
   };
@@ -89,8 +87,8 @@ export default function SearchNewsPage() {
         const y = await getScrollY(pathname);
 
         setTimeout(() => {
-          if (scrollRef.current) {
-            scrollRef.current.scrollTo({ y, animated: false });
+          if (listScrollRef.current) {
+            listScrollRef.current.scrollTo({ y, animated: false });
           }
         }, 0);
       })();
@@ -106,65 +104,69 @@ export default function SearchNewsPage() {
         locations={[0, 0, 0.12, 0.85]}
         style={{ flex: 1 }}
       >
-        <ScrollView
-          ref={scrollRef}
-          onScroll={handleScroll}
-          scrollEventThrottle={16}
-          showsVerticalScrollIndicator={false}
-        >
-          <SafeAreaView style={styles.safeArea}>
+        <SafeAreaView style={{ flex: 1 }}>
+          <View className="px-4 pb-1">
             <View className="w-full items-center justify-center pb-2 relative">
               <TouchableOpacity
-                onPress={() => router.push("/(tabs)")}
+                onPress={() => router.push("/")}
                 className="absolute left-4 top-1"
               >
                 <Image
-                  source={require("../../my-expo-app/assets/images/BackButton.png")}
+                  source={require("../my-expo-app/assets/images/BackButton.png")}
                   className="w-[12px] h-[18px] mt-3"
-                  resizeMode="contain"
                 />
               </TouchableOpacity>
 
               <Image
-                source={require("../../my-expo-app/assets/images/HEARDAY.png")}
+                source={require("../my-expo-app/assets/images/HEARDAY.png")}
                 className="w-[130px] h-[45px]"
                 resizeMode="contain"
               />
             </View>
-          </SafeAreaView>
 
-          <View className="items-center">
-            <SearchBar
-              value={searchText}
-              onChangeText={setSearchText}
-              onPressSearch={handleSearch}
-            />
+            {/* 검색창 */}
+            <View className="items-center">
+              <SearchBar
+                value={searchText}
+                onChangeText={setSearchText}
+                onPressSearch={handleSearch}
+              />
+            </View>
+
+            {/* 카테고리 버튼들 */}
+            <View className="mt-3">
+              <ScrollButton
+                categories={categories}
+                selectedCategory={selectedCategory}
+                onSelect={async (v) => {
+                  setSelectedCategory(v);
+                  await saveSelectedCategory(pathname, v);
+                }}
+                initialX={categoryScrollX}
+                onScrollX={(x) => saveScrollX(pathname, x)}
+              />
+            </View>
           </View>
 
-          <View className="mt-3">
-            <ScrollButton
-              categories={categories}
-              selectedCategory={selectedCategory}
-              onSelect={async (v) => {
-                setSelectedCategory(v);
-                await saveSelectedCategory(pathname, v);
-              }}
-              initialX={categoryScrollX}
-              onScrollX={(x) => saveScrollX(pathname, x)}
+          <ScrollView
+            ref={listScrollRef}
+            onScroll={handleScrollListY}
+            scrollEventThrottle={16}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 50 }}
+          >
+            <NewsCardList
+              background="white"
+              articles={articles}
+              onPressArticle={(id: string) =>
+                router.push({
+                  pathname: "/newsplayer/[id]",
+                  params: { id, from: "category" },
+                })
+              }
             />
-          </View>
-
-          <NewsCardList
-            background="white"
-            articles={articles}
-            onPressArticle={(id: string) => {
-              router.push({
-                pathname: "/newsplayer/[id]",
-                params: { id, from: "category" },
-              });
-            }}
-          />
-        </ScrollView>
+          </ScrollView>
+        </SafeAreaView>
       </LinearGradient>
     </>
   );

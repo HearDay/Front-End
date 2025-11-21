@@ -93,7 +93,7 @@ export const NewsPlayerScreen = ({ articleId, from }: NewsPlayerScreenProps) => 
       router.push('/');  
     } else if (from === 'category') {
       router.push({
-        pathname: '/search',
+        pathname: '/SearchNewsPage',
         params: { category: category || '전체' },
       });
     } else {
