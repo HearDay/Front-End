@@ -6,11 +6,15 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { Stack, useRouter } from "expo-router";
 import { Eye, EyeOff } from "lucide-react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
+  Animated,
   Image,
+  Keyboard,
+  KeyboardAvoidingView,
   Platform,
   SafeAreaView,
+  ScrollView,
   StatusBar,
   Text,
   TextInput,
@@ -23,23 +27,70 @@ const LoginPage = () => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
   const [isSecure, setIsSecure] = useState(true);
-  const [delayedSecure, setDelayedSecure] = useState(isSecure);
+  const [delayedSecure, setDelayedSecure] = useState(true);
+
+  // 애니메이션 값 (Tree 전용)
+  const fadeTree = useRef(new Animated.Value(1)).current;
+  const moveTree = useRef(new Animated.Value(0)).current;
+  const moveForm = useRef(new Animated.Value(0)).current;
+
+  // 키보드 상태 감지
+  useEffect(() => {
+    const showSub = Keyboard.addListener("keyboardDidShow", () => {
+      Animated.parallel([
+        Animated.timing(fadeTree, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(moveTree, {
+          toValue: 50,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(moveForm, {
+          toValue: -250,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    });
+
+    const hideSub = Keyboard.addListener("keyboardDidHide", () => {
+      Animated.parallel([
+        Animated.timing(fadeTree, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(moveTree, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(moveForm, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    });
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   useEffect(() => {
-    if (Platform.OS === "ios") {
-      const t = setTimeout(() => setDelayedSecure(isSecure), 50);
-      return () => clearTimeout(t);
-    } else {
-      setDelayedSecure(isSecure);
-    }
+    const t = setTimeout(() => setDelayedSecure(isSecure), 50);
+    return () => clearTimeout(t);
   }, [isSecure]);
 
-  // 로그인 처리
   const handleLogin = async () => {
     if (!email || !password) {
       setModalMessage("아이디와 비밀번호를 모두 입력해주세요.");
@@ -50,7 +101,6 @@ const LoginPage = () => {
 
     try {
       const res = await login({ email, password });
-
       if (res.success && res.data?.accessToken) {
         await AsyncStorage.setItem("accessToken", res.data.accessToken);
         setModalMessage("로그인에 성공했습니다!");
@@ -69,13 +119,9 @@ const LoginPage = () => {
     }
   };
 
-  const handleModalConfirm = async () => {
+  const handleModalConfirm = () => {
     setIsModalVisible(false);
-    if (isSuccess) {
-      setTimeout(() => {
-        router.replace("/(tabs)");
-      }, 300);
-    }
+    if (isSuccess) router.replace("/(tabs)");
   };
 
   return (
@@ -86,14 +132,12 @@ const LoginPage = () => {
       <LinearGradient
         colors={["#006716", "#428F48", "#85B77A", "#FBFFD3"]}
         locations={[0, 0.22, 0.54, 0.85]}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 1 }}
         style={{ flex: 1 }}
-        className="items-center justify-center"
       >
-        <SafeAreaView className="flex-1 w-full items-center justify-center">
-          {/* 로고 */}
-          <View className="items-center mb-5 mt-3">
+        <SafeAreaView style={{ flex: 1 }}>
+          
+          {/* 로고 완전 고정! */}
+          <View style={{ alignItems: "center", marginTop: 50, marginBottom: 10 }}>
             <Image
               source={require("../my-expo-app/assets/images/HEARDAY.png")}
               className="w-[156px] h-[56px]"
@@ -101,85 +145,97 @@ const LoginPage = () => {
             />
           </View>
 
-          {/* 트리 이미지 */}
-          <View className="items-center mb-3">
-            <Image
-              source={require("../my-expo-app/assets/images/Tree.png")}
-              className="w-[267px] h-[267px]"
-              resizeMode="contain"
-            />
-          </View>
-
-          {/* 입력 필드 */}
-          <View className="gap-3 mb-3">
-            {/* 이메일 입력 */}
-            <InputBox
-              placeholder="이메일을 입력해 주세요"
-              value={email}
-              onChangeText={setEmail}
-              variant="transparent"
-            />
-
-            {/* 비밀번호 입력*/}
-            <View
-              className="flex-row items-center text-white w-[350px] h-[50px] rounded-[10px] px-6 bg-white/20"
-              style={{
-                paddingVertical: Platform.OS === "ios" ? 10 : 6,
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : undefined}
+            keyboardVerticalOffset={Platform.OS === "ios" ? 10 : 0}
+            style={{ flex: 1 }}
+          >
+            <ScrollView
+              style={{ flex: 1 }}
+              contentContainerStyle={{
+                flexGrow: 1,
+                justifyContent: "center",
+                alignItems: "center",
+                paddingBottom: 40,
               }}
+              keyboardShouldPersistTaps="handled"
             >
-              <TextInput
-                placeholder="비밀번호를 입력해 주세요"
-                placeholderTextColor="white"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry={delayedSecure}
+
+              {/* Tree만 애니메이션 */}
+              <Animated.View
                 style={{
-                  flex: 1,
-                  fontSize: 17,
-                  color: "#FFFFFF",
-                  includeFontPadding: false,
-                  textAlignVertical: "center",
-                  paddingVertical: 0,
+                  opacity: fadeTree,
+                  transform: [{ translateY: moveTree }],
                 }}
-                autoCapitalize="none"
-                autoCorrect={false}
-                autoComplete="off"
-                importantForAutofill="no"
-                textContentType="none"
-              />
-              <TouchableOpacity onPress={() => setIsSecure(!isSecure)}>
-                {isSecure ? (
-                  <EyeOff size={22} color="#FFFFFFB3" />
-                ) : (
-                  <Eye size={22} color="#FFFFFFB3" />
-                )}
-              </TouchableOpacity>
-            </View>
-          </View>
+              >
+                <View className="items-center mb-2">
+                  <Image
+                    source={require("../my-expo-app/assets/images/Tree.png")}
+                    className="w-[267px] h-[267px]"
+                    resizeMode="contain"
+                  />
+                </View>
+              </Animated.View>
 
-          {/* 버튼 */}
-          <View className="gap-3">
-            <PrimaryButton title="로그인" variant="white" onPress={handleLogin} />
-            <PrimaryButton
-              title="카카오로 시작하기"
-              variant="kakao"
-              onPress={() => router.push("/KakaoLoginView")}
-            />
-          </View>
+              {/* 입력창/버튼 */}
+              <Animated.View
+                style={{
+                  transform: [{ translateY: moveForm }],
+                  width: "100%",
+                  alignItems: "center",
+                }}
+              >
+                <View className="gap-3 mb-3">
+                  <InputBox
+                    placeholder="이메일을 입력해 주세요"
+                    value={email}
+                    onChangeText={setEmail}
+                    variant="transparent"
+                  />
 
-          {/* 하단 링크 */}
-          <View className="flex-row items-center gap-2 mt-12">
-            <TouchableOpacity onPress={() => router.push("/CertificationPage")}>
-              <Text className="text-[#006716] text-[13px]">비밀번호 변경</Text>
-            </TouchableOpacity>
-            <Text className="text-[#006716] text-[13px]">|</Text>
-            <TouchableOpacity onPress={() => router.push("/SignUpPage")}>
-              <Text className="text-[#006716] text-[13px]">회원가입</Text>
-            </TouchableOpacity>
-          </View>
+                  <View className="flex-row items-center text-white w-[350px] h-[50px] rounded-[10px] px-6 bg-white/20">
+                    <TextInput
+                      placeholder="비밀번호를 입력해 주세요"
+                      placeholderTextColor="white"
+                      value={password}
+                      onChangeText={setPassword}
+                      secureTextEntry={delayedSecure}
+                      style={{ flex: 1, fontSize: 17, color: "#FFFFFF" }}
+                    />
+                    <TouchableOpacity onPress={() => setIsSecure(!isSecure)}>
+                      {isSecure ? (
+                        <EyeOff size={22} color="#FFFFFFB3" />
+                      ) : (
+                        <Eye size={22} color="#FFFFFFB3" />
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                <View className="gap-3 mb-5">
+                  <PrimaryButton title="로그인" variant="white" onPress={handleLogin} />
+                  <PrimaryButton
+                    title="카카오로 시작하기"
+                    variant="kakao"
+                    onPress={() => router.push("/KakaoLoginView")}
+                  />
+                </View>
+
+                <View className="flex-row items-center gap-2 mt-4">
+                  <TouchableOpacity onPress={() => router.push("/CertificationPage")}>
+                    <Text className="text-[#006716] text-[13px]">비밀번호 변경</Text>
+                  </TouchableOpacity>
+                  <Text className="text-[#006716] text-[13px]">|</Text>
+                  <TouchableOpacity onPress={() => router.push("/SignUpPage")}>
+                    <Text className="text-[#006716] text-[13px]">회원가입</Text>
+                  </TouchableOpacity>
+                </View>
+              </Animated.View>
+
+            </ScrollView>
+          </KeyboardAvoidingView>
         </SafeAreaView>
 
-        {/* 로그인 결과 모달 */}
         <Modal
           visible={isModalVisible}
           title={modalMessage}
