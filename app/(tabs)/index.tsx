@@ -4,9 +4,9 @@ import NewsCardList from "@/components/screens/HomePage/NewsCardList";
 import NewsCardSlider from "@/components/screens/HomePage/NewsCardSlider";
 import { fetchCategoryRecommendNews } from "@/services/api/categoryRecommendNews";
 import { fetchRecommendNews } from "@/services/api/recommendNews";
-import { CategoryArticle } from "@/types/auth/categoryRecommendNews";
+import { useCategoryStore } from "@/services/utils/categoryStore";
 import { RecommendArticle } from "@/types/auth/recommendNews";
-import { usePathname } from "expo-router";
+import { router, usePathname } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import Animated, {
@@ -16,7 +16,16 @@ import Animated, {
 } from "react-native-reanimated";
 
 export default function Index() {
-  // 백엔드 카테고리 매핑 (UI표시: key, 서버전송: value)
+  // ✨ Zustand
+  const {
+    selectedCategory,
+    categoryArticles,
+    setSelectedCategory,
+    setCategoryArticles,
+    clearCategory,
+  } = useCategoryStore();
+
+  // ⭐ 카테고리 매핑
   const categoryMap: Record<string, string> = {
     "경제": "경제",
     "방송 / 연예": "방송_연예",
@@ -30,14 +39,15 @@ export default function Index() {
 
   const categories = Object.keys(categoryMap);
 
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  // ✨ 로컬 상태 (유저정보, 애니메이션)
   const [nickname, setNickname] = useState<string>("");
   const [level, setLevel] = useState<number>(1);
   const [updateTime, setUpdateTime] = useState<string>("");
-  const [recommendedArticles, setRecommendedArticles] = useState<RecommendArticle[]>([]);
-  const [categoryArticles, setCategoryArticles] = useState<CategoryArticle[]>([]);
+  const [recommendedArticles, setRecommendedArticles] = useState<
+    RecommendArticle[]
+  >([]);
 
-  const offset = useSharedValue(0);
+  const offset = useSharedValue(selectedCategory ? 1 : 0);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -50,10 +60,7 @@ export default function Index() {
       "/KakaoLoginView",
     ];
 
-    if (publicRoutes.includes(pathname)) {
-      console.log("public route 감지 → fetchRecommendNews() 실행 안 함:", pathname);
-      return;
-    }
+    if (publicRoutes.includes(pathname)) return;
 
     const loadUserInfo = async () => {
       try {
@@ -64,15 +71,14 @@ export default function Index() {
           setUpdateTime(res.data.updateTime);
           setRecommendedArticles(res.data.recommendedArticles);
         }
-      } catch (error) {
-        console.error("유저 정보 로드 실패:", error);
+      } catch (err) {
+        console.error("유저 정보 로드 실패:", err);
       }
     };
 
     loadUserInfo();
   }, [pathname]);
 
-  // 카테고리별 뉴스 로드
   const handleSelectCategory = async (category: string) => {
     setSelectedCategory(category);
     offset.value = withTiming(1, { duration: 600 });
@@ -81,7 +87,7 @@ export default function Index() {
       const backendCategory = categoryMap[category] || category;
       const res = await fetchCategoryRecommendNews(backendCategory);
       if (res.success) {
-        setCategoryArticles(res.data);
+        setCategoryArticles(res.data); // Zustand 저장
       }
     } catch (err) {
       console.error("카테고리별 뉴스 로드 실패:", err);
@@ -89,7 +95,7 @@ export default function Index() {
   };
 
   const handleBackToHome = () => {
-    setSelectedCategory(null);
+    clearCategory();
     offset.value = withTiming(0, { duration: 600 });
   };
 
@@ -124,8 +130,11 @@ export default function Index() {
             />
           </View>
 
-          {/* 카테고리별 뉴스 리스트 */}
-          <NewsCardList background="green" articles={categoryArticles} />
+          <NewsCardList
+            background="green"
+            articles={categoryArticles}
+            onPressArticle={(id) => router.push(`/newsplayer/${id}?from=home`)}
+          />
         </Animated.View>
       ) : (
         <>
