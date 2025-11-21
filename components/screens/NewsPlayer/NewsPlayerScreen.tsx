@@ -90,7 +90,7 @@ export const NewsPlayerScreen = ({ articleId, from }: NewsPlayerScreenProps) => 
     if (from === 'savednews') {
       router.push('/(tabs)/savednews');
     } else if (from === 'home') {
-      router.push('/(tabs)');  
+      router.push('/');  
     } else if (from === 'category') {
       router.push({
         pathname: '/search',

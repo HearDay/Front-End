@@ -5,6 +5,7 @@ export default function SearchLayout() {
     <Stack
       screenOptions={{
         headerShown: false,
+        animation: "none",
       }}
     />
   );

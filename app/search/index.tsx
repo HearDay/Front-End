@@ -3,20 +3,10 @@ import ScrollButton from "@/components/screens/SearchNews/ScrollButton";
 import SearchBar from "@/components/screens/SearchNews/SearchBar";
 import { fetchArticles } from "@/services/api/articles";
 import { LinearGradient } from "expo-linear-gradient";
-import {
-  Stack,
-  useLocalSearchParams,
-  usePathname,
-  useRouter,
-} from "expo-router";
+import { Stack, useLocalSearchParams, usePathname, useRouter } from "expo-router";
 
 import { useFocusEffect } from "@react-navigation/native";
-import React, {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Image,
   ScrollView,
@@ -27,13 +17,17 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
+  getScrollX,
   getScrollY,
-  saveScrollY
-} from "../../../services/utils/scrollStore";
+  getSelectedCategory,
+  saveScrollX,
+  saveScrollY,
+  saveSelectedCategory,
+} from "@/services/utils/scrollStore";
 
-const SearchNewsPage = () => {
+export default function SearchNewsPage() {
   const router = useRouter();
-  const pathname = usePathname(); // 현재 경로
+  const pathname = usePathname();
   const scrollRef = useRef<ScrollView>(null);
 
   const { category } = useLocalSearchParams<{ category?: string }>();
@@ -41,8 +35,8 @@ const SearchNewsPage = () => {
   const [searchText, setSearchText] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(category || "전체");
   const [articles, setArticles] = useState<any[]>([]);
+  const [categoryScrollX, setCategoryScrollX] = useState(0);
 
-  // 카테고리 매핑
   const categoryMap: Record<string, string> = {
     전체: "전체",
     경제: "경제",
@@ -57,42 +51,49 @@ const SearchNewsPage = () => {
 
   const categories = Object.keys(categoryMap);
 
-  // 기사 검색 함수
-  const handleSearch = async (title?: string, categoryParam?: string) => {
-    const backendCategory = categoryMap[categoryParam ?? selectedCategory];
-    const result = await fetchArticles(title ?? searchText, backendCategory);
-    setArticles(result);
-  };
-
-  // 첫 진입 → 전체 조회
+  // 초기 데이터 로드 + 저장된 상태 복구
   useEffect(() => {
-    handleSearch("", selectedCategory);
+    (async () => {
+      const savedCat = await getSelectedCategory(pathname);
+      setSelectedCategory(savedCat);
+
+      const backendCategory = categoryMap[savedCat];
+      const result = await fetchArticles("", backendCategory);
+      setArticles(result);
+
+      const savedX = await getScrollX(pathname);
+      setCategoryScrollX(savedX);
+    })();
   }, []);
 
-  // 카테고리 변경 → 재조회
   useEffect(() => {
     handleSearch();
   }, [selectedCategory]);
 
-  // 스크롤 저장
+  const handleSearch = async () => {
+    const backendCategory = categoryMap[selectedCategory];
+    const result = await fetchArticles(searchText, backendCategory);
+    setArticles(result);
+
+    await saveSelectedCategory(pathname, selectedCategory);
+  };
+
   const handleScroll = (e: any) => {
     const y = e.nativeEvent.contentOffset.y;
     saveScrollY(pathname, y);
   };
 
-  // 페이지 복귀 시 스크롤 복원
   useFocusEffect(
     useCallback(() => {
-      const y = getScrollY(pathname);
+      (async () => {
+        const y = await getScrollY(pathname);
 
-      setTimeout(() => {
-        if (scrollRef.current) {
-          scrollRef.current.scrollTo({
-            y,
-            animated: false,
-          });
-        }
-      }, 0);
+        setTimeout(() => {
+          if (scrollRef.current) {
+            scrollRef.current.scrollTo({ y, animated: false });
+          }
+        }, 0);
+      })();
     }, [pathname])
   );
 
@@ -111,7 +112,6 @@ const SearchNewsPage = () => {
           scrollEventThrottle={16}
           showsVerticalScrollIndicator={false}
         >
-          {/* 상단 SafeArea */}
           <SafeAreaView style={styles.safeArea}>
             <View className="w-full items-center justify-center pb-2 relative">
               <TouchableOpacity
@@ -119,49 +119,48 @@ const SearchNewsPage = () => {
                 className="absolute left-4 top-1"
               >
                 <Image
-                  source={require("../../../my-expo-app/assets/images/BackButton.png")}
+                  source={require("../../my-expo-app/assets/images/BackButton.png")}
                   className="w-[12px] h-[18px] mt-3"
                   resizeMode="contain"
                 />
               </TouchableOpacity>
 
               <Image
-                source={require("../../../my-expo-app/assets/images/HEARDAY.png")}
+                source={require("../../my-expo-app/assets/images/HEARDAY.png")}
                 className="w-[130px] h-[45px]"
                 resizeMode="contain"
               />
             </View>
           </SafeAreaView>
 
-          {/* 검색창 */}
           <View className="items-center">
             <SearchBar
               value={searchText}
               onChangeText={setSearchText}
-              onPressSearch={() => handleSearch()}
+              onPressSearch={handleSearch}
             />
           </View>
 
-          {/* 카테고리 버튼 */}
           <View className="mt-3">
             <ScrollButton
               categories={categories}
               selectedCategory={selectedCategory}
-              onSelect={(v) => setSelectedCategory(v)}
+              onSelect={async (v) => {
+                setSelectedCategory(v);
+                await saveSelectedCategory(pathname, v);
+              }}
+              initialX={categoryScrollX}
+              onScrollX={(x) => saveScrollX(pathname, x)}
             />
           </View>
 
-          {/* 기사 리스트 */}
           <NewsCardList
             background="white"
             articles={articles}
             onPressArticle={(id: string) => {
               router.push({
-                pathname: `/newsplayer/[id]`,
-                params: {
-                  id,
-                  from: "category",
-                },
+                pathname: "/newsplayer/[id]",
+                params: { id, from: "category" },
               });
             }}
           />
@@ -169,12 +168,10 @@ const SearchNewsPage = () => {
       </LinearGradient>
     </>
   );
-};
+}
 
 const styles = StyleSheet.create({
   safeArea: {
     backgroundColor: "transparent",
   },
 });
-
-export default SearchNewsPage;
