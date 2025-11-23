@@ -9,6 +9,7 @@ import { fetchCategoryRecommendNews } from "@/services/api/categoryRecommendNews
 import { fetchRecommendNews } from "@/services/api/recommendNews";
 import { useCategoryStore } from "@/services/utils/categoryStore";
 import { RecommendArticle } from "@/types/auth/recommendNews";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocalSearchParams, usePathname, useFocusEffect, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { ScrollView, Text, View } from "react-native";
@@ -56,13 +57,11 @@ export default function Index() {
   const [showTodayNewsModal, setShowTodayNewsModal] = useState(false);
   const [todayNewsItems, setTodayNewsItems] = useState<any[]>([]);
   const [completedNewsId, setCompletedNewsId] = useState<string | null>(null);
-  const hasShownModal = useRef(false);
-  const isFirstMount = useRef(true);
+  const shouldShowModalOnReturn = useRef(false); // 오늘의 뉴스에서 돌아올 때 모달 표시 플래그
 
   const offset = useSharedValue(selectedCategory ? 1 : 0);
   const pathname = usePathname();
   const router = useRouter();
-  const { showTodayNews, newsId, from } = useLocalSearchParams<{ showTodayNews?: string; newsId?: string; from?: string }>();
 
   // 유저 정보 로드
   useEffect(() => {
@@ -115,41 +114,35 @@ export default function Index() {
     loadTodayNews();
   }, []);
 
-  // 오늘의 뉴스에서 돌아올 때만 모달 표시 (내 작업)
+  // 맨 처음 앱 진입 시에만 모달 표시 (AsyncStorage 사용)
   useEffect(() => {
-    if (showTodayNews === 'true' && from === 'todaynews') {
-      setShowTodayNewsModal(true);
-      if (newsId) {
-        setCompletedNewsId(newsId);
+    const checkFirstLaunch = async () => {
+      try {
+        const hasShownTodayNews = await AsyncStorage.getItem('hasShownTodayNewsModal');
+        if (!hasShownTodayNews) {
+          // 처음 실행하는 경우
+          setTimeout(() => {
+            setShowTodayNewsModal(true);
+          }, 500);
+          // 모달을 표시했다고 저장
+          await AsyncStorage.setItem('hasShownTodayNewsModal', 'true');
+        }
+      } catch (error) {
+        console.error('AsyncStorage 오류:', error);
       }
-      router.setParams({ showTodayNews: undefined, from: undefined });
-    }
-  }, [showTodayNews, newsId, from, router]);
+    };
 
-  // 맨 처음 앱 진입 시에만 모달 표시 (내 작업)
+    checkFirstLaunch();
+  }, []); // 빈 배열로 첫 마운트에만 실행
+
+  // 오늘의 뉴스에서 돌아왔을 때 모달 표시 (useFocusEffect 사용)
   useFocusEffect(
     useCallback(() => {
-      const publicRoutes = [
-        "/LoginPage",
-        "/SignUpPage",
-        "/CertificationPage",
-        "/ResetPasswordPage",
-        "/SelectCategoryPage",
-        "/KakaoLoginView",
-      ];
-
-      if (hasShownModal.current || showTodayNews || publicRoutes.includes(pathname)) {
-        return;
+      if (shouldShowModalOnReturn.current) {
+        shouldShowModalOnReturn.current = false;
+        setShowTodayNewsModal(true);
       }
-
-      if (isFirstMount.current && pathname === "/") {
-        isFirstMount.current = false;
-        setTimeout(() => {
-          setShowTodayNewsModal(true);
-          hasShownModal.current = true;
-        }, 500);
-      }
-    }, [showTodayNews, pathname])
+    }, [])
   );
 
   // 카테고리 선택 시 (develop 브랜치 코드)
@@ -185,6 +178,14 @@ export default function Index() {
     setShowTodayNewsModal(true);
   };
 
+  const handleNewsCardPress = (newsId: string) => {
+    // 오늘의 뉴스 카드를 눌러서 재생화면으로 이동할 때 플래그 설정
+    shouldShowModalOnReturn.current = true;
+    setCompletedNewsId(newsId);
+    router.push(`/newsplayer/${newsId}?from=todaynews`);
+    setShowTodayNewsModal(false);
+  };
+
   return (
     <View className="flex-1 bg-white">
       <HeroSection
@@ -201,6 +202,7 @@ export default function Index() {
             setCompletedNewsId(null);
           }, 0);
         }}
+        onNewsCardPress={handleNewsCardPress}
         newsItems={todayNewsItems.length > 0 ? todayNewsItems : DUMMY_TODAY_NEWS}
         userInfo={{ age: "20", gender: "여성" }}
         completedNewsId={completedNewsId}

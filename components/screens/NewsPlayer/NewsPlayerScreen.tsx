@@ -92,7 +92,9 @@ export const NewsPlayerScreen = ({ articleId, from }: NewsPlayerScreenProps) => 
     } else if (from === 'home') {
       router.push('/(tabs)');
     } else if (from === 'todaynews') {
-      router.push(`/(tabs)?showTodayNews=true&newsId=${articleId}&from=todaynews`);
+      // 오늘의 뉴스에서 왔으면 단순히 홈으로 돌아가기
+      // shouldShowModalOnReturn 플래그가 index.tsx에서 설정되어 있어서 자동으로 모달이 표시됨
+      router.push('/(tabs)');
     } else if (from === 'category') {
       router.push({
         pathname: '/SearchNewsPage',
@@ -101,7 +103,7 @@ export const NewsPlayerScreen = ({ articleId, from }: NewsPlayerScreenProps) => 
     } else {
       router.back();
     }
-  }, [router, from, articleId]);
+  }, [router, from]);
 
   const handlePlay = useCallback(async () => {
     await play();

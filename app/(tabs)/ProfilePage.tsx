@@ -32,6 +32,9 @@ const ProfilePage = () => {
       // 3) AsyncStorage 스크롤 기록 삭제
       await resetScrollStorage();
 
+      // 4) 오늘의 뉴스 모달 표시 기록 삭제
+      await AsyncStorage.removeItem("hasShownTodayNewsModal");
+
       console.log("로그아웃 완료 — 모든 저장 상태 리셋됨!");
 
       router.replace("/LoginPage");

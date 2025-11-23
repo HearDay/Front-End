@@ -29,6 +29,7 @@ interface TodayNewsModalProps {
     gender: string
   }
   completedNewsId?: string | null
+  onNewsCardPress?: (newsId: string) => void
 }
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window')
@@ -41,6 +42,7 @@ export const TodayNewsModal = ({
   newsItems,
   userInfo,
   completedNewsId,
+  onNewsCardPress,
 }: TodayNewsModalProps) => {
   const router = useRouter()
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -70,11 +72,17 @@ export const TodayNewsModal = ({
 
   const handleCardPress = useCallback(
     (newsId: string) => {
-      router.push(`/(tabs)?showTodayNews=true&newsId=${newsId}&from=todaynews`)
-      router.push(`/newsplayer/${newsId}?from=todaynews`)
-      onClose()
+      if (onNewsCardPress) {
+        // 부모 컴포넌트에서 제공한 함수가 있으면 사용 (하드코딩 방식)
+        onNewsCardPress(newsId)
+      } else {
+        // 없으면 기존 방식 사용 (fallback)
+        router.push(`/(tabs)?showTodayNews=true&newsId=${newsId}&from=todaynews`)
+        router.push(`/newsplayer/${newsId}?from=todaynews`)
+        onClose()
+      }
     },
-    [router, onClose]
+    [router, onClose, onNewsCardPress]
   )
 
   const panResponder = useRef(
