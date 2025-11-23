@@ -1,12 +1,13 @@
 import { CategoryChipGroup, Modal } from '@/components/common'
 import TopBar from '@/components/common/TopBar'
+import { useSavedNewsScroll } from '@/contexts/SavedNewsScrollContext'
 import { newsService } from '@/services'
 import { useRouter } from 'expo-router'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { SavedNewsItem } from '../../../types/screens'
-import { SavedNewsList } from './SavedNewsList'
+import { SavedNewsList, SavedNewsListRef } from './SavedNewsList'
 
 export function SavedNewsScreen() {
   const router = useRouter()
@@ -14,6 +15,8 @@ export function SavedNewsScreen() {
   const [savedNews, setSavedNews] = useState<SavedNewsItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const savedNewsListRef = useRef<SavedNewsListRef>(null)
+  const { scrollPosition } = useSavedNewsScroll()
 
   // 삭제 확인 모달 관련 상태
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false)
@@ -48,6 +51,16 @@ export function SavedNewsScreen() {
   useEffect(() => {
     fetchSavedNews()
   }, [fetchSavedNews])
+
+  // 스크롤 위치 복원
+  useEffect(() => {
+    if (!loading && savedNews.length > 0 && scrollPosition.current > 0) {
+      // 데이터 로딩이 완료되고 저장된 스크롤 위치가 있으면 복원
+      setTimeout(() => {
+        savedNewsListRef.current?.scrollToPosition(scrollPosition.current)
+      }, 100)
+    }
+  }, [loading, savedNews.length, scrollPosition])
 
   const filteredNews = useMemo(() => {
     return savedNews.filter(news => {
@@ -118,6 +131,7 @@ export function SavedNewsScreen() {
       </View>
 
       <SavedNewsList
+        ref={savedNewsListRef}
         newsList={filteredNews}
         onNewsPress={handleNewsPress}
         onDelete={handleDeletePress}

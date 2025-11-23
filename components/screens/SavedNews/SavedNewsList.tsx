@@ -1,13 +1,32 @@
-import { memo } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { useSavedNewsScroll } from '@/contexts/SavedNewsScrollContext';
+import { forwardRef, memo, useImperativeHandle, useRef } from 'react';
+import { NativeScrollEvent, NativeSyntheticEvent, ScrollView, Text, View } from 'react-native';
 import { SavedNewsListProps } from '../../../types/screens';
 import { SavedNewsCard } from './SavedNewsCard';
 
-export const SavedNewsList = memo(function SavedNewsList({
+export interface SavedNewsListRef {
+  scrollToPosition: (y: number) => void;
+}
+
+export const SavedNewsList = memo(forwardRef<SavedNewsListRef, SavedNewsListProps>(function SavedNewsList({
   newsList,
   onNewsPress,
   onDelete,
-}: SavedNewsListProps) {
+}, ref) {
+  const scrollViewRef = useRef<ScrollView>(null);
+  const { setScrollPosition } = useSavedNewsScroll();
+
+  useImperativeHandle(ref, () => ({
+    scrollToPosition: (y: number) => {
+      scrollViewRef.current?.scrollTo({ y, animated: false });
+    },
+  }));
+
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const yOffset = event.nativeEvent.contentOffset.y;
+    setScrollPosition(yOffset);
+  };
+
   if (newsList.length === 0) {
     return (
       <View className="flex-1 justify-center items-center">
@@ -20,8 +39,11 @@ export const SavedNewsList = memo(function SavedNewsList({
 
   return (
     <ScrollView
+      ref={scrollViewRef}
       className="flex-1 px-4 pt-4"
       showsVerticalScrollIndicator={false}
+      onScroll={handleScroll}
+      scrollEventThrottle={16}
     >
       {newsList.map((news) => (
         <SavedNewsCard
@@ -33,4 +55,4 @@ export const SavedNewsList = memo(function SavedNewsList({
       ))}
     </ScrollView>
   )
-})
+}))
