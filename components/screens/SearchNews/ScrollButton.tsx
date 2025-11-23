@@ -5,23 +5,26 @@ interface ScrollButtonProps {
   categories: string[];
   onSelect: (category: string) => void;
   selectedCategory: string;
+
+  // 스크롤 복원
+  initialX: number;
+  onScrollX: (x: number) => void;
 }
 
-const ScrollButton = ({
+export default function ScrollButton({
   categories,
   onSelect,
   selectedCategory,
-}: ScrollButtonProps) => {
+  initialX,
+  onScrollX,
+}: ScrollButtonProps) {
   const scrollRef = useRef<ScrollView>(null);
 
-  // 뒤로 돌아왔을 때도 유지되도록 선택된 버튼으로 자동 스크롤 
   useEffect(() => {
-    const selectedIndex = categories.indexOf(selectedCategory);
-    if (selectedIndex !== -1 && scrollRef.current) {
-      const scrollX = selectedIndex * 80;
-      scrollRef.current.scrollTo({ x: scrollX, animated: false });
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({ x: initialX, animated: false });
     }
-  }, [selectedCategory]);
+  }, [initialX]);
 
   return (
     <View className="w-full mt-2">
@@ -29,13 +32,12 @@ const ScrollButton = ({
         ref={scrollRef}
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingHorizontal: 16,
-          gap: 8,
-        }}
+        contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}
+        onScroll={(e) => onScrollX(e.nativeEvent.contentOffset.x)}
+        scrollEventThrottle={16}
       >
         {categories.map((category, idx) => {
-          const isSelected = selectedCategory === category;
+          const isSelected = category === selectedCategory;
           return (
             <TouchableOpacity
               key={idx}
@@ -58,6 +60,4 @@ const ScrollButton = ({
       </ScrollView>
     </View>
   );
-};
-
-export default ScrollButton;
+}

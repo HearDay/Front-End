@@ -4,18 +4,35 @@ import { useRouter } from "expo-router";
 import React from "react";
 import { View } from "react-native";
 
+// Zustand stores
+import { useCategoryStore } from "@/services/utils/categoryStore";
+import { useSavedCategoryScrollStore } from "@/services/utils/savedCategoryStore";
+
+// scrollStore AsyncStorage reset 함수
+import { resetScrollStorage } from "@/services/utils/scrollStore";
+
 const ProfilePage = () => {
   const router = useRouter();
 
-  // 로그아웃 처리 함수
+  // Zustand reset 함수 불러오기
+  const clearCategory = useCategoryStore((state) => state.clearCategory);
+  const resetSavedCategory = useSavedCategoryScrollStore(
+    (state) => state.resetSavedCategory
+  );
+
   const handleLogout = async () => {
     try {
-
+      // 1) 토큰 삭제
       await AsyncStorage.removeItem("accessToken");
 
-      const afterToken = await AsyncStorage.getItem("accessToken");
-      console.log("로그아웃 후 accessToken:", afterToken);
-      console.log("로그아웃 성공! 토큰이 정상적으로 삭제되었습니다.");
+      // 2) Zustand 스토어 초기화
+      clearCategory();
+      resetSavedCategory();
+
+      // 3) AsyncStorage 스크롤 기록 삭제
+      await resetScrollStorage();
+
+      console.log("로그아웃 완료 — 모든 저장 상태 리셋됨!");
 
       router.replace("/LoginPage");
     } catch (error) {
