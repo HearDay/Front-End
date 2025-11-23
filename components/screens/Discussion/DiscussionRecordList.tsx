@@ -16,7 +16,8 @@ export function DiscussionRecordList({
     { value: 'oldest', label: '오래된순' },
   ] as const;
 
-  const currentLabel = sortOptions.find(opt => opt.value === sortBy)?.label || '최신순';
+  const currentLabel =
+    sortOptions.find(opt => opt.value === sortBy)?.label || '최신순';
 
   return (
     <View className="flex-1">
@@ -38,7 +39,7 @@ export function DiscussionRecordList({
             {/* 드롭다운 메뉴 */}
             {showDropdown && (
               <View className="absolute top-8 right-0 bg-white rounded-lg shadow-lg py-2 w-24 z-10">
-                {sortOptions.map((option) => (
+                {sortOptions.map(option => (
                   <TouchableOpacity
                     key={option.value}
                     onPress={() => {
@@ -47,9 +48,13 @@ export function DiscussionRecordList({
                     }}
                     className="py-2 px-4"
                   >
-                    <Text className={`text-sm ${
-                      sortBy === option.value ? 'text-[#00801A] font-bold' : 'text-gray-700'
-                    }`}>
+                    <Text
+                      className={`text-sm ${
+                        sortBy === option.value
+                          ? 'text-[#00801A] font-bold'
+                          : 'text-gray-700'
+                      }`}
+                    >
                       {option.label}
                     </Text>
                   </TouchableOpacity>
@@ -58,7 +63,7 @@ export function DiscussionRecordList({
             )}
           </View>
         </View>
-        
+
         {/* 초록색 언더라인 */}
         <View className="h-px bg-[#00801A]" />
       </View>
@@ -71,14 +76,16 @@ export function DiscussionRecordList({
       >
         {records.length === 0 ? (
           <View className="flex-1 items-center justify-center py-20">
-            <Text className="text-gray-400 text-base">토론 기록이 없습니다</Text>
+            <Text className="text-gray-400 text-base">
+              토론 기록이 없습니다
+            </Text>
           </View>
         ) : (
-          records.map((item) => (
+          records.map(item => (
             <DiscussionRecordCard
               key={item.id}
               record={item}
-              onPress={() => onRecordPress(item.id)}
+              onPress={() => onRecordPress(item.id)} // ⬅ discussionId 전달
             />
           ))
         )}

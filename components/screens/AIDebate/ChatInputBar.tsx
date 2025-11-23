@@ -1,12 +1,16 @@
 import React, { useState } from "react";
 import { Image, TextInput, TouchableOpacity, View } from "react-native";
 
-export default function ChatInputBar() {
+interface ChatInputBarProps {
+  onSend: (message: string) => void;
+}
+
+export default function ChatInputBar({ onSend }: ChatInputBarProps) {
   const [message, setMessage] = useState("");
 
   const handleSend = () => {
     if (message.trim().length === 0) return;
-    console.log("Send message:", message);
+    onSend(message);
     setMessage("");
   };
 

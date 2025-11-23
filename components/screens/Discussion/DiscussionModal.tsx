@@ -1,25 +1,26 @@
-import { Modal } from '@/components/common'
-import { useRouter } from 'expo-router'
-import { Text, TouchableOpacity, View } from 'react-native'
-import { DiscussionModalProps } from '../../../types/screens'
+import { Modal } from '@/components/common';
+import { useRouter } from 'expo-router';
+import { Text, TouchableOpacity, View } from 'react-native';
+import { DiscussionModalProps } from '../../../types/screens';
 
 export function DiscussionModal({
   visible,
   articleId,
   onClose,
 }: DiscussionModalProps) {
-  const router = useRouter()
+  const router = useRouter();
 
-  // 토론 시작 핸들러
-  const handleStartDiscussion = (mode: 'voice' | 'chat') => {
-    if (!articleId) return
-    if (mode === 'voice') {
-      router.push('/AIVoiceDebatePage') // 음성 토론 페이지로 이동
+  const handleStartDiscussion = (mode: "voice" | "chat") => {
+    if (!articleId) return;
+
+    if (mode === "voice") {
+      router.push(`/AIVoiceDebatePage?articleId=${articleId}&mode=voice`);
     } else {
-      router.push('/AIChatDebatePage?mode=chat') // 채팅 토론 페이지로 이동
+      router.push(`/AIChatDebatePage?articleId=${articleId}&mode=chat`);
     }
-    onClose()
-  }
+
+    onClose();
+  };
 
   return (
     <Modal
@@ -30,23 +31,20 @@ export function DiscussionModal({
       confirmText=""
     >
       <View className="gap-3 mt-6">
-        {/* 음성으로 토론 */}
         <TouchableOpacity
           className="bg-[#DBFDE0] py-4 rounded-2xl"
-          onPress={() => handleStartDiscussion('voice')}
+          onPress={() => handleStartDiscussion("voice")}
         >
           <Text className="text-center font-medium">음성으로 토론하러 가기</Text>
         </TouchableOpacity>
 
-        {/* 채팅으로 토론 */}
         <TouchableOpacity
           className="bg-[#DBFDE0] py-4 rounded-2xl"
-          onPress={() => handleStartDiscussion('chat')}
+          onPress={() => handleStartDiscussion("chat")}
         >
           <Text className="text-center font-medium">채팅으로 토론하러 가기</Text>
         </TouchableOpacity>
 
-        {/* 다음에 하기 */}
         <TouchableOpacity
           className="bg-[#DBFDE0] py-4 rounded-2xl"
           onPress={onClose}
@@ -55,5 +53,5 @@ export function DiscussionModal({
         </TouchableOpacity>
       </View>
     </Modal>
-  )
+  );
 }
