@@ -90,7 +90,11 @@ export const NewsPlayerScreen = ({ articleId, from }: NewsPlayerScreenProps) => 
     if (from === 'savednews') {
       router.push('/(tabs)/savednews');
     } else if (from === 'home') {
-      router.push('/');  
+      router.push('/(tabs)');
+    } else if (from === 'todaynews') {
+      // 오늘의 뉴스에서 왔으면 단순히 홈으로 돌아가기
+      // shouldShowModalOnReturn 플래그가 index.tsx에서 설정되어 있어서 자동으로 모달이 표시됨
+      router.push('/(tabs)');
     } else if (from === 'category') {
       router.push({
         pathname: '/SearchNewsPage',
@@ -99,9 +103,7 @@ export const NewsPlayerScreen = ({ articleId, from }: NewsPlayerScreenProps) => 
     } else {
       router.back();
     }
-  }, [router, from, category]);
-
-
+  }, [router, from]);
 
   const handlePlay = useCallback(async () => {
     await play();
@@ -164,6 +166,10 @@ export const NewsPlayerScreen = ({ articleId, from }: NewsPlayerScreenProps) => 
     setShowSaveConfirmModal(true);
   }, []);
 
+  const handleQuiz = useCallback(() => {
+    router.push(`/quiz/${articleId}`);
+  }, [router, articleId]);
+
   const handleConfirmSave = useCallback(async () => {
     setShowSaveConfirmModal(false);
     try {
@@ -213,7 +219,7 @@ export const NewsPlayerScreen = ({ articleId, from }: NewsPlayerScreenProps) => 
   return (
     <LinearGradient colors={['#FFFEF0', '#E8F5E9', '#C8E6C9']} style={{ flex: 1 }}>
       <SafeAreaView className="flex-1">
-        <NewsPlayerHeader title={newsData.title} onBack={handleBack} />
+        <NewsPlayerHeader title={newsData.title} onBack={handleBack} onQuizPress={handleQuiz} />
         
         {/* 이미지와 가사를 포함하는 클릭 가능한 컨테이너 */}
         <TouchableOpacity

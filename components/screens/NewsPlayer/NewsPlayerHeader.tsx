@@ -4,26 +4,44 @@ import { NewsPlayerHeaderProps } from '../../../types/screens';
 
 // 개선: memo로 컴포넌트 감싸기
 // 이유: title, onBack이 변하지 않으면 리렌더링 스킵
-export const NewsPlayerHeader = memo(function NewsPlayerHeader({ 
-  title, 
-  onBack 
+export const NewsPlayerHeader = memo(function NewsPlayerHeader({
+  title,
+  onBack,
+  onQuizPress
 }: NewsPlayerHeaderProps) {
   return (
     <>
-      {/* 뒤로가기 버튼 */}
-      <View className="px-4 pt-2">
-        <TouchableOpacity 
+      {/* 헤더 */}
+      <View className="px-4 pt-2 flex-row items-center justify-between">
+        {/* 뒤로가기 버튼 */}
+        <TouchableOpacity
           onPress={onBack}
-          activeOpacity={0.7} 
+          activeOpacity={0.7}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} // ✅ 추가: 터치 영역 확대
         >
           <Text className="text-3xl">←</Text>
         </TouchableOpacity>
+
+        {/* QUIZ 버튼 */}
+        {onQuizPress && (
+          <TouchableOpacity
+            onPress={onQuizPress}
+            activeOpacity={0.7}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Text className="text-[20px] font-bold">
+              <Text className="text-[#FF9D42]">Q</Text>
+              <Text className="text-[#89B93F]">U</Text>
+              <Text className="text-[#FF9D42]">I</Text>
+              <Text className="text-[#4A90E2]">Z</Text>
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* 제목 */}
       <View className="px-6 pt-8 pb-6">
-        <Text 
+        <Text
           className="text-2xl font-bold leading-tight text-center"
           numberOfLines={2} // 추가: 제목이 너무 길 때 2줄로 제한
         >

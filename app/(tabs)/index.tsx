@@ -2,12 +2,16 @@ import { CategoryChipGroup } from "@/components/common";
 import HeroSection from "@/components/screens/HomePage/HeroSection";
 import NewsCardList from "@/components/screens/HomePage/NewsCardList";
 import NewsCardSlider from "@/components/screens/HomePage/NewsCardSlider";
+import { DUMMY_TODAY_NEWS } from "@/components/screens/HomePage/TodayNewsDummy";
+import { TodayNewsModal } from "@/components/screens/HomePage/TodayNewsModal";
+import { newsService } from "@/services";
 import { fetchCategoryRecommendNews } from "@/services/api/categoryRecommendNews";
 import { fetchRecommendNews } from "@/services/api/recommendNews";
 import { useCategoryStore } from "@/services/utils/categoryStore";
 import { RecommendArticle } from "@/types/auth/recommendNews";
-import { router, usePathname } from "expo-router";
-import React, { useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useLocalSearchParams, usePathname, useFocusEffect, useRouter } from "expo-router";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { ScrollView, Text, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -41,7 +45,7 @@ export default function Index() {
 
   const categories = Object.keys(categoryMap);
 
-  // 유저 정보
+  // 유저 정보 (develop 브랜치 코드)
   const [nickname, setNickname] = useState("");
   const [level, setLevel] = useState(1);
   const [updateTime, setUpdateTime] = useState("");
@@ -49,8 +53,15 @@ export default function Index() {
     RecommendArticle[]
   >([]);
 
+  // 오늘의 뉴스 관련 state (내 작업)
+  const [showTodayNewsModal, setShowTodayNewsModal] = useState(false);
+  const [todayNewsItems, setTodayNewsItems] = useState<any[]>([]);
+  const [completedNewsId, setCompletedNewsId] = useState<string | null>(null);
+  const shouldShowModalOnReturn = useRef(false); // 오늘의 뉴스에서 돌아올 때 모달 표시 플래그
+
   const offset = useSharedValue(selectedCategory ? 1 : 0);
   const pathname = usePathname();
+  const router = useRouter();
 
   // 유저 정보 로드
   useEffect(() => {
@@ -81,7 +92,60 @@ export default function Index() {
     loadUserInfo();
   }, [pathname]);
 
-  // 카테고리 선택 시
+  // 오늘의 뉴스 데이터 로드 (내 작업)
+  useEffect(() => {
+    const loadTodayNews = async () => {
+      try {
+        const articles = await newsService.getArticles(0, 5);
+        const news = articles.map((article) => ({
+          id: article.id.toString(),
+          title: article.title,
+          imageUrl: article.imageUrl,
+          summary: article.description,
+          category: article.category,
+        }));
+        setTodayNewsItems(news);
+      } catch (error) {
+        console.error("오늘의 뉴스 로드 실패:", error);
+        setTodayNewsItems(DUMMY_TODAY_NEWS);
+      }
+    };
+
+    loadTodayNews();
+  }, []);
+
+  // 맨 처음 앱 진입 시에만 모달 표시 (AsyncStorage 사용)
+  useEffect(() => {
+    const checkFirstLaunch = async () => {
+      try {
+        const hasShownTodayNews = await AsyncStorage.getItem('hasShownTodayNewsModal');
+        if (!hasShownTodayNews) {
+          // 처음 실행하는 경우
+          setTimeout(() => {
+            setShowTodayNewsModal(true);
+          }, 500);
+          // 모달을 표시했다고 저장
+          await AsyncStorage.setItem('hasShownTodayNewsModal', 'true');
+        }
+      } catch (error) {
+        console.error('AsyncStorage 오류:', error);
+      }
+    };
+
+    checkFirstLaunch();
+  }, []); // 빈 배열로 첫 마운트에만 실행
+
+  // 오늘의 뉴스에서 돌아왔을 때 모달 표시 (useFocusEffect 사용)
+  useFocusEffect(
+    useCallback(() => {
+      if (shouldShowModalOnReturn.current) {
+        shouldShowModalOnReturn.current = false;
+        setShowTodayNewsModal(true);
+      }
+    }, [])
+  );
+
+  // 카테고리 선택 시 (develop 브랜치 코드)
   const handleSelectCategory = async (category: string) => {
     setSelectedCategory(category);
     offset.value = withTiming(1, { duration: 600 });
@@ -110,9 +174,39 @@ export default function Index() {
     opacity: withTiming(offset.value),
   }));
 
+  const handleTodayNewsPress = () => {
+    setShowTodayNewsModal(true);
+  };
+
+  const handleNewsCardPress = (newsId: string) => {
+    // 오늘의 뉴스 카드를 눌러서 재생화면으로 이동할 때 플래그 설정
+    shouldShowModalOnReturn.current = true;
+    setCompletedNewsId(newsId);
+    router.push(`/newsplayer/${newsId}?from=todaynews`);
+    setShowTodayNewsModal(false);
+  };
+
   return (
     <View className="flex-1 bg-white">
-      <HeroSection offset={offset} userLevel={level} />
+      <HeroSection
+        offset={offset}
+        userLevel={level}
+        onTodayNewsPress={handleTodayNewsPress}
+      />
+
+      <TodayNewsModal
+        visible={showTodayNewsModal}
+        onClose={() => {
+          setTimeout(() => {
+            setShowTodayNewsModal(false);
+            setCompletedNewsId(null);
+          }, 0);
+        }}
+        onNewsCardPress={handleNewsCardPress}
+        newsItems={todayNewsItems.length > 0 ? todayNewsItems : DUMMY_TODAY_NEWS}
+        userInfo={{ age: "20", gender: "여성" }}
+        completedNewsId={completedNewsId}
+      />
 
       {selectedCategory ? (
         <Animated.View style={[{ flex: 1 }, listStyle]}>

@@ -3,6 +3,7 @@ import { Slot, usePathname } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { AudioProvider } from "../contexts/AudioContext";
+import { SavedNewsScrollProvider } from "../contexts/SavedNewsScrollContext";
 import "../global.css";
 import LoginPage from "./LoginPage";
 
@@ -51,7 +52,9 @@ export default function RootLayout() {
   // 인증 여부 확인 후 Slot 렌더링
   return (
     <AudioProvider>
-      <Slot />
+      <SavedNewsScrollProvider>
+        <Slot />
+      </SavedNewsScrollProvider>
     </AudioProvider>
   );
 }

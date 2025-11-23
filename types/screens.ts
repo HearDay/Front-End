@@ -73,6 +73,7 @@ export interface NewsPlayerData {
 export interface NewsPlayerHeaderProps {
   title: string
   onBack: () => void
+  onQuizPress?: () => void
 }
 
 export interface NewsImagePlaceholderProps {

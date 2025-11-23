@@ -12,9 +12,10 @@ import Animated, {
 interface HeroSectionProps {
   offset: any;
   userLevel: number;
+  onTodayNewsPress?: () => void;
 }
 
-const HeroSection = ({ offset, userLevel }: HeroSectionProps) => {
+const HeroSection = ({ offset, userLevel, onTodayNewsPress }: HeroSectionProps) => {
   const router = useRouter();
 
   const pressAnim = useSharedValue(1);
@@ -31,8 +32,8 @@ const HeroSection = ({ offset, userLevel }: HeroSectionProps) => {
   const sunStyle = useAnimatedStyle(() => ({
     opacity: withTiming(1 - offset.value, { duration: 400 }),
     transform: [
-      { translateY: withTiming(offset.value * -40) }, 
-      { scale: hoverAnim.value }, 
+      { translateY: withTiming(offset.value * -40) },
+      { scale: hoverAnim.value },
     ],
   }));
 
@@ -46,9 +47,8 @@ const HeroSection = ({ offset, userLevel }: HeroSectionProps) => {
       pressAnim.value = withTiming(1, { duration: 120 });
     });
 
-    // 오늘의 뉴스 모달 연결 필요
-    // 현재 라우팅은 빈값으로 처리해뒀습니당!!
-    router.push(""); 
+    // 오늘의 뉴스 모달 열기
+    onTodayNewsPress?.();
   };
 
 
