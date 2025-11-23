@@ -3,7 +3,7 @@ import { useAudio } from '@/contexts/AudioContext';
 import { Audio } from 'expo-av';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { newsService } from '../../../services';
@@ -90,7 +90,7 @@ export const NewsPlayerScreen = ({ articleId, from }: NewsPlayerScreenProps) => 
     if (from === 'savednews') {
       router.push('/(tabs)/savednews');
     } else if (from === 'home') {
-      router.push('/(tabs)');
+      router.push('/');  
     } else if (from === 'category') {
       router.push({
         pathname: '/SearchNewsPage',
@@ -99,7 +99,9 @@ export const NewsPlayerScreen = ({ articleId, from }: NewsPlayerScreenProps) => 
     } else {
       router.back();
     }
-  }, [router, from]);
+  }, [router, from, category]);
+
+
 
   const handlePlay = useCallback(async () => {
     await play();

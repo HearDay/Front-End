@@ -16,12 +16,12 @@ export default function TabLayout() {
           elevation: 0,
         },
         tabBarItemStyle: {
-          paddingTop: 8, 
+          paddingTop: 8,
           paddingBottom: 10,
         },
         tabBarLabelStyle: {
           fontSize: 12,
-          marginTop: 4, 
+          marginTop: 4,
           color: "#14532D",
         },
         tabBarIcon: ({ focused }) => {
@@ -73,6 +73,13 @@ export default function TabLayout() {
       <Tabs.Screen name="index" options={{ title: "홈" }} />
       <Tabs.Screen name="savednews" options={{ title: "저장" }} />
       <Tabs.Screen name="ProfilePage" options={{ title: "프로필" }} />
+
+      <Tabs.Screen
+        name="search"
+        options={{
+          href: null, 
+        }}
+      />
     </Tabs>
   );
 }

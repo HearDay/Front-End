@@ -180,6 +180,7 @@ const SignUpPage = () => {
             emailDomain={emailDomain}
             onChangeEmailDomain={setEmailDomain}
             onPressVerify={handleVerify}
+            disabled={isEmailVerified} 
           />
         </View>
 
@@ -192,6 +193,7 @@ const SignUpPage = () => {
               onChangeText={setCertificationCode}
               buttonText="확인"
               onPressButton={handleCodeConfirm}
+              disabled={isEmailVerified} 
             />
           </View>
         )}

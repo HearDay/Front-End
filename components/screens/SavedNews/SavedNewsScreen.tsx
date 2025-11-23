@@ -1,6 +1,7 @@
 import { CategoryChipGroup, Modal } from '@/components/common'
 import TopBar from '@/components/common/TopBar'
 import { newsService } from '@/services'
+import { useSavedCategoryScrollStore } from '@/services/utils/savedCategoryStore'
 import { useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native'
@@ -10,12 +11,20 @@ import { SavedNewsList } from './SavedNewsList'
 
 export function SavedNewsScreen() {
   const router = useRouter()
-  const [selectedCategory, setSelectedCategory] = useState<string | null>('전체')
+
+  // Zustand에서 상태 가져오기
+  const {
+    savedSelectedCategory,
+    savedScrollX,
+    setSavedSelectedCategory,
+    setSavedScrollX,
+  } = useSavedCategoryScrollStore()
+
   const [savedNews, setSavedNews] = useState<SavedNewsItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // 삭제 확인 모달 관련 상태
+  // 삭제 모달 상태
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false)
   const [deletingNewsId, setDeletingNewsId] = useState<string | null>(null)
   const [showDeleteErrorModal, setShowDeleteErrorModal] = useState(false)
@@ -26,7 +35,6 @@ export function SavedNewsScreen() {
       setError(null)
       const response = await newsService.getSavedNews()
 
-      // ArticleData를 SavedNewsItem으로 변환
       const savedNewsItems: SavedNewsItem[] = response.map(article => ({
         id: String(article.id),
         title: article.title,
@@ -50,23 +58,24 @@ export function SavedNewsScreen() {
   }, [fetchSavedNews])
 
   const filteredNews = useMemo(() => {
-    return savedNews.filter(news => {
-      const categoryMatch = selectedCategory === '전체' || news.category === selectedCategory
-      return categoryMatch
-    })
-  }, [savedNews, selectedCategory])
+    if (savedSelectedCategory === '전체') return savedNews
+    return savedNews.filter(
+      news => news.category === savedSelectedCategory
+    )
+  }, [savedNews, savedSelectedCategory])
 
-  const handleNewsPress = useCallback((articleId: string) => {
-    router.push(`/newsplayer/${articleId}?from=savednews`)
-  }, [router])
+  const handleNewsPress = useCallback(
+    (articleId: string) => {
+      router.push(`/newsplayer/${articleId}?from=savednews`)
+    },
+    [router]
+  )
 
-  // 삭제 버튼 클릭 시 모달을 띄우는 함수
   const handleDeletePress = useCallback((articleId: string) => {
     setDeletingNewsId(articleId)
     setShowDeleteConfirmModal(true)
   }, [])
 
-  // 모달에서 '확인'을 눌렀을 때 실제 삭제를 실행하는 함수
   const handleConfirmDelete = useCallback(async () => {
     if (!deletingNewsId) return
     try {
@@ -85,7 +94,9 @@ export function SavedNewsScreen() {
     return (
       <SafeAreaView className="flex-1 bg-gray-50 justify-center items-center">
         <ActivityIndicator size="large" color="#16a34a" />
-        <Text className="text-gray-500 mt-4">저장된 뉴스를 불러오는 중...</Text>
+        <Text className="text-gray-500 mt-4">
+          저장된 뉴스를 불러오는 중...
+        </Text>
       </SafeAreaView>
     )
   }
@@ -106,15 +117,30 @@ export function SavedNewsScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50" edges={['bottom', 'left', 'right']}>
+    <SafeAreaView
+      className="flex-1 bg-gray-50"
+      edges={['bottom', 'left', 'right']}
+    >
       <TopBar showBackButton={false} />
 
       <View className="-mt-8 -mb-2">
-      <CategoryChipGroup
-        categories={['전체', '경제', '방송/연예', 'IT', '쇼핑', '생활', '해외', '스포츠', '정치']}
-        selectedCategory={selectedCategory}
-        onSelectCategory={setSelectedCategory}
-      />
+        <CategoryChipGroup
+          categories={[
+            '전체',
+            '경제',
+            '방송/연예',
+            'IT',
+            '쇼핑',
+            '생활',
+            '해외',
+            '스포츠',
+            '정치',
+          ]}
+          selectedCategory={savedSelectedCategory}
+          onSelectCategory={setSavedSelectedCategory}
+          scrollX={savedScrollX}
+          onScrollXChange={setSavedScrollX}
+        />
       </View>
 
       <SavedNewsList
@@ -126,26 +152,30 @@ export function SavedNewsScreen() {
       {/* 삭제 확인 모달 */}
       <Modal
         visible={showDeleteConfirmModal}
-       title={`이 뉴스를 삭제하시겠어요?
+        title={`이 뉴스를 삭제하시겠어요?
 저장된 뉴스 목록에서 사라집니다.`}
         onConfirm={handleConfirmDelete}
         onClose={() => setShowDeleteConfirmModal(false)}
       >
-          <View className="flex-row gap-3 mt-6 mb-[-16px]">
-            <TouchableOpacity
-              className="flex-1 bg-white border border-[#006716] rounded-xl py-3"
-              onPress={() => setShowDeleteConfirmModal(false)}
-            >
-              <Text className="text-center text-[#006716] font-semibold">취소</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className="flex-1 bg-[#006716] rounded-xl py-3"
-              onPress={handleConfirmDelete}
-            >
-              <Text className="text-white text-center font-semibold">확인</Text>
-            </TouchableOpacity>
-          </View>
-        </Modal>
+        <View className="flex-row gap-3 mt-6 mb-[-16px]">
+          <TouchableOpacity
+            className="flex-1 bg-white border border-[#006716] rounded-xl py-3"
+            onPress={() => setShowDeleteConfirmModal(false)}
+          >
+            <Text className="text-center text-[#006716] font-semibold">
+              취소
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            className="flex-1 bg-[#006716] rounded-xl py-3"
+            onPress={handleConfirmDelete}
+          >
+            <Text className="text-white text-center font-semibold">
+              확인
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
 
       {/* 삭제 실패 모달 */}
       <Modal
@@ -160,7 +190,9 @@ export function SavedNewsScreen() {
             onPress={() => setShowDeleteErrorModal(false)}
             activeOpacity={0.7}
           >
-            <Text className="text-white text-center font-semibold">확인</Text>
+            <Text className="text-white text-center font-semibold">
+              확인
+            </Text>
           </TouchableOpacity>
         </View>
       </Modal>

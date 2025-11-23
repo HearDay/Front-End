@@ -21,6 +21,7 @@ const InputBoxWithButton = ({
 }: InputBoxWithButtonProps) => {
   return (
     <View className="flex-row items-center w-[350px] h-[50px] gap-3 mb-1">
+      
       {/* 입력창 */}
       <View className="flex-1 w-[260px] h-[50px]">
         <InputBox
@@ -28,6 +29,11 @@ const InputBoxWithButton = ({
           value={value}
           onChangeText={onChangeText}
           variant="default"
+          editable={!disabled}  
+          style={{
+            width: 262,
+            backgroundColor: disabled ? "#E5E5E5" : "#FEFFF5",  
+          }}
         />
       </View>
 
@@ -35,7 +41,7 @@ const InputBoxWithButton = ({
       <TouchableOpacity
         onPress={onPressButton}
         activeOpacity={0.8}
-        disabled={disabled}
+        disabled={disabled} 
         className={`w-[80px] h-[50px] bg-white rounded-[10px] border border-[#1B8131] items-center justify-center ${
           disabled ? "opacity-50" : ""
         }`}
