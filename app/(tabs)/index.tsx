@@ -181,9 +181,17 @@ export default function Index() {
     opacity: withTiming(offset.value),
   }));
 
+  const handleTodayNewsPress = () => {
+    setShowTodayNewsModal(true);
+  };
+
   return (
     <View className="flex-1 bg-white">
-      <HeroSection offset={offset} userLevel={level} />
+      <HeroSection
+        offset={offset}
+        userLevel={level}
+        onTodayNewsPress={handleTodayNewsPress}
+      />
 
       <TodayNewsModal
         visible={showTodayNewsModal}

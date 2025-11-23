@@ -239,17 +239,20 @@ export const TodayNewsModal = ({
       animationType="slide"
       onRequestClose={onClose}
     >
-      <View
+      <Pressable
         className="flex-1 bg-black/50 justify-center"
         style={{ paddingBottom: 80 }}
+        onPress={onClose}
       >
-        <Text className="text-white text-center text-[12px] mb-8 px-8">
-          옆으로 스크롤하여 다음 뉴스를 확인해보세요!
-        </Text>
-        <View className="items-center">
-          {newsItems.map((item, index) => renderCard(item, index))}
-        </View>
-      </View>
+        <Pressable onPress={(e) => e.stopPropagation()}>
+          <Text className="text-white text-center text-[12px] mb-8 px-8">
+            옆으로 스크롤하여 다음 뉴스를 확인해보세요!
+          </Text>
+          <View className="items-center">
+            {newsItems.map((item, index) => renderCard(item, index))}
+          </View>
+        </Pressable>
+      </Pressable>
     </Modal>
   )
 }
