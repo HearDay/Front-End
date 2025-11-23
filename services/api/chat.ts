@@ -9,28 +9,22 @@ export const fetchDiscussionDetail = async (
   sort = "desc"
 ): Promise<DiscussionDetailResponse> => {
   try {
-    // 토큰 자동 불러오기
-    const token = await AsyncStorage.getItem("accessToken");
+    const rawToken = await AsyncStorage.getItem("accessToken");
+    const token = rawToken ? rawToken.replace(/"/g, "") : ""; // 토큰문자열 따옴표 제거
 
-    // axios 요청 옵션 구성
-    const config = {
-      headers: {} as Record<string, string>,
-      params: {
-        page,
-        size,
-        sort,
-      },
-    };
-
-    // 토큰이 있으면 자동으로 Authorization 추가
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-
-    // API 요청
-    const response = await axiosInstance.get<DiscussionDetailResponse>(
-      `/api/discussion/${discussionId}`,
-      config
+    const response = await axiosInstance.get(
+      `/api/discussion/${discussionId}`, 
+      {
+        headers: {
+          Authorization: token ? `Bearer ${token}` : "",
+        },
+        params: {
+          discussionId, 
+          page,
+          size,
+          sort,
+        },
+      }
     );
 
     return response.data;

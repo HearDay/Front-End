@@ -108,11 +108,9 @@ export function DiscussionScreen() {
     }
   }
 
-  // 기록 클릭 → 채팅 페이지로 이동
+  // 기록 클릭 → 기록 페이지로 이동 (수정 완료)
   const handleRecordItemPress = (discussionId: string | number) => {
-    router.push(
-      `/AIChatDebatePage?mode=view&discussionId=${discussionId}`
-    )
+    router.push(`/AIChatRecordPage?discussionId=${discussionId}`)
   }
 
   // 로딩 화면

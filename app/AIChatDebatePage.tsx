@@ -52,8 +52,7 @@ export default function AIChatDebatePage() {
       <Stack.Screen options={{ headerShown: false }} />
       <TopBar showBackButton onBackPress={() => router.replace("/AiPage")} />
 
-      <ChatList chatList={chatList} showInputBar={true} />
-
+      <ChatList chatList={chatList}/>
       <ChatInputBar onSend={handleSend} />
     </View>
   );

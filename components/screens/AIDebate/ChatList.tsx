@@ -5,18 +5,14 @@ import ChatBubble from "./ChatBubble";
 
 interface ChatListProps {
   chatList: ChatContent[];
-  showInputBar?: boolean;
 }
 
-export default function ChatList({
-  chatList,
-  showInputBar = false,
-}: ChatListProps) {
+export default function ChatList({ chatList }: ChatListProps) {
   return (
     <View className="flex-1 bg-[#FEFFF5]">
       <ScrollView
         showsVerticalScrollIndicator={false}
-        className={`px-5 ${showInputBar ? "pb-24" : "pb-10"}`}
+        className="px-5 pb-10"
       >
         {chatList.map(chat => (
           <ChatBubble

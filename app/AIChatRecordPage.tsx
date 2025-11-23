@@ -30,8 +30,7 @@ export default function AIChatRecordPage() {
     <View className="flex-1 bg-[#FEFFF5]">
       <Stack.Screen options={{ headerShown: false }} />
       <TopBar showBackButton onBackPress={() => router.replace("/AiPage")} />
-
-      <ChatList chatList={chatList} showInputBar={false} />
+      <ChatList chatList={chatList} />
     </View>
   );
 }
