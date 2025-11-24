@@ -15,7 +15,7 @@ interface EmailInputWithSelectProps {
   emailDomain: string;
   onChangeEmailDomain: (domain: string) => void;
   onPressVerify: () => void;
-  disabled?: boolean; // 🔥 인증 완료 시 true
+  disabled?: boolean; 
   buttonType?: "verify" | "confirm";
 }
 

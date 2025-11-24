@@ -6,9 +6,12 @@ import { useCallback, useEffect, useState } from 'react'
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { DiscussionNewsItem, DiscussionRecordItem } from '../../../types/screens'
+
+import { DiscussionLevelModal } from '../Discussion/DiscussionLevelModal'
+import { DiscussionModal } from '../Discussion/DiscussionModal'
+
 import { DiscussionActionButtons } from './DiscussionActionButtons'
 import { DiscussionHeader } from './DiscussionHeader'
-import { DiscussionModal } from './DiscussionModal'
 import { DiscussionNewsList } from './DiscussionNewsList'
 import { DiscussionRecordList } from './DiscussionRecordList'
 
@@ -18,35 +21,31 @@ export function DiscussionScreen() {
   const [activeButton, setActiveButton] =
     useState<'discussion' | 'record'>('discussion')
 
-  // 토론하기 탭
   const [viewedNews, setViewedNews] = useState<DiscussionNewsItem[]>([])
   const [sortBy, setSortBy] = useState<'latest' | 'oldest'>('latest')
 
-  // 기록보기 탭
-  const [discussionRecords, setDiscussionRecords] = useState<
-    DiscussionRecordItem[]
-  >([])
-  const [recordSortBy, setRecordSortBy] =
-    useState<'latest' | 'oldest'>('latest')
+  const [discussionRecords, setDiscussionRecords] = useState<DiscussionRecordItem[]>([])
+  const [recordSortBy, setRecordSortBy] = useState<'latest' | 'oldest'>('latest')
 
-  // 공통
-  const [showModal, setShowModal] = useState(false)
-  const [selectedArticleId, setSelectedArticleId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const [showErrorModal, setShowErrorModal] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
-  // 내가 본 뉴스 가져오기
+  const [showDiscussionModal, setShowDiscussionModal] = useState(false)
+  const [showLevelModal, setShowLevelModal] = useState(false)
+  const [selectedMode, setSelectedMode] = useState<'voice' | 'chat' | null>(null)
+  const [selectedArticleId, setSelectedArticleId] = useState<string | null>(null)
+
+  // 데이터 로딩 함수
   const fetchViewedNews = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
 
-      const apiSortBy =
-        sortBy === 'latest' ? 'RECENT' : 'PUBLISH_DATE'
-      const response = await newsService.getRecentArticles(apiSortBy)
+      const apiSort = sortBy === 'latest' ? 'RECENT' : 'PUBLISH_DATE'
+      const response = await newsService.getRecentArticles(apiSort)
 
       const transformed: DiscussionNewsItem[] = response.map(article => ({
         id: String(article.id),
@@ -64,11 +63,11 @@ export function DiscussionScreen() {
     }
   }, [sortBy])
 
-  // 토론 기록 가져오기
   const fetchDiscussionRecords = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
+
       const response = await discussionService.getDiscussionRecords(recordSortBy)
       setDiscussionRecords(response)
     } catch {
@@ -87,28 +86,13 @@ export function DiscussionScreen() {
     if (activeButton === 'record') fetchDiscussionRecords()
   }, [activeButton, recordSortBy, fetchDiscussionRecords])
 
-  // 뉴스 → 토론 시작 모달
+  // 뉴스 클릭 → 모달 열기
   const handleNewsPress = (articleId: string) => {
     setSelectedArticleId(articleId)
-    setShowModal(true)
+    setShowDiscussionModal(true)
   }
 
-  const handleStartDiscussion = async (
-    type: 'voice' | 'chat',
-    articleId: string
-  ) => {
-    try {
-      setShowModal(false)
-      router.push(
-        `/AIVoiceDebatePage?articleId=${articleId}&mode=${type}`
-      )
-    } catch {
-      setErrorMessage('토론을 시작할 수 없습니다.')
-      setShowErrorModal(true)
-    }
-  }
-
-  // 기록 클릭 → 기록 페이지로 이동 (수정 완료)
+  // 기록 클릭 → 페이지 이동
   const handleRecordItemPress = (discussionId: string | number) => {
     router.push(`/AIChatRecordPage?discussionId=${discussionId}`)
   }
@@ -118,9 +102,7 @@ export function DiscussionScreen() {
     return (
       <SafeAreaView className="flex-1 bg-[#F5FCE9] justify-center items-center">
         <ActivityIndicator size="large" color="#16a34a" />
-        <Text className="text-gray-500 mt-4">
-          데이터를 불러오는 중...
-        </Text>
+        <Text className="text-gray-500 mt-4">데이터를 불러오는 중...</Text>
       </SafeAreaView>
     )
   }
@@ -144,14 +126,10 @@ export function DiscussionScreen() {
     )
   }
 
-  // 최종 렌더링
+  // 정상 화면
   return (
-    <SafeAreaView
-      className="flex-1 bg-[#F5FCE9]"
-      edges={['left', 'right']}
-    >
+    <SafeAreaView className="flex-1 bg-[#F5FCE9]" edges={['left', 'right']}>
       <TopBar showBackButton={false} />
-
       <DiscussionHeader />
 
       <View className="my-2">
@@ -178,13 +156,39 @@ export function DiscussionScreen() {
         />
       )}
 
-      {/* 토론 모달 */}
+      {/* ===== (1) 토론 방식 선택 모달 ===== */}
       <DiscussionModal
-        visible={showModal}
+        visible={showDiscussionModal}
         articleId={selectedArticleId}
-        onClose={() => setShowModal(false)}
-        onStartDiscussion={handleStartDiscussion}
+        onClose={() => setShowDiscussionModal(false)}
+        onStartDiscussion={(mode) => {
+          setSelectedMode(mode)
+          setShowDiscussionModal(false)
+          setShowLevelModal(true)
+        }}
       />
+
+      {/* ===== (2) 난이도 선택 모달 ===== */}
+      {selectedMode && selectedArticleId && (
+        <DiscussionLevelModal
+          visible={showLevelModal}
+          articleId={selectedArticleId}
+          mode={selectedMode}
+          onClose={() => setShowLevelModal(false)}
+          onSelect={(level) => {
+            const target =
+              selectedMode === 'voice'
+                ? '/AIVoiceDebatePage'
+                : '/AIChatDebatePage'
+
+            router.push(
+              `${target}?articleId=${selectedArticleId}&mode=${selectedMode}&level=${level}`
+            )
+
+            setShowLevelModal(false)
+          }}
+        />
+      )}
 
       {/* 에러 모달 */}
       <Modal

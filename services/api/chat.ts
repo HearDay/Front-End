@@ -6,7 +6,7 @@ export const fetchDiscussionDetail = async (
   discussionId: number,
   page = 0,
   size = 10,
-  sort = "desc"
+  sort = "asc"
 ): Promise<DiscussionDetailResponse> => {
   try {
     const rawToken = await AsyncStorage.getItem("accessToken");

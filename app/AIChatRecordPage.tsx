@@ -19,6 +19,7 @@ export default function AIChatRecordPage() {
     (async () => {
       try {
         const res = await fetchDiscussionDetail(Number(discussionId));
+
         setChatList(res.data.contentList);
       } catch (error) {
         console.error("기록 조회 실패:", error);

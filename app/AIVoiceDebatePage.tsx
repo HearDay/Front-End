@@ -10,14 +10,14 @@ type Speaker = "AI" | "User" | "Pending";
 
 export default function AIVoiceDebatePage() {
   const router = useRouter();
-  const { articleId } = useLocalSearchParams<{ articleId?: string }>();
+  const { articleId, level } = useLocalSearchParams<{ articleId?: string; level?: string }>();
 
   const [currentSpeaker, setCurrentSpeaker] = useState<Speaker>("Pending");
   const [discussionId, setDiscussionId] = useState<number | null>(null);
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [sound, setSound] = useState<Audio.Sound | null>(null);
 
-  /** iOS 재생 설정 */
+  // iOS 재생 설정 
   useEffect(() => {
     const setAudioMode = async () => {
       await Audio.setAudioModeAsync({
@@ -26,9 +26,31 @@ export default function AIVoiceDebatePage() {
       });
     };
     setAudioMode();
+
+    // 페이지 나갈때 음성종료하는 클린업 함수
+    return () => {
+      cleanUpAudio();
+    };
   }, []);
 
-  /** 녹음 시작 */
+  // 녹음/재생 모두 정리 함수 
+  const cleanUpAudio = async () => {
+    try {
+      if (recording) {
+        await recording.stopAndUnloadAsync().catch(() => {});
+        setRecording(null);
+      }
+
+      if (sound) {
+        await sound.unloadAsync().catch(() => {});
+        setSound(null);
+      }
+    } catch (e) {
+      console.error("오디오 정리 중 오류:", e);
+    }
+  };
+
+  // 녹음 시작 
   const startRecording = async () => {
     try {
       setCurrentSpeaker("User");
@@ -49,7 +71,7 @@ export default function AIVoiceDebatePage() {
     }
   };
 
-  /** 녹음 종료 */
+  // 녹음 종료 
   const stopRecording = async () => {
     try {
       if (!recording) return;
@@ -66,7 +88,7 @@ export default function AIVoiceDebatePage() {
     }
   };
 
-  /** 서버로 음성 전송 후 Base64 WAV 재생 */
+  // 서버로 음성 전송 후 Base64 WAV 재생 
   const sendVoice = async (uri: string) => {
     try {
       setCurrentSpeaker("Pending");
@@ -109,7 +131,7 @@ export default function AIVoiceDebatePage() {
         }
       );
 
-      /** Base64 prefix 제거 */
+      // Base64 prefix 제거 
       let replyBase64 = response.data.data.reply;
       replyBase64 = replyBase64.replace(/^data:audio\/wav;base64,/, "");
 
@@ -128,7 +150,7 @@ export default function AIVoiceDebatePage() {
     }
   };
 
-  /** Base64 WAV → 파일 저장 → 재생 */
+  // Base64 WAV → 파일 저장 → 재생 
   const playBase64Wav = async (base64: string) => {
     try {
       const path = FileSystem.cacheDirectory + `ai_reply.wav`;
@@ -147,12 +169,13 @@ export default function AIVoiceDebatePage() {
       );
 
       setSound(newSound);
+
     } catch (err) {
       console.error("AI 음성 재생 실패:", err);
     }
   };
 
-  /** 상태별 이미지 */
+  // 상태별 이미지 
   const getImageSource = () => {
     switch (currentSpeaker) {
       case "AI":
@@ -164,7 +187,7 @@ export default function AIVoiceDebatePage() {
     }
   };
 
-  /** 상태 문구 */
+  // 상태 문구 
   const getStatusText = () => {
     switch (currentSpeaker) {
       case "AI":
@@ -192,6 +215,7 @@ export default function AIVoiceDebatePage() {
     <>
       <Stack.Screen options={{ headerShown: false }} />
       <View className="flex-1 items-center justify-center bg-[#FEFFF5] px-6">
+        
         {/* 제목 */}
         <View className="items-center px-6">
           <Text className="text-left text-2xl font-semibold text-black mb-10">
@@ -213,13 +237,13 @@ export default function AIVoiceDebatePage() {
         {recording ? (
           <TouchableOpacity onPress={stopRecording}>
             <Text className="text-red-600 text-[17px] underline">
-              녹음 중지
+              내 차례 멈추기
             </Text>
           </TouchableOpacity>
         ) : (
           <TouchableOpacity onPress={startRecording}>
             <Text className="text-[#2E7D32] text-[17px] underline">
-              말하기 (녹음 시작)
+              내 차례 시작하기
             </Text>
           </TouchableOpacity>
         )}
@@ -232,16 +256,20 @@ export default function AIVoiceDebatePage() {
             })
           }
         >
-          <Text className="text-[#2E7D32] text-[15px] mt-5 mb-5 underline">
+          <Text className="text-[#2E7D32] text-[15px] mt-10 mb-5">
             이전 대화 보러가기
           </Text>
         </TouchableOpacity>
 
+        {/* 끝내기 버튼: cleanUpAudio() 실행 후 페이지 이동 */}
         <TouchableOpacity
-          className="w-[101px] h-[43px] rounded-full border border-[#2E7D32] bg-white flex items-center justify-center"
-          onPress={() => router.replace("/AiPage")}
+          className="w-[101px] h-[43px] rounded-full border border-[#2E7D32] mt-10 bg-white flex items-center justify-center"
+          onPress={async () => {
+            await cleanUpAudio();
+            router.replace("/AiPage");
+          }}
         >
-          <Text className="text-[#2E7D32] font-medium text-[15px]">
+          <Text className="text-[#2E7D32] font-medium text-[15px] ">
             끝내기
           </Text>
         </TouchableOpacity>

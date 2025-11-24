@@ -9,8 +9,8 @@ import { sendChatMessage } from "@/services/api/aiChat";
 import { ChatContent } from "@/types/auth/chat";
 
 export default function AIChatDebatePage() {
-  const { articleId } =
-    useLocalSearchParams<{ articleId?: string }>();
+  const { articleId, level } =
+    useLocalSearchParams<{ articleId?: string; level?: string }>();
 
   const [discussionId, setDiscussionId] = useState<number | undefined>(undefined);
   const [chatList, setChatList] = useState<ChatContent[]>([]);
@@ -18,6 +18,7 @@ export default function AIChatDebatePage() {
   const handleSend = async (message: string) => {
     if (!articleId) return;
 
+    // 사용자 메시지 표시
     setChatList(prev => [
       ...prev,
       { contentId: Date.now(), role: "USER", content: message }
@@ -26,13 +27,15 @@ export default function AIChatDebatePage() {
     try {
       const res = await sendChatMessage(
         Number(articleId),
-        { message, level: "beginner" },
+        { message, level: (level as any) || "beginner" },
         discussionId
       );
 
       if (res.success) {
+        // 최초 discussionId 세팅
         if (!discussionId) setDiscussionId(res.data.discussionId);
 
+        // AI 답변 추가
         setChatList(prev => [
           ...prev,
           {
