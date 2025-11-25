@@ -1,4 +1,4 @@
-import { quizService, QuizQuestion } from '@/services/quiz/quizService'
+import { quizService, QuizQuestion } from '@/services/api/quiz'
 import { useRouter } from 'expo-router'
 import { useEffect, useRef, useState } from 'react'
 import { ActivityIndicator, Animated, Image, Text, TouchableOpacity, View } from 'react-native'
