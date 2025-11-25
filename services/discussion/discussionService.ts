@@ -1,7 +1,6 @@
-import { DiscussionRecordItem } from '../../types/screens';
-import apiClient from '../api/client'
-import { ENDPOINTS } from '../api/endpoints'
-import { ApiResponse } from '../../types/api'
+import { ApiResponse, DiscussionRecordItem } from '../../types/screens';
+import apiClient from '../api/client';
+import { ENDPOINTS } from '../api/endpoints';
 
 interface Discussion {
   id: string
@@ -10,12 +9,6 @@ interface Discussion {
   createdAt: string
 }
 
-interface DiscussionMessage {
-  id: string
-  role: 'user' | 'ai'
-  content: string
-  timestamp: string
-}
 
 export const discussionService = {
   // 토론 기록 가져오기
@@ -56,19 +49,6 @@ export const discussionService = {
 
   async getDiscussionDetail(discussionId: string): Promise<Discussion> {
     const response = await apiClient.get(ENDPOINTS.DISCUSSION.DETAIL(discussionId))
-    return response.data
-  },
-
-  async getMessages(discussionId: string): Promise<DiscussionMessage[]> {
-    const response = await apiClient.get(ENDPOINTS.DISCUSSION.MESSAGES(discussionId))
-    return response.data
-  },
-
-  async sendMessage(discussionId: string, content: string): Promise<DiscussionMessage> {
-    const response = await apiClient.post(
-      ENDPOINTS.DISCUSSION.SEND_MESSAGE(discussionId),
-      { content }
-    )
     return response.data
   },
 }

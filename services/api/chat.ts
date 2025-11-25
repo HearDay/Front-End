@@ -1,4 +1,3 @@
-// services/api/chat.ts
 import axiosInstance from "@/services/api/axiosInstance";
 import { DiscussionDetailResponse } from "@/types/auth/chat";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -7,21 +6,20 @@ export const fetchDiscussionDetail = async (
   discussionId: number,
   page = 0,
   size = 10,
-  sort = "desc"
+  sort = "asc"
 ): Promise<DiscussionDetailResponse> => {
   try {
-    const token = await AsyncStorage.getItem("accessToken");
-    if (!token) {
-      throw new Error("토큰이 없습니다. 로그인 후 다시 시도해주세요.");
-    }
+    const rawToken = await AsyncStorage.getItem("accessToken");
+    const token = rawToken ? rawToken.replace(/"/g, "") : ""; // 토큰문자열 따옴표 제거
 
-    const response = await axiosInstance.get<DiscussionDetailResponse>(
-      `/api/discussion/${discussionId}`,
+    const response = await axiosInstance.get(
+      `/api/discussion/${discussionId}`, 
       {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: token ? `Bearer ${token}` : "",
         },
         params: {
+          discussionId, 
           page,
           size,
           sort,

@@ -214,9 +214,8 @@ export interface DiscussionNewsCardProps {
 
 export interface DiscussionModalProps {
   visible: boolean
-  articleId: string | null
+  articleId: string;
   onClose: () => void
-  onStartDiscussion: (type: 'voice' | 'chat', articleId: string) => void
 }
 
 // ========== 토론 기록 관련 ==========
