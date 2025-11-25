@@ -44,10 +44,9 @@ export const ENDPOINTS = {
 
   // 토론
   DISCUSSION: {
-    LIST: '/api/discussion',
-    CREATE: '/api/discussion',
-    DETAIL: (id: string) => `/api/discussion/${id}`,
-    MESSAGES: (id: string) => `/api/discussion/${id}/messages`,
-    SEND_MESSAGE: (id: string) => `/api/discussion/${id}/messages`,
+    LIST: '/api/discussion',                         // 토론 전체 조회
+    CREATE: '/api/discussion',                       // 토론 생성
+    DETAIL: (discussionId: string | number) => `/api/discussion/${discussionId}`, // 토론 상세 조회
   },
+
 }

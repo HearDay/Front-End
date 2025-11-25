@@ -11,8 +11,8 @@ export function DiscussionRecordCard({ record }: DiscussionRecordCardProps) {
 
   const handlePress = () => {
     router.push({
-      pathname: "/AIChatDebatePage",
-      params: { mode: "view", discussionId: record.id },
+      pathname: "/AIChatRecordPage",
+      params: { discussionId: record.id },
     });
   };
 
