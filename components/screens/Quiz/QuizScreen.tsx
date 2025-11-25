@@ -1,62 +1,104 @@
+import { quizService, QuizQuestion } from '@/services/quiz/quizService'
 import { useRouter } from 'expo-router'
-import { useRef, useState } from 'react'
-import { Animated, Image, Text, TouchableOpacity, View } from 'react-native'
+import { useEffect, useRef, useState } from 'react'
+import { ActivityIndicator, Animated, Image, Text, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 interface QuizOption {
-  id: string
+  id: number
   text: string
   isCorrect: boolean
 }
 
 interface QuizData {
-  id: string
+  id: number
   question: string
   options: QuizOption[]
-  points: number
   explanation: string
 }
 
-// 더미 데이터
-const DUMMY_QUIZ: QuizData = {
-  id: '1',
-  question: 'KT 차기 CEO 최종 후보는 언제 선정될 예정인가요?',
-  options: [
-    { id: '1', text: '내년 3월에 선정될 예정이다.', isCorrect: false },
-    { id: '2', text: '올해 안에 선정될 예정이다.', isCorrect: true },
-    { id: '3', text: '주주총회에서 선정될 예정이다.', isCorrect: false },
-  ],
-  points: 5,
-  explanation: 'KT는 올해 안에 차기 CEO 최종 후보를 선정할 예정입니다. 현재 내부 및 외부 후보자들을 대상으로 면접과 평가가 진행 중이며, 이사회의 최종 승인을 거쳐 올해 말까지 새로운 CEO가 확정될 것으로 보입니다.',
+interface QuizScreenProps {
+  articleId: string
 }
 
-export const QuizScreen = () => {
+export const QuizScreen = ({ articleId }: QuizScreenProps) => {
   const router = useRouter()
-  const [selectedOption, setSelectedOption] = useState<string | null>(null)
+  const [quizData, setQuizData] = useState<QuizData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [selectedOption, setSelectedOption] = useState<number | null>(null)
   const [isAnswered, setIsAnswered] = useState(false)
   const [showCorrectAnimation, setShowCorrectAnimation] = useState(false)
   const [showExplanation, setShowExplanation] = useState(false)
 
   const shakeAnimation = useRef(new Animated.Value(0)).current
   const correctAnimation = useRef(new Animated.Value(0)).current
-  const optionAnimations = useRef(
-    DUMMY_QUIZ.options.reduce((acc, option) => {
-      acc[option.id] = {
-        translateX: new Animated.Value(0),
-        opacity: new Animated.Value(1),
-      }
-      return acc
-    }, {} as Record<string, { translateX: Animated.Value; opacity: Animated.Value }>)
-  ).current
+  const [optionAnimations, setOptionAnimations] = useState<Record<number, { translateX: Animated.Value; opacity: Animated.Value }>>({})
 
-  const handleOptionPress = (optionId: string) => {
+  // 퀴즈 데이터 로드
+  useEffect(() => {
+    const fetchQuiz = async () => {
+      try {
+        setLoading(true)
+        const quiz = await quizService.getQuizByArticle(parseInt(articleId))
+
+        // API 데이터를 QuizData 형식으로 변환
+        const formattedQuiz: QuizData = {
+          id: quiz.id,
+          question: quiz.question,
+          options: [
+            { id: 1, text: quiz.option1, isCorrect: quiz.correctAnswer === 1 },
+            { id: 2, text: quiz.option2, isCorrect: quiz.correctAnswer === 2 },
+            { id: 3, text: quiz.option3, isCorrect: quiz.correctAnswer === 3 },
+          ],
+          explanation: quiz.explanation,
+        }
+
+        setQuizData(formattedQuiz)
+
+        // 애니메이션 초기화
+        const animations = formattedQuiz.options.reduce((acc, option) => {
+          acc[option.id] = {
+            translateX: new Animated.Value(0),
+            opacity: new Animated.Value(1),
+          }
+          return acc
+        }, {} as Record<number, { translateX: Animated.Value; opacity: Animated.Value }>)
+        setOptionAnimations(animations)
+
+        // 이미 풀었는지 표시
+        if (quiz.isSolved) {
+          setIsAnswered(true)
+          setShowExplanation(true)
+          setSelectedOption(quiz.correctAnswer)
+        }
+      } catch (err: any) {
+        if (err.response?.status === 403) {
+          setError('이 기사에는 아직 퀴즈가 준비되지 않았습니다.')
+        } else if (err.response?.status === 404) {
+          setError('퀴즈를 찾을 수 없습니다.')
+        } else {
+          setError('퀴즈를 불러올 수 없습니다.')
+        }
+        console.error('퀴즈 로드 실패:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchQuiz()
+  }, [articleId])
+
+  const handleOptionPress = (optionId: number) => {
     if (!isAnswered) {
       setSelectedOption(optionId)
     }
   }
 
-  const handleConfirm = () => {
-    const selectedOptionData = DUMMY_QUIZ.options.find(opt => opt.id === selectedOption)
+  const handleConfirm = async () => {
+    if (!quizData) return
+
+    const selectedOptionData = quizData.options.find(opt => opt.id === selectedOption)
 
     setIsAnswered(true)
 
@@ -74,6 +116,13 @@ export const QuizScreen = () => {
         setIsAnswered(false)
       }, 2000)
     } else if (selectedOptionData && selectedOptionData.isCorrect) {
+      // 정답 제출
+      try {
+        await quizService.solveQuiz(quizData.id)
+      } catch (error) {
+        console.error('퀴즈 제출 실패:', error)
+      }
+
       // 맞았을 때 O 애니메이션
       setShowCorrectAnimation(true)
       Animated.sequence([
@@ -86,7 +135,7 @@ export const QuizScreen = () => {
         // O 애니메이션이 끝나면 해설 보여주기
         setTimeout(() => {
           // 틀린 선지들을 왼쪽으로 사라지게
-          const animations = DUMMY_QUIZ.options
+          const animations = quizData.options
             .filter(opt => !opt.isCorrect)
             .map(opt =>
               Animated.parallel([
@@ -134,6 +183,34 @@ export const QuizScreen = () => {
     return 'bg-white border-[#B3D7BB]'
   }
 
+  if (loading) {
+    return (
+      <View className="flex-1 bg-white">
+        <SafeAreaView className="flex-1 justify-center items-center">
+          <ActivityIndicator size="large" color="#006716" />
+          <Text className="text-gray-600 mt-4">퀴즈를 불러오는 중...</Text>
+        </SafeAreaView>
+      </View>
+    )
+  }
+
+  if (error || !quizData) {
+    return (
+      <View className="flex-1 bg-white">
+        <SafeAreaView className="flex-1 justify-center items-center px-4">
+          <Text className="text-red-500 text-center mb-4">{error || '퀴즈를 찾을 수 없습니다.'}</Text>
+          <TouchableOpacity
+            onPress={handleBack}
+            className="bg-green-600 px-6 py-3 rounded-xl"
+            activeOpacity={0.7}
+          >
+            <Text className="text-white font-semibold">돌아가기</Text>
+          </TouchableOpacity>
+        </SafeAreaView>
+      </View>
+    )
+  }
+
   return (
     <View className="flex-1 bg-white">
       <SafeAreaView className="flex-1">
@@ -163,22 +240,15 @@ export const QuizScreen = () => {
 
         {/* Content */}
         <View className="flex-1 px-6 pt-6">
-          {/* Points Badge */}
-          <View className="self-start bg-[#FBFFD3] px-4 py-1 rounded-full mb-6">
-            <Text className="text-[14px] font-semibold text-[#002C09]">
-              {DUMMY_QUIZ.points} POINT
-            </Text>
-          </View>
-
           {/* Question */}
           <Text className="text-[20px] font-bold mb-8">
             <Text className="text-[#006716]">Q. </Text>
-            {DUMMY_QUIZ.question}
+            {quizData.question}
           </Text>
 
           {/* Options */}
           <View className="gap-5">
-            {DUMMY_QUIZ.options.map((option) => {
+            {quizData.options.map((option) => {
               if (showExplanation && !option.isCorrect) {
                 return null
               }
@@ -191,10 +261,10 @@ export const QuizScreen = () => {
                       {
                         translateX: isAnswered && selectedOption === option.id && !option.isCorrect
                           ? shakeAnimation
-                          : optionAnimations[option.id].translateX
+                          : optionAnimations[option.id]?.translateX || new Animated.Value(0)
                       }
                     ],
-                    opacity: optionAnimations[option.id].opacity
+                    opacity: optionAnimations[option.id]?.opacity || new Animated.Value(1)
                   }}
                 >
                   <TouchableOpacity
@@ -231,7 +301,7 @@ export const QuizScreen = () => {
           {showExplanation && (
             <View className="mt-6 p-5 bg-gray-50 rounded-2xl">
               <Text className="text-[16px] text-[#7B7B7B] leading-6">
-                {DUMMY_QUIZ.explanation}
+                {quizData.explanation}
               </Text>
             </View>
           )}
