@@ -1,4 +1,3 @@
-// DiscussionLevelModal.tsx
 import { Modal } from "@/components/common";
 import { Text, TouchableOpacity, View } from "react-native";
 
@@ -31,7 +30,7 @@ export function DiscussionLevelModal({
       confirmText=""
       onConfirm={onClose}
     >
-      <View className="mt-4 gap-3 items-center">
+      <View className="mt-6 gap-3 items-center">
         <TouchableOpacity
           className="w-[250px] py-3 rounded-2xl bg-[#1B8131]"
           onPress={() => handleSelectLevel("beginner")}
