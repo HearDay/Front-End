@@ -46,6 +46,7 @@ export const TodayNewsModal = ({
 }: TodayNewsModalProps) => {
   const router = useRouter()
   const [currentIndex, setCurrentIndex] = useState(0)
+  const currentIndexRef = useRef(0)
   const position = useRef(new Animated.Value(0)).current
   const newsItemsRef = useRef(newsItems)
 
@@ -54,30 +55,24 @@ export const TodayNewsModal = ({
     newsItemsRef.current = newsItems
   }, [newsItems])
 
+  // currentIndex가 변경될 때마다 ref 업데이트
+  useEffect(() => {
+    currentIndexRef.current = currentIndex
+  }, [currentIndex])
+
   useEffect(() => {
     if (visible) {
-      if (completedNewsId) {
-        const index = newsItems.findIndex(item => item.id === completedNewsId)
-        if (index !== -1) {
-          setCurrentIndex(index)
-        } else {
-          setCurrentIndex(0)
-        }
-      } else {
-        setCurrentIndex(0)
-      }
+      setCurrentIndex(0)
+      currentIndexRef.current = 0
       position.setValue(0)
     }
-  }, [visible, completedNewsId, newsItems])
+  }, [visible, newsItems, position])
 
   const handleCardPress = useCallback(
     (newsId: string) => {
-      console.log('기사 선택 - Article ID:', newsId);
       if (onNewsCardPress) {
-        // 부모 컴포넌트에서 제공한 함수가 있으면 사용 (하드코딩 방식)
         onNewsCardPress(newsId)
       } else {
-        // 없으면 기존 방식 사용 (fallback)
         router.push(`/(tabs)?showTodayNews=true&newsId=${newsId}&from=todaynews`)
         router.push(`/newsplayer/${newsId}?from=todaynews`)
         onClose()
@@ -99,26 +94,36 @@ export const TodayNewsModal = ({
       },
       onPanResponderRelease: (_, gesture) => {
         if (gesture.dx < SWIPE_THRESHOLD) {
+          const newIndex = currentIndexRef.current + 1
+
+          if (newIndex >= newsItemsRef.current.length) {
+            Animated.timing(position, {
+              toValue: -SCREEN_WIDTH,
+              duration: 300,
+              useNativeDriver: true,
+            }).start(() => {
+              InteractionManager.runAfterInteractions(() => {
+                onClose()
+              })
+            })
+            return
+          }
+
+          setCurrentIndex(newIndex)
+          currentIndexRef.current = newIndex
+
           Animated.timing(position, {
             toValue: -SCREEN_WIDTH,
-            duration: 250,
+            duration: 300,
             useNativeDriver: true,
           }).start(() => {
-            setCurrentIndex(prevIndex => {
-              const newIndex = prevIndex + 1
-              if (newIndex >= newsItemsRef.current.length) {
-                InteractionManager.runAfterInteractions(() => {
-                  onClose()
-                })
-                return prevIndex
-              }
-              position.setValue(0)
-              return newIndex
-            })
+            position.setValue(0)
           })
         } else {
           Animated.spring(position, {
             toValue: 0,
+            tension: 50,
+            friction: 7,
             useNativeDriver: true,
           }).start()
         }
@@ -127,15 +132,29 @@ export const TodayNewsModal = ({
   ).current
 
   const renderCard = (item: TodayNewsItem, index: number) => {
-    if (index < currentIndex) return null
-
     const isCurrentCard = index === currentIndex
     const offset = index - currentIndex
-    const scale = 1 - offset * 0.03
-    const translateY = -offset * 10
-    const translateX = offset * 10
+    const scale = 1 - Math.abs(offset) * 0.03
+    const translateY = -Math.max(offset, 0) * 10
+    const translateX = Math.max(offset, 0) * 10
     const isCompleted = completedNewsId === item.id
 
+    // 지나간 카드는 화면 밖으로 완전히 숨김
+    if (index < currentIndex) {
+      return (
+        <View
+          key={item.id}
+          style={{
+            position: 'absolute',
+            width: CARD_WIDTH,
+            opacity: 0,
+            transform: [{ translateX: -SCREEN_WIDTH }],
+          }}
+        />
+      )
+    }
+
+    // 현재 카드와 다음 카드들
     const animatedStyle = isCurrentCard
       ? {
           transform: [{ translateX: position }, { translateY }, { scale }],
@@ -158,16 +177,21 @@ export const TodayNewsModal = ({
             width: CARD_WIDTH,
             zIndex: newsItems.length - index,
             shadowColor: '#000',
-            shadowOffset: { width: 0, height: offset * 2 },
-            shadowOpacity: 0.1 + offset * 0.05,
+            shadowOffset: { width: 0, height: Math.max(offset, 0) * 2 },
+            shadowOpacity: 0.1 + Math.max(offset, 0) * 0.05,
             shadowRadius: 5,
             elevation: newsItems.length - index,
           },
           animatedStyle,
         ]}
+        pointerEvents={index < currentIndex ? 'none' : 'auto'}
         {...panResponder.panHandlers}
       >
-        <Pressable onPress={() => isCurrentCard && handleCardPress(item.id)}>
+        <Pressable onPress={() => {
+          if (isCurrentCard) {
+            handleCardPress(item.id);
+          }
+        }}>
           <View
             className="bg-white rounded-3xl overflow-hidden"
             style={{
