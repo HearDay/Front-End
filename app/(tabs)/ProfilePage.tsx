@@ -2,12 +2,36 @@ import PrimaryButton from "@/components/common/PrimaryButton";
 import TopBar from "@/components/common/TopBar";
 import AttendanceCalendar from "@/components/screens/Profile/AttendanceCalendar";
 import UserInfo from "@/components/screens/Profile/UserInfo";
+import { fetchProfile } from "@/services/api/profile";
+import { ProfileData } from "@/types/auth/profile";
 import { Stack, useRouter } from "expo-router";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
 const Profile = () => {
   const router = useRouter();
+  const [user, setUser] = useState<ProfileData | null>(null);
+
+  // 오늘 날짜 기준으로 year/month API 호출
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth() + 1;
+
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetchProfile(year, month);
+        setUser(res.data);
+      } catch (err) {
+        console.error("프로필 조회 실패:", err);
+      }
+    };
+
+    load();
+  }, []);
+
+  if (!user) return null;
 
   return (
     <View className="flex-1 bg-white">
@@ -20,14 +44,11 @@ const Profile = () => {
         onBackPress={() => router.replace("/AiPage")}
       />
 
-      {/* 설정 버튼 absolute 배치 */}
+      {/* 설정 버튼 */}
       <TouchableOpacity
-        onPress={() => router.push("/SettingPage")} 
+        onPress={() => router.push("/SettingPage")}
         className="absolute"
-        style={{
-          top: 73,
-          right: 20, 
-        }}
+        style={{ top: 73, right: 20 }}
       >
         <Image
           source={require("../../my-expo-app/assets/images/Setting.png")}
@@ -36,12 +57,13 @@ const Profile = () => {
       </TouchableOpacity>
 
       <View className="w-full items-center">
-        {/* UserInfo */}
+
+        {/* 사용자 정보 영역 */}
         <UserInfo
-          nickname="데이"
-          email="hearday@naver.com"
-          level={5}
-          point={75}
+          nickname={user.nickname}
+          email={user.email}
+          level={user.level}   // 백엔드값 그대로
+          point={user.point}   // 누적 포인트
         />
 
         {/* 프로필 편집 버튼 */}
@@ -58,7 +80,8 @@ const Profile = () => {
           출석 현황
         </Text>
 
-        <AttendanceCalendar />
+        {/* 캘린더 */}
+        <AttendanceCalendar attendance={user.attendance} />
       </View>
     </View>
   );
