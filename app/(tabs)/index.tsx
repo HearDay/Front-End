@@ -2,11 +2,10 @@ import { CategoryChipGroup } from "@/components/common";
 import HeroSection from "@/components/screens/HomePage/HeroSection";
 import NewsCardList from "@/components/screens/HomePage/NewsCardList";
 import NewsCardSlider from "@/components/screens/HomePage/NewsCardSlider";
-import { DUMMY_TODAY_NEWS } from "@/components/screens/HomePage/TodayNewsDummy";
 import { TodayNewsModal } from "@/components/screens/HomePage/TodayNewsModal";
-import { newsService } from "@/services";
 import { fetchCategoryRecommendNews } from "@/services/api/categoryRecommendNews";
 import { fetchRecommendNews } from "@/services/api/recommendNews";
+import { todayNewsService } from "@/services/api/todayNews";
 import { useCategoryStore } from "@/services/utils/categoryStore";
 import { RecommendArticle } from "@/types/auth/recommendNews";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -57,7 +56,8 @@ export default function Index() {
   const [showTodayNewsModal, setShowTodayNewsModal] = useState(false);
   const [todayNewsItems, setTodayNewsItems] = useState<any[]>([]);
   const [completedNewsId, setCompletedNewsId] = useState<string | null>(null);
-  const shouldShowModalOnReturn = useRef(false); // 오늘의 뉴스에서 돌아올 때 모달 표시 플래그
+  const [userGender, setUserGender] = useState<string>("여성");
+  const [userAge, setUserAge] = useState<string>("20");
 
   const offset = useSharedValue(selectedCategory ? 1 : 0);
   const pathname = usePathname();
@@ -92,11 +92,12 @@ export default function Index() {
     loadUserInfo();
   }, [pathname]);
 
-  // 오늘의 뉴스 데이터 로드 (내 작업)
+  // 오늘의 뉴스 데이터 및 사용자 정보 로드
   useEffect(() => {
-    const loadTodayNews = async () => {
+    const loadTodayNewsAndUserInfo = async () => {
       try {
-        const articles = await newsService.getArticles(0, 5);
+        // 맞춤 기사 가져오기
+        const articles = await todayNewsService.getTopByDemographic();
         const news = articles.map((article) => ({
           id: article.id.toString(),
           title: article.title,
@@ -105,13 +106,25 @@ export default function Index() {
           category: article.category,
         }));
         setTodayNewsItems(news);
+
+        // 사용자 성별/나이 가져오기
+        const userDemographic = await todayNewsService.getUserDemographic();
+        const genderText = userDemographic.gender === "M" ? "남성" : "여성";
+        const ageText = Math.floor(userDemographic.age / 10) * 10;
+        setUserGender(genderText);
+        setUserAge(ageText.toString());
+
+        // AsyncStorage에서 completedNewsId 복원
+        const savedCompletedId = await AsyncStorage.getItem('completedTodayNewsId');
+        if (savedCompletedId) {
+          setCompletedNewsId(savedCompletedId);
+        }
       } catch (error) {
-        console.error("오늘의 뉴스 로드 실패:", error);
-        setTodayNewsItems(DUMMY_TODAY_NEWS);
+        console.error("오늘의 뉴스 또는 사용자 정보 로드 실패:", error);
       }
     };
 
-    loadTodayNews();
+    loadTodayNewsAndUserInfo();
   }, []);
 
   // 맨 처음 앱 진입 시에만 모달 표시 (AsyncStorage 사용)
@@ -135,13 +148,31 @@ export default function Index() {
     checkFirstLaunch();
   }, []); // 빈 배열로 첫 마운트에만 실행
 
-  // 오늘의 뉴스에서 돌아왔을 때 모달 표시 (useFocusEffect 사용)
+  // 오늘의 뉴스에서 돌아왔을 때 모달 표시
   useFocusEffect(
     useCallback(() => {
-      if (shouldShowModalOnReturn.current) {
-        shouldShowModalOnReturn.current = false;
-        setShowTodayNewsModal(true);
-      }
+      const checkReturnFlag = async () => {
+        try {
+          const shouldReturn = await AsyncStorage.getItem('shouldShowTodayNewsModalOnReturn');
+          const savedCompletedId = await AsyncStorage.getItem('completedTodayNewsId');
+
+          if (shouldReturn === 'true') {
+            await AsyncStorage.removeItem('shouldShowTodayNewsModalOnReturn');
+
+            if (savedCompletedId) {
+              setCompletedNewsId(savedCompletedId);
+            }
+
+            setTimeout(() => {
+              setShowTodayNewsModal(true);
+            }, 300);
+          }
+        } catch (error) {
+          console.error('AsyncStorage 오류:', error);
+        }
+      };
+
+      checkReturnFlag();
     }, [])
   );
 
@@ -178,9 +209,14 @@ export default function Index() {
     setShowTodayNewsModal(true);
   };
 
-  const handleNewsCardPress = (newsId: string) => {
-    // 오늘의 뉴스 카드를 눌러서 재생화면으로 이동할 때 플래그 설정
-    shouldShowModalOnReturn.current = true;
+  const handleNewsCardPress = async (newsId: string) => {
+    try {
+      await AsyncStorage.setItem('shouldShowTodayNewsModalOnReturn', 'true');
+      await AsyncStorage.setItem('completedTodayNewsId', newsId);
+    } catch (error) {
+      console.error('AsyncStorage 저장 오류:', error);
+    }
+
     setCompletedNewsId(newsId);
     router.push(`/newsplayer/${newsId}?from=todaynews`);
     setShowTodayNewsModal(false);
@@ -197,14 +233,11 @@ export default function Index() {
       <TodayNewsModal
         visible={showTodayNewsModal}
         onClose={() => {
-          setTimeout(() => {
-            setShowTodayNewsModal(false);
-            setCompletedNewsId(null);
-          }, 0);
+          setShowTodayNewsModal(false);
         }}
         onNewsCardPress={handleNewsCardPress}
-        newsItems={todayNewsItems.length > 0 ? todayNewsItems : DUMMY_TODAY_NEWS}
-        userInfo={{ age: "20", gender: "여성" }}
+        newsItems={todayNewsItems}
+        userInfo={{ age: userAge, gender: userGender }}
         completedNewsId={completedNewsId}
       />
 
