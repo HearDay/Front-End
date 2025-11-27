@@ -3,12 +3,14 @@ import HeroSection from "@/components/screens/HomePage/HeroSection";
 import NewsCardList from "@/components/screens/HomePage/NewsCardList";
 import NewsCardSlider from "@/components/screens/HomePage/NewsCardSlider";
 import { TodayNewsModal } from "@/components/screens/HomePage/TodayNewsModal";
+import { newsService } from "@/services";
 import { fetchCategoryRecommendNews } from "@/services/api/categoryRecommendNews";
 import { fetchRecommendNews } from "@/services/api/recommendNews";
 import { todayNewsService } from "@/services/api/todayNews";
 import { useCategoryStore } from "@/services/utils/categoryStore";
+import { usePlaylistStore } from "@/stores/playlistStore";
+import { useTodayNewsStore } from "@/stores/todayNewsStore";
 import { RecommendArticle } from "@/types/auth/recommendNews";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocalSearchParams, usePathname, useFocusEffect, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { ScrollView, Text, View } from "react-native";
@@ -52,12 +54,21 @@ export default function Index() {
     RecommendArticle[]
   >([]);
 
-  // 오늘의 뉴스 관련 state (내 작업)
+  // Zustand - 오늘의 뉴스
+  const {
+    hasShownModal,
+    shouldShowOnReturn,
+    completedNewsId,
+    setHasShownModal,
+    setShouldShowOnReturn,
+    setCompletedNewsId,
+  } = useTodayNewsStore();
+
+  // 오늘의 뉴스 관련 state
   const [showTodayNewsModal, setShowTodayNewsModal] = useState(false);
   const [todayNewsItems, setTodayNewsItems] = useState<any[]>([]);
-  const [completedNewsId, setCompletedNewsId] = useState<string | null>(null);
-  const [userGender, setUserGender] = useState<string>("여성");
-  const [userAge, setUserAge] = useState<string>("20");
+  const [userGender, setUserGender] = useState<string>("");
+  const [userAge, setUserAge] = useState<string>("");
 
   const offset = useSharedValue(selectedCategory ? 1 : 0);
   const pathname = usePathname();
@@ -96,84 +107,89 @@ export default function Index() {
   useEffect(() => {
     const loadTodayNewsAndUserInfo = async () => {
       try {
+        console.log('========================================');
+        console.log('오늘의 뉴스 API 호출 시작');
+        console.log('========================================');
+
         // 맞춤 기사 가져오기
         const articles = await todayNewsService.getTopByDemographic();
-        const news = articles.map((article) => ({
-          id: article.id.toString(),
-          title: article.title,
-          imageUrl: article.imageUrl,
-          summary: article.description,
-          category: article.category,
-        }));
-        setTodayNewsItems(news);
+        console.log('맞춤 기사 API 응답 성공');
+        console.log('받아온 기사 개수:', articles?.length || 0);
+        console.log('기사 데이터:', JSON.stringify(articles, null, 2));
+
+        if (articles && articles.length > 0) {
+          const news = articles.map((article) => ({
+            id: article.id.toString(),
+            title: article.title,
+            imageUrl: article.imageUrl,
+            summary: article.description,
+            category: article.category,
+          }));
+          setTodayNewsItems(news);
+          console.log('todayNewsItems 설정 완료:', news.length, '개');
+        } else {
+          console.log('받아온 기사가 없음 (빈 배열 또는 null)');
+          setTodayNewsItems([]);
+        }
+
+        console.log('========================================');
+        console.log('사용자 정보 API 호출 시작');
+        console.log('========================================');
 
         // 사용자 성별/나이 가져오기
         const userDemographic = await todayNewsService.getUserDemographic();
+        console.log('사용자 정보 API 응답 성공');
+        console.log('사용자 데이터:', JSON.stringify(userDemographic, null, 2));
+
         const genderText = userDemographic.gender === "M" ? "남성" : "여성";
         const ageText = Math.floor(userDemographic.age / 10) * 10;
         setUserGender(genderText);
         setUserAge(ageText.toString());
+        console.log('사용자 정보 설정 완료:', ageText, '대', genderText);
 
-        // AsyncStorage에서 completedNewsId 복원
-        const savedCompletedId = await AsyncStorage.getItem('completedTodayNewsId');
-        if (savedCompletedId) {
-          setCompletedNewsId(savedCompletedId);
-        }
+        console.log('========================================');
+        console.log('모든 API 호출 완료');
+        console.log('========================================');
       } catch (error) {
-        console.error("오늘의 뉴스 또는 사용자 정보 로드 실패:", error);
+        console.log('========================================');
+        console.error("API 호출 실패");
+        console.error("에러 타입:", error?.constructor?.name);
+        console.error("에러 메시지:", error?.message);
+        console.error("에러 상세:", error);
+        if (error?.response) {
+          console.error("HTTP 상태:", error.response.status);
+          console.error("응답 데이터:", JSON.stringify(error.response.data, null, 2));
+        }
+        console.log('========================================');
       }
     };
 
     loadTodayNewsAndUserInfo();
   }, []);
 
-  // 맨 처음 앱 진입 시에만 모달 표시 (AsyncStorage 사용)
+  // 맨 처음 앱 진입 시에만 모달 표시 (Zustand 사용)
   useEffect(() => {
-    const checkFirstLaunch = async () => {
-      try {
-        const hasShownTodayNews = await AsyncStorage.getItem('hasShownTodayNewsModal');
-        if (!hasShownTodayNews) {
-          // 처음 실행하는 경우
-          setTimeout(() => {
-            setShowTodayNewsModal(true);
-          }, 500);
-          // 모달을 표시했다고 저장
-          await AsyncStorage.setItem('hasShownTodayNewsModal', 'true');
-        }
-      } catch (error) {
-        console.error('AsyncStorage 오류:', error);
-      }
-    };
-
-    checkFirstLaunch();
+    if (!hasShownModal) {
+      // 처음 실행하는 경우
+      setTimeout(() => {
+        setShowTodayNewsModal(true);
+      }, 500);
+      // 모달을 표시했다고 저장
+      setHasShownModal(true);
+    }
   }, []); // 빈 배열로 첫 마운트에만 실행
 
   // 오늘의 뉴스에서 돌아왔을 때 모달 표시
   useFocusEffect(
     useCallback(() => {
-      const checkReturnFlag = async () => {
-        try {
-          const shouldReturn = await AsyncStorage.getItem('shouldShowTodayNewsModalOnReturn');
-          const savedCompletedId = await AsyncStorage.getItem('completedTodayNewsId');
+      if (shouldShowOnReturn) {
+        setShouldShowOnReturn(false);
 
-          if (shouldReturn === 'true') {
-            await AsyncStorage.removeItem('shouldShowTodayNewsModalOnReturn');
-
-            if (savedCompletedId) {
-              setCompletedNewsId(savedCompletedId);
-            }
-
-            setTimeout(() => {
-              setShowTodayNewsModal(true);
-            }, 300);
-          }
-        } catch (error) {
-          console.error('AsyncStorage 오류:', error);
-        }
-      };
-
-      checkReturnFlag();
-    }, [])
+        setTimeout(() => {
+          setShowTodayNewsModal(true);
+        }, 300);
+      }
+    }, [shouldShowOnReturn, setShouldShowOnReturn])
   );
 
   // 카테고리 선택 시 (develop 브랜치 코드)
@@ -211,14 +227,41 @@ export default function Index() {
 
   const handleNewsCardPress = async (newsId: string) => {
     try {
-      await AsyncStorage.setItem('shouldShowTodayNewsModalOnReturn', 'true');
-      await AsyncStorage.setItem('completedTodayNewsId', newsId);
+      // Zustand에 플래그 및 완료 ID 저장
+      setShouldShowOnReturn(true);
+      setCompletedNewsId(newsId);
+
+      // 플레이리스트 생성
+      console.log('========================================');
+      console.log('플레이리스트 생성 시작');
+
+      // 1. 오늘의 뉴스 5개 ID를 map으로 동적 생성
+      const todayNewsIds = todayNewsItems.map(item => parseInt(item.id));
+      console.log('오늘의 뉴스 IDs:', todayNewsIds);
+
+      // 2. 랜덤 뉴스 100개 가져오기
+      const randomArticles = await newsService.getArticles(0, 100);
+      const randomIds = randomArticles.map(article => article.id);
+      console.log('랜덤 뉴스 개수:', randomIds.length);
+
+      // 3. 전체 플레이리스트 생성 (중복 제거)
+      const allIds = [...todayNewsIds, ...randomIds.filter(id => !todayNewsIds.includes(id))];
+      console.log('전체 플레이리스트 개수:', allIds.length);
+
+      // 4. Zustand에 저장
+      usePlaylistStore.getState().setPlaylist(allIds);
+
+      // 5. 클릭한 기사의 인덱스 찾기
+      const startIndex = allIds.indexOf(parseInt(newsId));
+      usePlaylistStore.setState({ currentIndex: startIndex });
+      console.log('시작 인덱스:', startIndex);
+      console.log('플레이리스트 생성 완료');
+      console.log('========================================');
     } catch (error) {
-      console.error('AsyncStorage 저장 오류:', error);
+      console.error('플레이리스트 생성 오류:', error);
     }
 
-    setCompletedNewsId(newsId);
-    router.push(`/newsplayer/${newsId}?from=todaynews`);
+    router.push(`/newsplayer/${newsId}?playlist=true`);
     setShowTodayNewsModal(false);
   };
 

@@ -18,6 +18,7 @@ export const newsService = {
       imageUrl: article.imageUrl,
       fullText: article.detail.content,
       audioUrl: article.detail.ttsUrl,
+      ttsAlignment: article.detail.ttsAlignment,
     }
   },
 

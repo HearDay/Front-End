@@ -43,6 +43,7 @@ export interface ApiResponse<T> {
 interface ArticleDetail {
   content: string;
   ttsUrl: string;
+  ttsAlignment: string;
 }
 
 export interface ArticleData {
@@ -66,6 +67,7 @@ export interface NewsPlayerData {
   imageUrl: string;
   fullText: string;
   audioUrl: string;
+  ttsAlignment: string;
 }
 
 // ========== 뉴스 플레이어 관련 ==========

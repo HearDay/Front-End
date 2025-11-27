@@ -3,6 +3,7 @@ import { DiscussionLevelModal } from "../Discussion/DiscussionLevelModal";
 import { DiscussionModal } from "../Discussion/DiscussionModal";
 
 import { useAudio } from "@/contexts/AudioContext";
+import { usePlaylistStore } from "@/stores/playlistStore";
 import { Audio } from "expo-av";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -25,20 +26,24 @@ import { NewsPlayerHeader } from "./NewsPlayerHeader";
 interface NewsPlayerScreenProps {
   articleId: string;
   from?: string;
+  isPlaylistMode?: boolean;
 }
 
 export const NewsPlayerScreen = ({
   articleId,
   from,
+  isPlaylistMode = false,
 }: NewsPlayerScreenProps) => {
   const router = useRouter();
   const { category } = useLocalSearchParams<{ category?: string }>();
-  const { isPlaying, loadAudio, play, pause } = useAudio();
+  const { isPlaying, currentPosition, loadAudio, play, pause } = useAudio();
+  const { goToNext, goToPrev } = usePlaylistStore();
 
   const [newsData, setNewsData] = useState<NewsPlayerData | null>(null);
   const [currentLines, setCurrentLines] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [alignmentData, setAlignmentData] = useState<any[]>([]);
 
   // 토론 모달 
   const [showDiscussionModal, setShowDiscussionModal] = useState(false);
@@ -90,11 +95,111 @@ export const NewsPlayerScreen = ({
     fetchRecentArticles();
   }, [fetchNewsData, fetchRecentArticles]);
 
+  // ttsAlignment 파싱 및 전체 텍스트를 줄 단위로 분할
   useEffect(() => {
-    if (newsData?.fullText) {
-      setCurrentLines([newsData.fullText]);
+    if (!newsData?.fullText) return;
+
+    try {
+      // 전체 텍스트를 공백 기준으로 단어 분할
+      const allWords = newsData.fullText.split(/\s+/).filter(w => w.length > 0);
+
+      let wordTimings: Array<{ word: string; startTime: number; endTime: number }> = [];
+
+      if (newsData.ttsAlignment) {
+        // ttsAlignment가 있는 경우 파싱 시도
+        try {
+          const parsed = JSON.parse(newsData.ttsAlignment);
+
+          // 각 세그먼트의 단어를 타임스탬프와 매핑
+          parsed.forEach((segment: any) => {
+            const segmentText = segment.text || segment.word || '';
+            const segmentWords = segmentText.split(/\s+/).filter((w: string) => w.length > 0);
+            // camelCase와 snake_case 모두 지원
+            const startTime = segment.startTime ?? segment.start_time ?? segment.start ?? 0;
+            const endTime = segment.endTime ?? segment.end_time ?? segment.end ?? 0;
+            const segmentDuration = endTime - startTime;
+            const timePerWord = segmentDuration / Math.max(segmentWords.length, 1);
+
+            segmentWords.forEach((word: string, idx: number) => {
+              wordTimings.push({
+                word,
+                startTime: startTime + (timePerWord * idx),
+                endTime: startTime + (timePerWord * (idx + 1)),
+              });
+            });
+          });
+        } catch (parseErr) {
+          console.error('ttsAlignment 파싱 실패:', parseErr);
+        }
+      }
+
+      // ttsAlignment가 없거나 파싱 실패 시, 전체 시간을 균등 분배
+      if (wordTimings.length === 0) {
+        const totalDuration = 60; // 기본 60초로 가정
+        const timePerWord = totalDuration / allWords.length;
+
+        wordTimings = allWords.map((word, idx) => ({
+          word,
+          startTime: timePerWord * idx,
+          endTime: timePerWord * (idx + 1),
+        }));
+      }
+
+      setAlignmentData(wordTimings);
+
+      // 초기 3줄 설정 (한 줄당 6 단어)
+      const wordsPerLine = 6;
+      const line1 = wordTimings.slice(0, wordsPerLine).map(w => w.word).join(' ');
+      const line2 = wordTimings.slice(wordsPerLine, wordsPerLine * 2).map(w => w.word).join(' ');
+      const line3 = wordTimings.slice(wordsPerLine * 2, wordsPerLine * 3).map(w => w.word).join(' ');
+
+      setCurrentLines([line1, line2, line3].filter(l => l.length > 0));
+    } catch (err) {
+      console.error('전체 처리 실패:', err);
+      // 최후의 수단: 전체 텍스트를 3등분
+      const words = newsData.fullText.split(/\s+/);
+      const wordsPerLine = Math.ceil(words.length / 3);
+      const lines = [
+        words.slice(0, wordsPerLine).join(' '),
+        words.slice(wordsPerLine, wordsPerLine * 2).join(' '),
+        words.slice(wordsPerLine * 2).join(' '),
+      ].filter(l => l.length > 0);
+      setCurrentLines(lines);
     }
   }, [newsData]);
+
+  // 현재 재생 위치에 맞는 가사 업데이트 (3줄 표시, 한 줄씩 올라가기)
+  useEffect(() => {
+    if (!alignmentData || alignmentData.length === 0) return;
+
+    // 현재 재생 중인 단어의 인덱스 찾기
+    const currentWordIndex = alignmentData.findIndex((word: any) => {
+      return currentPosition >= word.startTime && currentPosition < word.endTime;
+    });
+
+    if (currentWordIndex >= 0) {
+      // 한 줄당 6 단어씩
+      const wordsPerLine = 6;
+
+      // 현재 단어가 속한 줄의 시작 인덱스 (중간 줄로 설정)
+      const currentLineStart = Math.floor(currentWordIndex / wordsPerLine) * wordsPerLine;
+
+      // 3줄 표시: 이전 줄, 현재 줄, 다음 줄
+      const startIndex = Math.max(0, currentLineStart - wordsPerLine);
+
+      const line1Words = alignmentData.slice(startIndex, startIndex + wordsPerLine);
+      const line2Words = alignmentData.slice(startIndex + wordsPerLine, startIndex + wordsPerLine * 2);
+      const line3Words = alignmentData.slice(startIndex + wordsPerLine * 2, startIndex + wordsPerLine * 3);
+
+      const line1 = line1Words.map((w: any) => w.word).join(' ');
+      const line2 = line2Words.map((w: any) => w.word).join(' ');
+      const line3 = line3Words.map((w: any) => w.word).join(' ');
+
+      const lines = [line1, line2, line3].filter(l => l.length > 0);
+
+      setCurrentLines(lines);
+    }
+  }, [currentPosition, alignmentData]);
 
   useEffect(() => {
     if (newsData?.audioUrl) {
@@ -120,16 +225,30 @@ export const NewsPlayerScreen = ({
   const handlePause = useCallback(async () => pause(), [pause]);
 
   const handleNext = useCallback(() => {
-    if (currentIndex < recentArticles.length - 1) {
-      router.replace(`/newsplayer/${recentArticles[currentIndex + 1]}`);
+    if (isPlaylistMode) {
+      const nextId = goToNext();
+      if (nextId) {
+        router.replace(`/newsplayer/${nextId}?playlist=true`);
+      }
+    } else {
+      if (currentIndex < recentArticles.length - 1) {
+        router.replace(`/newsplayer/${recentArticles[currentIndex + 1]}`);
+      }
     }
-  }, [currentIndex, recentArticles]);
+  }, [isPlaylistMode, goToNext, currentIndex, recentArticles, router]);
 
   const handlePrev = useCallback(() => {
-    if (currentIndex > 0) {
-      router.replace(`/newsplayer/${recentArticles[currentIndex - 1]}`);
+    if (isPlaylistMode) {
+      const prevId = goToPrev();
+      if (prevId) {
+        router.replace(`/newsplayer/${prevId}?playlist=true`);
+      }
+    } else {
+      if (currentIndex > 0) {
+        router.replace(`/newsplayer/${recentArticles[currentIndex - 1]}`);
+      }
     }
-  }, [currentIndex, recentArticles]);
+  }, [isPlaylistMode, goToPrev, currentIndex, recentArticles, router]);
 
   // -----------------------------
   // 차량 모드
@@ -198,6 +317,10 @@ export const NewsPlayerScreen = ({
   }
 
   // 정상 UI
+  if (!newsData) {
+    return null;
+  }
+
   return (
     <LinearGradient colors={["#FFFEF0", "#E8F5E9", "#C8E6C9"]} style={{ flex: 1 }}>
       <SafeAreaView className="flex-1">
