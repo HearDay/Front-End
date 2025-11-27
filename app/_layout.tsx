@@ -19,6 +19,9 @@ export default function RootLayout() {
     "/ResetPasswordPage",
     "/SelectCategoryPage",
     "/KakaoLoginView",
+    "/SelectGenderPage", 
+    "/SelectAgePage",
+    "/SelectTimePage"
   ];
 
   useEffect(() => {
