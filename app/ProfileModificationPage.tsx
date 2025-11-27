@@ -38,7 +38,7 @@ const ProfileModificationPage = () => {
           <View className="flex-1 ml-7">
             <View className="flex-row items-center justify-between">
               <Text className="text-[24px] font-semibold text-[#1F1F1F]">
-                데이
+                지호
               </Text>
 
               <TouchableOpacity>
