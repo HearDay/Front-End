@@ -1,4 +1,4 @@
-import { axiosInstance } from "./axiosInstance";
+import axiosInstance from "./axiosInstance";
 
 // 오늘의 뉴스 기사 타입
 export interface TodayNewsArticle {
