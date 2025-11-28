@@ -28,7 +28,7 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response Interceptor: 403 → 토큰 삭제 + 로그인 페이지 이동
+// Response Interceptor: 403면 토큰 삭제 + 로그인 페이지 이동
 axiosInstance.interceptors.response.use(
   (res) => res,
   async (err) => {
