@@ -30,6 +30,7 @@ const NewsCardSlider = ({ updateTime, articles = [] }: NewsCardSliderProps) => {
   };
 
   const handleNewsPress = (articleId: number) => {
+    console.log('기사 선택 - Article ID:', articleId);
     router.push(`/newsplayer/${articleId}?from=home`);
   };
 

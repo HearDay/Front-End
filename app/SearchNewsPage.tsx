@@ -158,12 +158,13 @@ export default function SearchNewsPage() {
             <NewsCardList
               background="white"
               articles={articles}
-              onPressArticle={(id: string) =>
+              onPressArticle={(id: string) => {
+                console.log('기사 선택 - Article ID:', id);
                 router.push({
                   pathname: "/newsplayer/[id]",
                   params: { id, from: "category" },
-                })
-              }
+                });
+              }}
             />
           </ScrollView>
         </SafeAreaView>

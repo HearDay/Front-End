@@ -79,6 +79,7 @@ export function SavedNewsScreen() {
 
   const handleNewsPress = useCallback(
     (articleId: string) => {
+      console.log('기사 선택 - Article ID:', articleId);
       router.push(`/newsplayer/${articleId}?from=savednews`)
     },
     [router]

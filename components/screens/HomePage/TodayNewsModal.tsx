@@ -72,6 +72,7 @@ export const TodayNewsModal = ({
 
   const handleCardPress = useCallback(
     (newsId: string) => {
+      console.log('기사 선택 - Article ID:', newsId);
       if (onNewsCardPress) {
         // 부모 컴포넌트에서 제공한 함수가 있으면 사용 (하드코딩 방식)
         onNewsCardPress(newsId)
