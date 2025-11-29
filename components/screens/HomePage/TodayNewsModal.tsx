@@ -28,7 +28,8 @@ interface TodayNewsModalProps {
     age: string
     gender: string
   }
-  completedNewsId?: string | null
+  completedNewsIds?: string[]
+  lastViewedNewsId?: string | null
   onNewsCardPress?: (newsId: string) => void
 }
 
@@ -41,7 +42,8 @@ export const TodayNewsModal = ({
   onClose,
   newsItems,
   userInfo,
-  completedNewsId,
+  completedNewsIds = [],
+  lastViewedNewsId,
   onNewsCardPress,
 }: TodayNewsModalProps) => {
   const router = useRouter()
@@ -62,11 +64,23 @@ export const TodayNewsModal = ({
 
   useEffect(() => {
     if (visible) {
+      // lastViewedNewsId가 있으면 해당 카드로 이동, 없으면 0번째
+      if (lastViewedNewsId) {
+        const viewedIndex = newsItems.findIndex(item => item.id === lastViewedNewsId)
+        if (viewedIndex !== -1) {
+          setCurrentIndex(viewedIndex)
+          currentIndexRef.current = viewedIndex
+          position.setValue(0)
+          console.log('[TodayNewsModal] lastViewedNewsId로 이동:', lastViewedNewsId, '인덱스:', viewedIndex)
+          return
+        }
+      }
+      // lastViewedNewsId가 없거나 찾지 못한 경우 0번째로
       setCurrentIndex(0)
       currentIndexRef.current = 0
       position.setValue(0)
     }
-  }, [visible, newsItems, position])
+  }, [visible, newsItems, lastViewedNewsId, position])
 
   const handleCardPress = useCallback(
     (newsId: string) => {
@@ -137,7 +151,7 @@ export const TodayNewsModal = ({
     const scale = 1 - Math.abs(offset) * 0.03
     const translateY = -Math.max(offset, 0) * 10
     const translateX = Math.max(offset, 0) * 10
-    const isCompleted = completedNewsId === item.id
+    const isCompleted = completedNewsIds.includes(item.id)
 
     // 지나간 카드는 화면 밖으로 완전히 숨김
     if (index < currentIndex) {

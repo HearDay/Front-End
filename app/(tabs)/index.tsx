@@ -54,21 +54,21 @@ export default function Index() {
     RecommendArticle[]
   >([]);
 
-  // Zustand - 오늘의 뉴스
+  // Zustand - 오늘의 뉴스 (완전히 Zustand로 관리)
   const {
-    hasShownModal,
-    shouldShowOnReturn,
-    completedNewsId,
+    showModal,
+    hasShownInitialModal,
+    completedNewsIds,
+    lastViewedNewsId,
     _hasHydrated,
-    isFirstFocus,
-    setHasShownModal,
-    setShouldShowOnReturn,
-    setCompletedNewsId,
-    setIsFirstFocus,
+    pendingReturn,
+    userDismissed,
+    setShowModal,
+    setHasShownInitialModal,
+    dismissModal,
+    onNewsCardClick,
+    checkAndShowOnReturn,
   } = useTodayNewsStore();
-
-  // 오늘의 뉴스 관련 state
-  const [showTodayNewsModal, setShowTodayNewsModal] = useState(false);
   const [todayNewsItems, setTodayNewsItems] = useState<any[]>([]);
   const [userGender, setUserGender] = useState<string>("");
   const [userAge, setUserAge] = useState<string>("");
@@ -113,6 +113,10 @@ export default function Index() {
         console.log('========================================');
         console.log('오늘의 뉴스 API 호출 시작');
         console.log('========================================');
+
+        // 로그인 시 userDismissed 초기화 (매번 팝업 표시를 위해)
+        useTodayNewsStore.getState().setUserDismissed(false);
+        console.log('[Index] userDismissed 초기화됨');
 
         // 맞춤 기사 가져오기
         const articles = await todayNewsService.getTopByDemographic();
@@ -175,54 +179,36 @@ export default function Index() {
     loadTodayNewsAndUserInfo();
   }, []);
 
-  // 맨 처음 앱 진입 시에만 모달 표시 (Zustand 사용)
+  // 맨 처음 앱 진입 시에만 모달 표시
   useEffect(() => {
-    if (!hasShownModal && todayNewsItems.length > 0) {
-      // 처음 실행하는 경우, 뉴스 데이터가 로드된 후에만
-      console.log('첫 로그인 - 팝업 표시 예정');
-      setTimeout(() => {
-        setShowTodayNewsModal(true);
-      }, 500);
-      // 모달을 표시했다고 저장
-      setHasShownModal(true);
-    }
-  }, [hasShownModal, todayNewsItems.length]); // todayNewsItems가 로드된 후 실행
+    console.log('[Index] 첫 로그인 체크:', {
+      hasShownInitialModal,
+      todayNewsItems: todayNewsItems.length,
+      _hasHydrated,
+      userDismissed,
+    });
 
-  // 오늘의 뉴스에서 돌아왔을 때 모달 표시
+    // 매번 팝업 표시 (단, 사용자가 직접 닫은 경우 제외)
+    if (todayNewsItems.length > 0 && _hasHydrated && !showModal && !userDismissed) {
+      console.log('[Index] 로그인 시 팝업 표시 예정');
+      setTimeout(() => {
+        console.log('[Index] 팝업 표시 실행');
+        setShowModal(true);
+        setHasShownInitialModal(true);
+      }, 500);
+    }
+  }, [todayNewsItems.length, _hasHydrated, showModal, userDismissed, setShowModal, setHasShownInitialModal]);
+
+  // 백버튼으로 돌아왔을 때 모달 표시
   useFocusEffect(
     useCallback(() => {
-      console.log('========================================');
-      console.log('useFocusEffect 실행 (포커스됨)');
-      console.log('isFirstFocus:', isFirstFocus);
-      console.log('_hasHydrated:', _hasHydrated);
-      console.log('shouldShowOnReturn:', shouldShowOnReturn);
-      console.log('completedNewsId:', completedNewsId);
-      console.log('todayNewsItems 개수:', todayNewsItems.length);
-      console.log('========================================');
+      console.log('[Index] useFocusEffect - pendingReturn:', pendingReturn);
 
-      // 첫 포커스는 스킵 (앱 시작 시)
-      if (isFirstFocus) {
-        console.log('첫 포커스 - 스킵');
-        setIsFirstFocus(false);
-        return;
+      if (_hasHydrated && pendingReturn && todayNewsItems.length > 0) {
+        console.log('[Index] 백버튼 후 팝업 표시');
+        checkAndShowOnReturn();
       }
-
-      // 뉴스 플레이어에서 돌아왔을 때만 모달 표시
-      if (_hasHydrated && shouldShowOnReturn && todayNewsItems.length > 0) {
-        console.log('조건 충족 - 모달 표시');
-
-        // 즉시 모달 표시
-        setShowTodayNewsModal(true);
-
-        // 플래그 초기화
-        setShouldShowOnReturn(false);
-      }
-
-      // cleanup: 화면을 떠날 때 실행
-      return () => {
-        console.log('useFocusEffect cleanup (포커스 잃음)');
-      };
-    }, [_hasHydrated, shouldShowOnReturn, completedNewsId, isFirstFocus, todayNewsItems.length, setShouldShowOnReturn, setIsFirstFocus])
+    }, [_hasHydrated, pendingReturn, todayNewsItems.length, checkAndShowOnReturn])
   );
 
   // 카테고리 선택 시 (develop 브랜치 코드)
@@ -255,59 +241,34 @@ export default function Index() {
   }));
 
   const handleTodayNewsPress = () => {
-    console.log('========================================');
-    console.log('[Index] 오늘의 뉴스 버튼 클릭');
-    console.log('[Index] todayNewsItems 개수:', todayNewsItems.length);
-    console.log('[Index] showTodayNewsModal:', showTodayNewsModal, '->', true);
-    console.log('========================================');
-    setShowTodayNewsModal(true);
+    console.log('[Index] 해 아이콘 클릭 - 팝업 표시');
+    setShowModal(true);
   };
 
   const handleNewsCardPress = async (newsId: string) => {
-    console.log('========================================');
     console.log('[Index] 뉴스 카드 클릭 - ID:', newsId);
 
-    // Zustand에 플래그 및 완료 ID 저장 (라우팅 전에!)
-    setShouldShowOnReturn(true);
-    setCompletedNewsId(newsId);
-    console.log('[Index] shouldShowOnReturn: true 설정 완료');
+    // Zustand에 백버튼 예약 및 완료 ID 저장
+    onNewsCardClick(newsId);
 
     try {
       // 플레이리스트 생성
-      console.log('플레이리스트 생성 시작');
-
-      // 1. 오늘의 뉴스 5개 ID를 map으로 동적 생성
       const todayNewsIds = todayNewsItems.map(item => parseInt(item.id));
-      console.log('오늘의 뉴스 IDs:', todayNewsIds);
-
-      // 2. 랜덤 뉴스 100개 가져오기
       const randomArticles = await newsService.getArticles(0, 100);
       const randomIds = randomArticles.map(article => article.id);
-      console.log('랜덤 뉴스 개수:', randomIds.length);
-
-      // 3. 전체 플레이리스트 생성 (중복 제거)
       const allIds = [...todayNewsIds, ...randomIds.filter(id => !todayNewsIds.includes(id))];
-      console.log('전체 플레이리스트 개수:', allIds.length);
 
-      // 4. Zustand에 저장
       usePlaylistStore.getState().setPlaylist(allIds);
-
-      // 5. 클릭한 기사의 인덱스 찾기
       const startIndex = allIds.indexOf(parseInt(newsId));
       usePlaylistStore.setState({ currentIndex: startIndex });
-      console.log('시작 인덱스:', startIndex);
-      console.log('플레이리스트 생성 완료');
+
+      console.log('[Index] 플레이리스트 생성 완료 - 시작 인덱스:', startIndex);
     } catch (error) {
-      console.error('플레이리스트 생성 오류:', error);
+      console.error('[Index] 플레이리스트 생성 오류:', error);
     }
 
-    // 모달 닫기
-    setShowTodayNewsModal(false);
-
-    console.log('라우팅: /newsplayer/' + newsId + '?playlist=true&from=todaynews');
-    console.log('========================================');
-
-    // from=todaynews 파라미터 추가!
+    // 라우팅
+    console.log('[Index] 라우팅: /newsplayer/' + newsId);
     router.push(`/newsplayer/${newsId}?playlist=true&from=todaynews`);
   };
 
@@ -320,14 +281,13 @@ export default function Index() {
       />
 
       <TodayNewsModal
-        visible={showTodayNewsModal}
-        onClose={() => {
-          setShowTodayNewsModal(false);
-        }}
+        visible={showModal}
+        onClose={dismissModal}
         onNewsCardPress={handleNewsCardPress}
         newsItems={todayNewsItems}
         userInfo={{ age: userAge, gender: userGender }}
-        completedNewsId={completedNewsId}
+        completedNewsIds={completedNewsIds}
+        lastViewedNewsId={lastViewedNewsId}
       />
 
       {selectedCategory ? (

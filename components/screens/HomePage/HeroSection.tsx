@@ -1,6 +1,6 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import React from "react";
+import React, { useEffect } from "react";
 import { Image, Platform, Text, TouchableOpacity, View } from "react-native";
 import Animated, {
   interpolate,
@@ -8,6 +8,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import { useTodayNewsStore } from "@/stores/todayNewsStore";
 
 interface HeroSectionProps {
   offset: any;
@@ -17,6 +18,7 @@ interface HeroSectionProps {
 
 const HeroSection = ({ offset, userLevel, onTodayNewsPress }: HeroSectionProps) => {
   const router = useRouter();
+  const { setPendingReturn } = useTodayNewsStore();
 
   const pressAnim = useSharedValue(1);
   const hoverAnim = useSharedValue(1);
@@ -40,6 +42,11 @@ const HeroSection = ({ offset, userLevel, onTodayNewsPress }: HeroSectionProps) 
   const pressStyle = useAnimatedStyle(() => ({
     opacity: pressAnim.value,
   }));
+
+  // offset 값 모니터링
+  useEffect(() => {
+    console.log('[HeroSection] 현재 offset.value:', offset.value);
+  }, [offset.value]);
 
   //  TODAY'S NEWS 버튼 클릭 시 동작
   const handlePressSun = () => {
@@ -131,10 +138,14 @@ const HeroSection = ({ offset, userLevel, onTodayNewsPress }: HeroSectionProps) 
           />
 
    
-          <View className="flex-col items-center mt-1 ml-auto">
+          <View className="flex-col items-center mt-1 ml-auto" style={{ zIndex: 1000 }}>
             <TouchableOpacity
               className="w-[24px] h-[24px] mt-4 ml-3"
-              onPress={() => router.push("/SearchNewsPage")}
+              onPress={() => {
+                console.log('[HeroSection] 검색 버튼 클릭 - pendingReturn 초기화');
+                setPendingReturn(false);
+                router.push("/SearchNewsPage");
+              }}
             >
               <Animated.Image
                 source={require("../../../my-expo-app/assets/images/Search1.png")}
@@ -152,30 +163,33 @@ const HeroSection = ({ offset, userLevel, onTodayNewsPress }: HeroSectionProps) 
               />
             </TouchableOpacity>
 
-            <TouchableOpacity
-              className="items-center mt-7 mr-5"
-              activeOpacity={0.7}
-              onPress={handlePressSun}
-              onPressIn={handleHoverIn}
-              onPressOut={handleHoverOut}
-              style={{ opacity: 1, zIndex: 999 }}
-              {...(Platform.OS === "web"
-                ? {
-                    onMouseEnter: handleHoverIn,
-                    onMouseLeave: handleHoverOut,
-                  }
-                : {})}
-            >
-              <Animated.View style={[sunStyle, pressStyle]} pointerEvents="none">
-                <Image
-                  source={require("../../../my-expo-app/assets/images/Sun.png")}
-                  style={{ width: 60, height: 60, resizeMode: "contain" }}
-                />
-                <Text className="text-[8px] text-[#FBFFD3] font-semibold">
-                  TODAY&apos;S NEWS
-                </Text>
-              </Animated.View>
-            </TouchableOpacity>
+            <View style={{ zIndex: 1001, elevation: 1001 }}>
+              <TouchableOpacity
+                className="items-center mt-7 mr-5"
+                activeOpacity={0.7}
+                onPress={handlePressSun}
+                onPressIn={handleHoverIn}
+                onPressOut={handleHoverOut}
+                style={{
+                  backgroundColor: 'transparent',
+                  width: 80,
+                  height: 80,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+                hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+              >
+                <Animated.View style={[sunStyle, pressStyle]} pointerEvents="none">
+                  <Image
+                    source={require("../../../my-expo-app/assets/images/Sun.png")}
+                    style={{ width: 60, height: 60, resizeMode: "contain" }}
+                  />
+                  <Text className="text-[8px] text-[#FBFFD3] font-semibold">
+                    TODAY&apos;S NEWS
+                  </Text>
+                </Animated.View>
+              </TouchableOpacity>
+            </View>
 
           </View>
         </View>
