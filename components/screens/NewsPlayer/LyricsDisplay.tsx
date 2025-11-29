@@ -4,7 +4,7 @@ import { LyricsDisplayProps } from '../../../types/screens';
 
 // 개선: memo로 컴포넌트 감싸기
 // 이유: currentLines가 변하지 않으면 리렌더링 스킵
-export const LyricsDisplay = memo(function LyricsDisplay({ 
+export const LyricsDisplay = memo(function LyricsDisplay({
   currentLines,
   onPress
 }: LyricsDisplayProps) {
@@ -31,14 +31,18 @@ export const LyricsDisplay = memo(function LyricsDisplay({
       activeOpacity={0.9}
       disabled={!onPress}
     >
-    <View className="px-6 pt-6">
-      <Text
-        numberOfLines={3}
-        className="text-base leading-7 text-gray-800 text-center"
-      >
-        {currentLines.join(' ')}
-      </Text>
-    </View>
-  </TouchableOpacity>
+      <View className="px-6 pt-6">
+        {currentLines.map((line, index) => (
+          <Text
+            key={index}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            className="text-base leading-7 text-gray-800 text-center mb-1"
+          >
+            {line}
+          </Text>
+        ))}
+      </View>
+    </TouchableOpacity>
   )
 })

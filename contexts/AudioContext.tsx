@@ -6,6 +6,7 @@ interface AudioContextType {
   sound: Audio.Sound | null
   isPlaying: boolean
   currentArticleId: string | null
+  currentPosition: number
   loadAudio: (audioUrl: string, articleId: string) => Promise<void>
   play: () => Promise<void>
   pause: () => Promise<void>
@@ -19,6 +20,7 @@ export const AudioProvider = ({ children }: { children: React.ReactNode }) => {
   const soundRef = useRef<Audio.Sound | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentArticleId, setCurrentArticleId] = useState<string | null>(null)
+  const [currentPosition, setCurrentPosition] = useState(0)
 
   // 초기 오디오 모드 설정
   useEffect(() => {
@@ -63,6 +65,7 @@ export const AudioProvider = ({ children }: { children: React.ReactNode }) => {
       sound.setOnPlaybackStatusUpdate((status) => {
         if (status.isLoaded) {
           setIsPlaying(status.isPlaying)
+          setCurrentPosition(status.positionMillis / 1000) // 밀리초를 초로 변환
         }
       })
     } catch (err) {
@@ -96,6 +99,7 @@ export const AudioProvider = ({ children }: { children: React.ReactNode }) => {
       soundRef.current = null
       setCurrentArticleId(null)
       setIsPlaying(false)
+      setCurrentPosition(0)
     }
   }, [])
 
@@ -114,6 +118,7 @@ export const AudioProvider = ({ children }: { children: React.ReactNode }) => {
         sound: soundRef.current,
         isPlaying,
         currentArticleId,
+        currentPosition,
         loadAudio,
         play,
         pause,
