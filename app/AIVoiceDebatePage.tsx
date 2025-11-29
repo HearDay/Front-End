@@ -6,18 +6,32 @@ import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
-type Speaker = "AI" | "User" | "Pending";
+type Speaker = "AI" | "User" | "Pending" | "None";
 
 export default function AIVoiceDebatePage() {
   const router = useRouter();
-  const { articleId, level } = useLocalSearchParams<{ articleId?: string; level?: string }>();
+  const {
+    articleId,
+    level,
+    title,
+    discussionId: paramDiscussionId,
+  } = useLocalSearchParams<{
+    articleId?: string;
+    level?: string;
+    title?: string;
+    discussionId?: string;
+  }>();
 
-  const [currentSpeaker, setCurrentSpeaker] = useState<Speaker>("Pending");
-  const [discussionId, setDiscussionId] = useState<number | null>(null);
+  // discussionId를 URL에서 우선 읽기
+  const [discussionId, setDiscussionId] = useState<number | null>(
+    paramDiscussionId ? Number(paramDiscussionId) : null
+  );
+
+  const [currentSpeaker, setCurrentSpeaker] = useState<Speaker>("None");
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [sound, setSound] = useState<Audio.Sound | null>(null);
 
-  // iOS 재생 설정 
+  // iOS 재생 설정
   useEffect(() => {
     const setAudioMode = async () => {
       await Audio.setAudioModeAsync({
@@ -27,30 +41,28 @@ export default function AIVoiceDebatePage() {
     };
     setAudioMode();
 
-    // 페이지 나갈때 음성종료하는 클린업 함수
     return () => {
       cleanUpAudio();
     };
   }, []);
 
-  // 녹음/재생 모두 정리 함수 
+  // 녹음/재생 모두 정리
   const cleanUpAudio = async () => {
     try {
       if (recording) {
         await recording.stopAndUnloadAsync().catch(() => {});
         setRecording(null);
       }
-
       if (sound) {
         await sound.unloadAsync().catch(() => {});
         setSound(null);
       }
     } catch (e) {
-      console.error("오디오 정리 중 오류:", e);
+      console.error("오디오 정리 오류:", e);
     }
   };
 
-  // 녹음 시작 
+  // 녹음 시작
   const startRecording = async () => {
     try {
       setCurrentSpeaker("User");
@@ -71,7 +83,7 @@ export default function AIVoiceDebatePage() {
     }
   };
 
-  // 녹음 종료 
+  // 녹음 종료
   const stopRecording = async () => {
     try {
       if (!recording) return;
@@ -80,15 +92,13 @@ export default function AIVoiceDebatePage() {
       const uri = recording.getURI();
       setRecording(null);
 
-      if (uri) {
-        await sendVoice(uri);
-      }
+      if (uri) sendVoice(uri);
     } catch (err) {
       console.error("녹음 종료 실패:", err);
     }
   };
 
-  // 서버로 음성 전송 후 Base64 WAV 재생 
+  // 서버로 음성 전송
   const sendVoice = async (uri: string) => {
     try {
       setCurrentSpeaker("Pending");
@@ -96,10 +106,7 @@ export default function AIVoiceDebatePage() {
       const rawToken = await AsyncStorage.getItem("accessToken");
       const token = rawToken ? rawToken.replace(/"/g, "") : "";
 
-      if (!articleId) {
-        console.error("❌ articleId 누락됨");
-        return;
-      }
+      if (!articleId) return;
 
       const ext = uri.split(".").pop();
       const mime =
@@ -125,20 +132,21 @@ export default function AIVoiceDebatePage() {
             "Content-Type": "multipart/form-data",
           },
           params: {
-            level: "beginner",
+            level,
             ...(discussionId ? { discussionId } : {}),
           },
         }
       );
 
-      // Base64 prefix 제거 
       let replyBase64 = response.data.data.reply;
       replyBase64 = replyBase64.replace(/^data:audio\/wav;base64,/, "");
 
       const newId = response.data.data.discussionId;
 
+      // discussionId 최초 생성 시 URL에 저장
       if (newId && !discussionId) {
         setDiscussionId(newId);
+        router.setParams({ discussionId: String(newId) });
       }
 
       await playBase64Wav(replyBase64);
@@ -150,18 +158,16 @@ export default function AIVoiceDebatePage() {
     }
   };
 
-  // Base64 WAV → 파일 저장 → 재생 
+  // Base64 → wav 재생
   const playBase64Wav = async (base64: string) => {
     try {
       const path = FileSystem.cacheDirectory + `ai_reply.wav`;
 
       await FileSystem.writeAsStringAsync(path, base64, {
-        encoding: "base64"
+        encoding: "base64",
       });
 
-      if (sound) {
-        await sound.unloadAsync();
-      }
+      if (sound) await sound.unloadAsync();
 
       const { sound: newSound } = await Audio.Sound.createAsync(
         { uri: path },
@@ -169,15 +175,16 @@ export default function AIVoiceDebatePage() {
       );
 
       setSound(newSound);
-
     } catch (err) {
       console.error("AI 음성 재생 실패:", err);
     }
   };
 
-  // 상태별 이미지 
+  // 상태별 이미지
   const getImageSource = () => {
     switch (currentSpeaker) {
+      case "None":
+        return require("../my-expo-app/assets/images/VoiceOff.png");
       case "AI":
         return require("../my-expo-app/assets/images/VoiceOn_AI.png");
       case "User":
@@ -187,46 +194,38 @@ export default function AIVoiceDebatePage() {
     }
   };
 
-  // 상태 문구 
-  const getStatusText = () => {
-    switch (currentSpeaker) {
-      case "AI":
-        return (
-          <Text className="text-[#002C09] text-3xl font-normal mt-2">
-            <Text className="font-black">AI</Text>가 말하고 있어요!
-          </Text>
-        );
-      case "User":
-        return (
-          <Text className="text-[#002C09] text-2xl font-normal mt-2">
-            <Text className="font-black">서진님</Text> 차례예요!
-          </Text>
-        );
-      default:
-        return (
-          <Text className="text-[#002C09] text-3xl font-normal mt-2">
-            <Text className="font-black">AI</Text>가 답변을 생각하고 있어요!
-          </Text>
-        );
-    }
-  };
-
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
+
       <View className="flex-1 items-center justify-center bg-[#FEFFF5] px-6">
-        
+
         {/* 제목 */}
-        <View className="items-center px-6">
+        <View className="items-center px-4">
           <Text className="text-left text-2xl font-semibold text-black mb-10">
-            <Text className="font-black">
-              오픈AI "개인정보 필터 오픈소스로 공개"
-            </Text>
+            <Text className="font-black">{title ?? ""}</Text>
             <Text className="font-light"> 로 토론 중이에요!</Text>
           </Text>
         </View>
 
-        {getStatusText()}
+        {/* 상태 문구 */}
+        {currentSpeaker === "AI" ? (
+          <Text className="text-[#002C09] text-3xl font-normal mt-2">
+            <Text className="font-black">AI</Text>가 말하고 있어요!
+          </Text>
+        ) : currentSpeaker === "User" ? (
+          <Text className="text-[#002C09] text-3xl font-normal mt-2">
+            <Text className="font-black">서진님</Text> 차례예요!
+          </Text>
+        ) : currentSpeaker === "None" ? (
+          <Text className="text-[#002C09] text-3xl font-normal mt-2">
+            <Text className="font-black">서진님</Text>이 준비되면 시작해요!
+          </Text>
+        ) : (
+          <Text className="text-[#002C09] text-3xl font-normal mt-2">
+            <Text className="font-black">AI</Text>가 답변을 생각하고 있어요!
+          </Text>
+        )}
 
         <Image
           source={getImageSource()}
@@ -261,7 +260,7 @@ export default function AIVoiceDebatePage() {
           </Text>
         </TouchableOpacity>
 
-        {/* 끝내기 버튼: cleanUpAudio() 실행 후 페이지 이동 */}
+        {/* 끝내기 */}
         <TouchableOpacity
           className="w-[101px] h-[43px] rounded-full border border-[#2E7D32] mt-10 bg-white flex items-center justify-center"
           onPress={async () => {
@@ -269,9 +268,7 @@ export default function AIVoiceDebatePage() {
             router.replace("/AiPage");
           }}
         >
-          <Text className="text-[#2E7D32] font-medium text-[15px] ">
-            끝내기
-          </Text>
+          <Text className="text-[#2E7D32] font-medium text-[15px] ">끝내기</Text>
         </TouchableOpacity>
       </View>
     </>

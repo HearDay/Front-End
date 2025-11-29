@@ -37,6 +37,7 @@ export function DiscussionScreen() {
   const [showLevelModal, setShowLevelModal] = useState(false)
   const [selectedMode, setSelectedMode] = useState<'voice' | 'chat' | null>(null)
   const [selectedArticleId, setSelectedArticleId] = useState<string | null>(null)
+  const [selectedTitle, setSelectedTitle] = useState<string | null>(null)
 
   // 데이터 로딩 함수
   const fetchViewedNews = useCallback(async () => {
@@ -88,7 +89,10 @@ export function DiscussionScreen() {
 
   // 뉴스 클릭 → 모달 열기
   const handleNewsPress = (articleId: string) => {
+    const news = viewedNews.find(item => item.id === articleId)
+
     setSelectedArticleId(articleId)
+    setSelectedTitle(news?.title ?? null)
     setShowDiscussionModal(true)
   }
 
@@ -182,7 +186,9 @@ export function DiscussionScreen() {
                 : '/AIChatDebatePage'
 
             router.push(
-              `${target}?articleId=${selectedArticleId}&mode=${selectedMode}&level=${level}`
+              `${target}?articleId=${selectedArticleId}&title=${encodeURIComponent(
+                selectedTitle ?? ''
+              )}&mode=${selectedMode}&level=${level}`
             )
 
             setShowLevelModal(false)
