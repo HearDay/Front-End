@@ -7,6 +7,7 @@ interface TodayNewsStore {
   showModal: boolean;
   hasShownInitialModal: boolean;
   userDismissed: boolean; // 사용자가 직접 닫았는지
+  hasTriggeredInitialPopup: boolean; // 최초 팝업 트리거 여부 (세션 유지)
 
   // 백버튼으로 돌아왔을 때 관련
   pendingReturn: boolean; // 뉴스 플레이어에서 돌아올 예정인지
@@ -25,6 +26,7 @@ interface TodayNewsStore {
   setLastViewedNewsId: (id: string | null) => void;
   addCompletedNewsId: (id: string) => void; // 완료 ID 추가
   setHasHydrated: (value: boolean) => void;
+  setHasTriggeredInitialPopup: (value: boolean) => void;
 
   // 사용자가 직접 모달을 닫음
   dismissModal: () => void;
@@ -44,6 +46,7 @@ export const useTodayNewsStore = create<TodayNewsStore>()(
       showModal: false,
       hasShownInitialModal: false,
       userDismissed: false,
+      hasTriggeredInitialPopup: false,
       pendingReturn: false,
       completedNewsIds: [],
       lastViewedNewsId: null,
@@ -88,6 +91,11 @@ export const useTodayNewsStore = create<TodayNewsStore>()(
       },
 
       setHasHydrated: (value) => set({ _hasHydrated: value }),
+
+      setHasTriggeredInitialPopup: (value) => {
+        console.log('[Store] setHasTriggeredInitialPopup:', value);
+        set({ hasTriggeredInitialPopup: value });
+      },
 
       // 사용자가 직접 모달을 닫음 (백그라운드 클릭)
       dismissModal: () => {
@@ -146,6 +154,7 @@ export const useTodayNewsStore = create<TodayNewsStore>()(
       partialize: (state) => ({
         hasShownInitialModal: state.hasShownInitialModal,
         userDismissed: state.userDismissed,
+        // hasTriggeredInitialPopup은 persist 제외 (세션 동안만 유지)
         pendingReturn: state.pendingReturn,
         completedNewsIds: state.completedNewsIds,
         lastViewedNewsId: state.lastViewedNewsId,
@@ -156,6 +165,7 @@ export const useTodayNewsStore = create<TodayNewsStore>()(
           completedNewsIds: state?.completedNewsIds,
           lastViewedNewsId: state?.lastViewedNewsId,
           userDismissed: state?.userDismissed,
+          hasTriggeredInitialPopup: state?.hasTriggeredInitialPopup,
         });
         state?.setHasHydrated(true);
       },

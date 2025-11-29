@@ -63,11 +63,13 @@ export default function Index() {
     _hasHydrated,
     pendingReturn,
     userDismissed,
+    hasTriggeredInitialPopup,
     setShowModal,
     setHasShownInitialModal,
     dismissModal,
     onNewsCardClick,
     checkAndShowOnReturn,
+    setHasTriggeredInitialPopup,
   } = useTodayNewsStore();
   const [todayNewsItems, setTodayNewsItems] = useState<any[]>([]);
   const [userGender, setUserGender] = useState<string>("");
@@ -134,6 +136,29 @@ export default function Index() {
           }));
           setTodayNewsItems(news);
           console.log('todayNewsItems 설정 완료:', news.length, '개');
+
+          // 최초 1회만 로그인 팝업 표시 (Zustand에서 관리)
+          if (!hasTriggeredInitialPopup) {
+            console.log('[Index] 최초 데이터 로드 완료 - 팝업 표시 트리거');
+            setHasTriggeredInitialPopup(true);
+
+            // hydration과 userDismissed 상태를 기다린 후 팝업 표시
+            setTimeout(() => {
+              const state = useTodayNewsStore.getState();
+              console.log('[Index] 팝업 표시 조건 체크:', {
+                _hasHydrated: state._hasHydrated,
+                userDismissed: state.userDismissed,
+              });
+
+              if (!state.userDismissed) {
+                console.log('[Index] ✅ 최초 로그인 팝업 표시');
+                setShowModal(true);
+                setHasShownInitialModal(true);
+              } else {
+                console.log('[Index] ❌ userDismissed=true, 팝업 표시 안함');
+              }
+            }, 800);
+          }
         } else {
           console.log('받아온 기사가 없음 (빈 배열 또는 null)');
           setTodayNewsItems([]);
@@ -179,36 +204,25 @@ export default function Index() {
     loadTodayNewsAndUserInfo();
   }, []);
 
-  // 맨 처음 앱 진입 시에만 모달 표시
-  useEffect(() => {
-    console.log('[Index] 첫 로그인 체크:', {
-      hasShownInitialModal,
-      todayNewsItems: todayNewsItems.length,
-      _hasHydrated,
-      userDismissed,
-    });
-
-    // 매번 팝업 표시 (단, 사용자가 직접 닫은 경우 제외)
-    if (todayNewsItems.length > 0 && _hasHydrated && !showModal && !userDismissed) {
-      console.log('[Index] 로그인 시 팝업 표시 예정');
-      setTimeout(() => {
-        console.log('[Index] 팝업 표시 실행');
-        setShowModal(true);
-        setHasShownInitialModal(true);
-      }, 500);
-    }
-  }, [todayNewsItems.length, _hasHydrated, showModal, userDismissed, setShowModal, setHasShownInitialModal]);
-
-  // 백버튼으로 돌아왔을 때 모달 표시
+  // 백버튼으로 돌아왔을 때 모달 표시 (오늘의 뉴스 카드에서 돌아온 경우만)
   useFocusEffect(
     useCallback(() => {
-      console.log('[Index] useFocusEffect - pendingReturn:', pendingReturn);
+      console.log('========================================');
+      console.log('[Index] useFocusEffect 실행');
+      console.log('[Index] _hasHydrated:', _hasHydrated);
+      console.log('[Index] pendingReturn:', pendingReturn);
+      console.log('[Index] todayNewsItems.length:', todayNewsItems.length);
+      console.log('[Index] showModal:', showModal);
+      console.log('[Index] userDismissed:', userDismissed);
+      console.log('========================================');
 
       if (_hasHydrated && pendingReturn && todayNewsItems.length > 0) {
-        console.log('[Index] 백버튼 후 팝업 표시');
+        console.log('[Index] ✅ 오늘의 뉴스에서 백버튼 - 팝업 표시');
         checkAndShowOnReturn();
+      } else {
+        console.log('[Index] ❌ 일반 포커스 - 팝업 표시 조건 불충족');
       }
-    }, [_hasHydrated, pendingReturn, todayNewsItems.length, checkAndShowOnReturn])
+    }, [_hasHydrated, pendingReturn, todayNewsItems.length, checkAndShowOnReturn, showModal, userDismissed])
   );
 
   // 카테고리 선택 시 (develop 브랜치 코드)
