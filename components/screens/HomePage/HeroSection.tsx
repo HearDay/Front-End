@@ -43,12 +43,23 @@ const HeroSection = ({ offset, userLevel, onTodayNewsPress }: HeroSectionProps) 
 
   //  TODAY'S NEWS 버튼 클릭 시 동작
   const handlePressSun = () => {
+    console.log('========================================');
+    console.log('[HeroSection] 해 아이콘 클릭됨!');
+    console.log('[HeroSection] offset.value:', offset.value);
+    console.log('[HeroSection] onTodayNewsPress 존재:', !!onTodayNewsPress);
+    console.log('========================================');
+
     pressAnim.value = withTiming(0.4, { duration: 120 }, () => {
       pressAnim.value = withTiming(1, { duration: 120 });
     });
 
     // 오늘의 뉴스 모달 열기
-    onTodayNewsPress?.();
+    if (onTodayNewsPress) {
+      console.log('[HeroSection] onTodayNewsPress 호출');
+      onTodayNewsPress();
+    } else {
+      console.log('[HeroSection] onTodayNewsPress가 없음!');
+    }
   };
 
 
@@ -141,28 +152,30 @@ const HeroSection = ({ offset, userLevel, onTodayNewsPress }: HeroSectionProps) 
               />
             </TouchableOpacity>
 
-            <Animated.View style={[sunStyle, pressStyle]}>
-              <TouchableOpacity
-                className="items-center mt-7 mr-5"
-                onPress={handlePressSun}
-                onPressIn={handleHoverIn}
-                onPressOut={handleHoverOut}
-                {...(Platform.OS === "web"
-                  ? {
-                      onMouseEnter: handleHoverIn,
-                      onMouseLeave: handleHoverOut,
-                    }
-                  : {})}
-              >
+            <TouchableOpacity
+              className="items-center mt-7 mr-5"
+              activeOpacity={0.7}
+              onPress={handlePressSun}
+              onPressIn={handleHoverIn}
+              onPressOut={handleHoverOut}
+              style={{ opacity: 1, zIndex: 999 }}
+              {...(Platform.OS === "web"
+                ? {
+                    onMouseEnter: handleHoverIn,
+                    onMouseLeave: handleHoverOut,
+                  }
+                : {})}
+            >
+              <Animated.View style={[sunStyle, pressStyle]} pointerEvents="none">
                 <Image
                   source={require("../../../my-expo-app/assets/images/Sun.png")}
                   style={{ width: 60, height: 60, resizeMode: "contain" }}
                 />
                 <Text className="text-[8px] text-[#FBFFD3] font-semibold">
-                  TODAY'S NEWS
+                  TODAY&apos;S NEWS
                 </Text>
-              </TouchableOpacity>
-            </Animated.View>
+              </Animated.View>
+            </TouchableOpacity>
 
           </View>
         </View>
