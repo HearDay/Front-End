@@ -1,11 +1,10 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import React, { useEffect } from "react";
-import { Image, Platform, Text, TouchableOpacity, View } from "react-native";
+import React from "react";
+import { Image, Text, TouchableOpacity, View } from "react-native";
 import Animated, {
   interpolate,
   useAnimatedStyle,
-  useSharedValue,
   withTiming,
 } from "react-native-reanimated";
 import { useTodayNewsStore } from "@/stores/todayNewsStore";
@@ -20,63 +19,12 @@ const HeroSection = ({ offset, userLevel, onTodayNewsPress }: HeroSectionProps) 
   const router = useRouter();
   const { setPendingReturn } = useTodayNewsStore();
 
-  const pressAnim = useSharedValue(1);
-  const hoverAnim = useSharedValue(1);
-
   // 스크롤에 따른 높이 애니메이션
   const animatedContainerStyle = useAnimatedStyle(() => ({
     height: withTiming(interpolate(offset.value, [0, 1], [440, 104]), {
       duration: 500,
     }),
   }));
-
-  // 해 버튼 스크롤 애니메이션
-  const sunStyle = useAnimatedStyle(() => ({
-    opacity: withTiming(1 - offset.value, { duration: 400 }),
-    transform: [
-      { translateY: withTiming(offset.value * -40) },
-      { scale: hoverAnim.value },
-    ],
-  }));
-
-  const pressStyle = useAnimatedStyle(() => ({
-    opacity: pressAnim.value,
-  }));
-
-  // offset 값 모니터링
-  useEffect(() => {
-    console.log('[HeroSection] 현재 offset.value:', offset.value);
-  }, [offset.value]);
-
-  //  TODAY'S NEWS 버튼 클릭 시 동작
-  const handlePressSun = () => {
-    console.log('========================================');
-    console.log('[HeroSection] 해 아이콘 클릭됨!');
-    console.log('[HeroSection] offset.value:', offset.value);
-    console.log('[HeroSection] onTodayNewsPress 존재:', !!onTodayNewsPress);
-    console.log('========================================');
-
-    pressAnim.value = withTiming(0.4, { duration: 120 }, () => {
-      pressAnim.value = withTiming(1, { duration: 120 });
-    });
-
-    // 오늘의 뉴스 모달 열기
-    if (onTodayNewsPress) {
-      console.log('[HeroSection] onTodayNewsPress 호출');
-      onTodayNewsPress();
-    } else {
-      console.log('[HeroSection] onTodayNewsPress가 없음!');
-    }
-  };
-
-
-  const handleHoverIn = () => {
-    hoverAnim.value = withTiming(1.05, { duration: 120 });
-  };
-
-  const handleHoverOut = () => {
-    hoverAnim.value = withTiming(1, { duration: 120 });
-  };
 
   const search1Style = useAnimatedStyle(() => ({
     opacity: withTiming(1 - offset.value, { duration: 400 }),
@@ -122,13 +70,13 @@ const HeroSection = ({ offset, userLevel, onTodayNewsPress }: HeroSectionProps) 
     userLevel === 6 ? "나무가 다 자랐어요!" : "뉴스를 시청하면\n나무가 자라요!";
 
   return (
-    <Animated.View style={[animatedContainerStyle]}>
+    <Animated.View style={[animatedContainerStyle, { overflow: 'visible' }]}>
       <LinearGradient
         colors={["#0F7022", "#85B77A", "#FBFFD3"]}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
-        className="w-full rounded-b-[24px] overflow-hidden"
-        style={{ flex: 1 }}
+        className="w-full rounded-b-[24px]"
+        style={{ flex: 1, overflow: 'visible' }}
       >
         <View className="flex-row justify-between items-start px-1 pt-12 mt-2">
           <Image
@@ -138,9 +86,9 @@ const HeroSection = ({ offset, userLevel, onTodayNewsPress }: HeroSectionProps) 
           />
 
    
-          <View className="flex-col items-center mt-1 ml-auto" style={{ zIndex: 1000 }}>
+          <View className="flex-col items-end mr-4" style={{ zIndex: 1000 }}>
             <TouchableOpacity
-              className="w-[24px] h-[24px] mt-4 ml-3"
+              className="w-[24px] h-[24px] mt-4"
               onPress={() => {
                 console.log('[HeroSection] 검색 버튼 클릭 - pendingReturn 초기화');
                 setPendingReturn(false);
@@ -162,35 +110,6 @@ const HeroSection = ({ offset, userLevel, onTodayNewsPress }: HeroSectionProps) 
                 ]}
               />
             </TouchableOpacity>
-
-            <View style={{ zIndex: 1001, elevation: 1001 }}>
-              <TouchableOpacity
-                className="items-center mt-7 mr-5"
-                activeOpacity={0.7}
-                onPress={handlePressSun}
-                onPressIn={handleHoverIn}
-                onPressOut={handleHoverOut}
-                style={{
-                  backgroundColor: 'transparent',
-                  width: 80,
-                  height: 80,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}
-                hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
-              >
-                <Animated.View style={[sunStyle, pressStyle]} pointerEvents="none">
-                  <Image
-                    source={require("../../../my-expo-app/assets/images/Sun.png")}
-                    style={{ width: 60, height: 60, resizeMode: "contain" }}
-                  />
-                  <Text className="text-[8px] text-[#FBFFD3] font-semibold">
-                    TODAY&apos;S NEWS
-                  </Text>
-                </Animated.View>
-              </TouchableOpacity>
-            </View>
-
           </View>
         </View>
 
