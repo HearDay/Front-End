@@ -4,6 +4,8 @@ import { DiscussionModal } from "../Discussion/DiscussionModal";
 
 import { useAudio } from "@/contexts/AudioContext";
 import { usePlaylistStore } from "@/stores/playlistStore";
+import { useNewsPlaybackStore, NewsArticle } from "@/stores/newsPlaybackStore";
+import { useAutoPlayArticles } from "@/hooks/useAutoPlayArticles";
 import { Audio } from "expo-av";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -35,9 +37,30 @@ export const NewsPlayerScreen = ({
   isPlaylistMode = false,
 }: NewsPlayerScreenProps) => {
   const router = useRouter();
-  const { category } = useLocalSearchParams<{ category?: string }>();
-  const { isPlaying, currentPosition, loadAudio, play, pause } = useAudio();
+  const { category, mode } = useLocalSearchParams<{ category?: string; mode?: string }>();
+  const { isPlaying, currentPosition, loadAudio, play, pause, setOnAudioEnd } = useAudio();
   const { goToNext, goToPrev } = usePlaylistStore();
+
+  // 연속 재생 스토어
+  const {
+    handleNewsEnd,
+    getNextArticleId,
+    isPlayingRecommended,
+    isAutoPlayMode,
+    setAutoPlayArticles,
+    isLastArticleInPage,
+  } = useNewsPlaybackStore();
+
+  // TanStack Query: 자동재생 기사 100개씩 로드
+  const {
+    data: autoPlayData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useAutoPlayArticles({
+    enabled: isAutoPlayMode,
+    pageSize: 100,
+  });
 
   const [newsData, setNewsData] = useState<NewsPlayerData | null>(null);
   const [currentLines, setCurrentLines] = useState<string[]>([]);
@@ -207,18 +230,171 @@ export const NewsPlayerScreen = ({
     }
   }, [newsData, articleId, loadAudio]);
 
+  // TanStack Query 데이터를 Zustand 스토어에 동기화
+  useEffect(() => {
+    if (!isAutoPlayMode || !autoPlayData?.pages) return;
+
+    const currentPage = autoPlayData.pages[autoPlayData.pages.length - 1];
+
+    if (currentPage?.data && currentPage.data.length > 0) {
+      const articles: NewsArticle[] = currentPage.data.map((article: any) => ({
+        id: String(article.id),
+        title: article.title,
+        imageUrl: article.imageUrl,
+        summary: article.description,
+        category: article.category,
+      }));
+
+      const pageNumber = autoPlayData.pages.length;
+
+      console.log('[NewsPlayer] TanStack Query 데이터 -> Zustand 스토어 동기화:', {
+        pageNumber,
+        articlesCount: articles.length,
+      });
+
+      setAutoPlayArticles(articles, pageNumber);
+    }
+  }, [autoPlayData, isAutoPlayMode, setAutoPlayArticles]);
+
+  // 뉴스 종료 시 자동 재생 (연속 재생 모드일 때만)
+  useEffect(() => {
+    console.log('[NewsPlayer] useEffect 실행 - 연속 재생 설정:', {
+      isPlayingRecommended,
+      isAutoPlayMode,
+      mode,
+      articleId,
+    });
+
+    const handleAudioEnd = async () => {
+      console.log('[NewsPlayer] ===== 오디오 종료 콜백 호출됨 =====');
+      console.log('[NewsPlayer] 오디오 종료 감지:', {
+        isPlayingRecommended,
+        isAutoPlayMode,
+        mode,
+        articleId,
+      });
+
+      // 연속 재생 모드가 아니면 무시
+      if (!isPlayingRecommended && !isAutoPlayMode) {
+        console.log('[NewsPlayer] 연속 재생 모드 아님 - 종료');
+        return;
+      }
+
+      // 먼저 다음 기사 ID를 미리 계산 (handleNewsEnd 전에!)
+      const currentState = useNewsPlaybackStore.getState();
+      let preCalculatedNextId: string | null = null;
+
+      if (currentState.isPlayingRecommended) {
+        const nextIdx = currentState.currentRecommendedIndex + 1;
+        if (nextIdx < currentState.recommendedArticles.length) {
+          preCalculatedNextId = currentState.recommendedArticles[nextIdx].id;
+          console.log('[NewsPlayer] 다음 추천 기사 미리 계산:', preCalculatedNextId);
+        }
+      }
+
+      // Zustand에 뉴스 종료 알림 (상태 업데이트)
+      handleNewsEnd();
+
+      // 잠시 대기하여 상태 업데이트 반영
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // 자동재생 모드일 때: 현재 페이지의 마지막 기사면 다음 페이지 로드
+      if (isAutoPlayMode && isLastArticleInPage()) {
+        console.log('[NewsPlayer] 현재 페이지(100개) 마지막 기사 - 다음 페이지 로드 시도');
+
+        if (hasNextPage && !isFetchingNextPage) {
+          console.log('[NewsPlayer] 다음 페이지 로드 중...');
+          await fetchNextPage();
+        } else if (!hasNextPage) {
+          console.log('[NewsPlayer] 더 이상 페이지 없음 - 재생 종료');
+          router.push('/(tabs)');
+          return;
+        }
+      }
+
+      // 다음 기사 ID 가져오기 (미리 계산한 값이 있으면 사용)
+      let nextArticleId = preCalculatedNextId || getNextArticleId();
+
+      // 자동재생 모드로 막 전환되었고 데이터가 없는 경우, 재시도
+      if (!nextArticleId && isAutoPlayMode) {
+        console.log('[NewsPlayer] 자동재생 데이터 로딩 대기 중... (최대 3초)');
+
+        for (let i = 0; i < 6; i++) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+          nextArticleId = getNextArticleId();
+
+          if (nextArticleId) {
+            console.log('[NewsPlayer] 자동재생 데이터 로드 완료');
+            break;
+          }
+        }
+      }
+
+      if (nextArticleId) {
+        // 현재 기사를 완료 처리하고 마지막 본 기사로 설정 (팝업에서 표시하기 위해)
+        if (isPlayingRecommended) {
+          const { addCompletedNewsId, setLastViewedNewsId } = await import('@/stores/todayNewsStore').then(m => m.useTodayNewsStore.getState());
+          addCompletedNewsId(articleId);
+          setLastViewedNewsId(nextArticleId); // 다음 기사를 마지막 본 기사로 설정
+          console.log('[NewsPlayer] 현재 기사 완료 처리:', articleId);
+          console.log('[NewsPlayer] 다음 기사를 마지막 본 기사로 설정:', nextArticleId);
+        }
+
+        console.log('[NewsPlayer] 다음 기사로 자동 이동:', nextArticleId);
+        router.replace(`/newsplayer/${nextArticleId}?mode=auto`);
+      } else {
+        console.log('[NewsPlayer] 더 이상 재생할 기사 없음 - 홈으로 이동');
+        router.push('/(tabs)');
+      }
+    };
+
+    // 오디오 종료 콜백 등록
+    setOnAudioEnd(handleAudioEnd);
+
+    // 클린업: 컴포넌트 언마운트 시 콜백 해제
+    return () => {
+      setOnAudioEnd(null);
+    };
+  }, [isPlayingRecommended, isAutoPlayMode, mode, handleNewsEnd, getNextArticleId, isLastArticleInPage, hasNextPage, isFetchingNextPage, fetchNextPage, router, setOnAudioEnd]);
+
   // 뒤로가기
-  const handleBack = useCallback(() => {
-    if (from === "savednews") return router.push("/(tabs)/savednews");
-    if (from === "home" || from === "todaynews") return router.push("/(tabs)");
+  const handleBack = useCallback(async () => {
+    console.log('[NewsPlayer] 백버튼 클릭:', { from, isPlayingRecommended, mode });
+
+    // 연속 재생 모드이면서 "오늘의 뉴스 팝업"에서 온 경우에만 팝업으로 돌아가기
+    if ((isPlayingRecommended || mode === "recommended") && from === "todaynews") {
+      console.log('[NewsPlayer] 오늘의 뉴스 팝업에서 왔음 - 팝업으로 돌아가기');
+
+      // pendingReturn 설정하여 팝업이 다시 뜨도록
+      const { setPendingReturn } = await import('@/stores/todayNewsStore').then(m => m.useTodayNewsStore.getState());
+      setPendingReturn(true);
+
+      // 홈으로 라우팅 (팝업이 자동으로 뜸)
+      return router.push("/(tabs)");
+    }
+
+    // 나머지 경우는 원래 위치로 돌아가기
+    if (from === "savednews") {
+      console.log('[NewsPlayer] 저장탭으로 돌아가기');
+      return router.push("/(tabs)/savednews");
+    }
+
+    if (from === "home") {
+      console.log('[NewsPlayer] 홈으로 돌아가기');
+      return router.push("/(tabs)");
+    }
+
     if (from === "category") {
+      console.log('[NewsPlayer] 검색 페이지로 돌아가기');
       return router.push({
         pathname: "/SearchNewsPage",
         params: { category: category || "전체" },
       });
     }
+
+    console.log('[NewsPlayer] 기본 뒤로가기');
     router.back();
-  }, [router, from]);
+  }, [router, from, isPlayingRecommended, mode, category]);
 
   // 오디오 제어
   const handlePlay = useCallback(async () => play(), [play]);

@@ -29,9 +29,31 @@ const NewsCardSlider = ({ updateTime, articles = [] }: NewsCardSliderProps) => {
     setActiveIndex(index);
   };
 
-  const handleNewsPress = (articleId: number) => {
-    console.log('기사 선택 - Article ID:', articleId);
-    router.push(`/newsplayer/${articleId}?from=home`);
+  const handleNewsPress = async (articleId: number) => {
+    console.log('[NewsCardSlider] 기사 선택 - Article ID:', articleId);
+
+    // 연속 재생 설정
+    const { setRecommendedArticles, startRecommendedPlayback } = await import('@/stores/newsPlaybackStore').then(m => m.useNewsPlaybackStore.getState());
+
+    // 추천 기사들을 연속 재생 목록으로 설정
+    const playbackArticles = articles.map(article => ({
+      id: String(article.id),
+      title: article.title,
+      imageUrl: article.imageUrl,
+      summary: article.originLink,
+      category: article.category || '전체',
+    }));
+
+    setRecommendedArticles(playbackArticles);
+
+    // 클릭한 기사의 인덱스 찾기
+    const clickedIndex = articles.findIndex(article => article.id === articleId);
+    console.log('[NewsCardSlider] 클릭한 기사 인덱스:', clickedIndex);
+
+    // 연속 재생 시작
+    startRecommendedPlayback(clickedIndex);
+
+    router.push(`/newsplayer/${articleId}?from=home&mode=recommended`);
   };
 
   return (

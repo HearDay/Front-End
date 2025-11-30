@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Slot, usePathname } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
@@ -6,6 +7,8 @@ import { AudioProvider } from "../contexts/AudioContext";
 import { SavedNewsScrollProvider } from "../contexts/SavedNewsScrollContext";
 import "../global.css";
 import LoginPage from "./LoginPage";
+
+const queryClient = new QueryClient();
 
 export default function RootLayout() {
   const [isLoading, setIsLoading] = useState(true);
@@ -54,10 +57,12 @@ export default function RootLayout() {
 
   // 인증 여부 확인 후 Slot 렌더링
   return (
-    <AudioProvider>
-      <SavedNewsScrollProvider>
-        <Slot />
-      </SavedNewsScrollProvider>
-    </AudioProvider>
+    <QueryClientProvider client={queryClient}>
+      <AudioProvider>
+        <SavedNewsScrollProvider>
+          <Slot />
+        </SavedNewsScrollProvider>
+      </AudioProvider>
+    </QueryClientProvider>
   );
 }

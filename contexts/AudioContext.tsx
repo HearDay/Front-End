@@ -11,6 +11,7 @@ interface AudioContextType {
   play: () => Promise<void>
   pause: () => Promise<void>
   unload: () => Promise<void>
+  setOnAudioEnd: (callback: (() => void) | null) => void
 }
 
 const AudioContext = createContext<AudioContextType | undefined>(undefined)
@@ -21,6 +22,7 @@ export const AudioProvider = ({ children }: { children: React.ReactNode }) => {
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentArticleId, setCurrentArticleId] = useState<string | null>(null)
   const [currentPosition, setCurrentPosition] = useState(0)
+  const onAudioEndCallback = useRef<(() => void) | null>(null)
 
   // 초기 오디오 모드 설정
   useEffect(() => {
@@ -65,7 +67,15 @@ export const AudioProvider = ({ children }: { children: React.ReactNode }) => {
       sound.setOnPlaybackStatusUpdate((status) => {
         if (status.isLoaded) {
           setIsPlaying(status.isPlaying)
-          setCurrentPosition(status.positionMillis / 1000) // 밀리초를 초로 변환
+          setCurrentPosition(status.positionMillis / 1000)
+
+          // 뉴스 재생 종료 감지
+          if (status.didJustFinish) {
+            console.log('[AudioContext] 오디오 재생 완료 - 콜백 실행');
+            if (onAudioEndCallback.current) {
+              onAudioEndCallback.current();
+            }
+          }
         }
       })
     } catch (err) {
@@ -103,6 +113,11 @@ export const AudioProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [])
 
+  const setOnAudioEnd = useCallback((callback: (() => void) | null) => {
+    console.log('[AudioContext] 오디오 종료 콜백 설정:', !!callback);
+    onAudioEndCallback.current = callback;
+  }, [])
+
   // 뉴스 재생/기사 화면이 아니면 오디오 정리
   useEffect(() => {
     const isNewsScreen = pathname.includes('/newsplayer/') || pathname.includes('/newsarticle/')
@@ -123,6 +138,7 @@ export const AudioProvider = ({ children }: { children: React.ReactNode }) => {
         play,
         pause,
         unload,
+        setOnAudioEnd,
       }}
     >
       {children}

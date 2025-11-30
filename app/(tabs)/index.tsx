@@ -265,25 +265,31 @@ export default function Index() {
     // Zustand에 백버튼 예약 및 완료 ID 저장
     onNewsCardClick(newsId);
 
-    try {
-      // 플레이리스트 생성
-      const todayNewsIds = todayNewsItems.map(item => parseInt(item.id));
-      const randomArticles = await newsService.getArticles(0, 100);
-      const randomIds = randomArticles.map(article => article.id);
-      const allIds = [...todayNewsIds, ...randomIds.filter(id => !todayNewsIds.includes(id))];
+    // 연속 재생 설정
+    const { setRecommendedArticles, startRecommendedPlayback } = await import('@/stores/newsPlaybackStore').then(m => m.useNewsPlaybackStore.getState());
 
-      usePlaylistStore.getState().setPlaylist(allIds);
-      const startIndex = allIds.indexOf(parseInt(newsId));
-      usePlaylistStore.setState({ currentIndex: startIndex });
+    // 추천 기사 5개 설정
+    const recommendedArticles = todayNewsItems.map(item => ({
+      id: item.id,
+      title: item.title,
+      imageUrl: item.imageUrl,
+      summary: item.summary,
+      category: item.category,
+    }));
 
-      console.log('[Index] 플레이리스트 생성 완료 - 시작 인덱스:', startIndex);
-    } catch (error) {
-      console.error('[Index] 플레이리스트 생성 오류:', error);
-    }
+    console.log('[Index] 추천 기사 설정:', recommendedArticles.length, '개');
+    setRecommendedArticles(recommendedArticles);
+
+    // 클릭한 기사의 인덱스 찾기
+    const clickedIndex = todayNewsItems.findIndex(item => item.id === newsId);
+    console.log('[Index] 클릭한 기사 인덱스:', clickedIndex);
+
+    // 추천 기사 재생 시작
+    startRecommendedPlayback(clickedIndex);
 
     // 라우팅
     console.log('[Index] 라우팅: /newsplayer/' + newsId);
-    router.push(`/newsplayer/${newsId}?playlist=true&from=todaynews`);
+    router.push(`/newsplayer/${newsId}?mode=recommended&from=todaynews`);
   };
 
   return (
@@ -338,9 +344,32 @@ export default function Index() {
               <NewsCardList
                 background="green"
                 articles={categoryArticles}
-                onPressArticle={(id) =>
-                  router.push(`/newsplayer/${id}?from=home`)
-                }
+                onPressArticle={async (id) => {
+                  console.log('[Index] 카테고리 기사 선택 - ID:', id);
+
+                  // 연속 재생 설정
+                  const { setRecommendedArticles, startRecommendedPlayback } = await import('@/stores/newsPlaybackStore').then(m => m.useNewsPlaybackStore.getState());
+
+                  // 카테고리 기사들을 추천 기사로 설정 (최대 100개)
+                  const playbackArticles = categoryArticles.slice(0, 100).map(article => ({
+                    id: String(article.id),
+                    title: article.title,
+                    imageUrl: article.imageUrl,
+                    summary: article.description,
+                    category: article.category,
+                  }));
+
+                  setRecommendedArticles(playbackArticles);
+
+                  // 클릭한 기사의 인덱스 찾기
+                  const clickedIndex = categoryArticles.findIndex(article => String(article.id) === id);
+                  console.log('[Index] 클릭한 기사 인덱스:', clickedIndex);
+
+                  // 연속 재생 시작
+                  startRecommendedPlayback(clickedIndex);
+
+                  router.push(`/newsplayer/${id}?from=home&mode=recommended`);
+                }}
               />
             </ScrollView>
           </View>
