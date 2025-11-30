@@ -13,7 +13,7 @@ import { useTodayNewsStore } from "@/stores/todayNewsStore";
 import { RecommendArticle } from "@/types/auth/recommendNews";
 import { useLocalSearchParams, usePathname, useFocusEffect, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -256,6 +256,20 @@ export default function Index() {
 
   const handleTodayNewsPress = () => {
     console.log('[Index] 해 아이콘 클릭 - 팝업 표시');
+    console.log('[Index] todayNewsItems:', todayNewsItems.length, '개');
+    console.log('[Index] completedNewsIds:', completedNewsIds);
+    console.log('[Index] lastViewedNewsId:', lastViewedNewsId);
+    console.log('[Index] showModal 상태:', showModal);
+
+    // 해 아이콘을 직접 클릭한 경우이므로 userDismissed를 false로 리셋
+    const { setUserDismissed, setLastViewedNewsId } = useTodayNewsStore.getState();
+    setUserDismissed(false);
+    console.log('[Index] userDismissed를 false로 리셋');
+
+    // lastViewedNewsId를 null로 초기화하여 첫 번째 카드부터 보이도록
+    setLastViewedNewsId(null);
+    console.log('[Index] lastViewedNewsId를 null로 초기화 - 첫 번째 카드부터 표시');
+
     setShowModal(true);
   };
 
@@ -299,6 +313,32 @@ export default function Index() {
         userLevel={level}
         onTodayNewsPress={handleTodayNewsPress}
       />
+
+      {/* 해 아이콘 - 별도로 렌더링 (원래 HeroSection 내부 위치와 동일하게) */}
+      <TouchableOpacity
+        onPress={handleTodayNewsPress}
+        style={{
+          position: 'absolute',
+          top: 100,
+          right: 10,
+          width: 80,
+          height: 80,
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 9999,
+          elevation: 9999,
+        }}
+        activeOpacity={0.7}
+        hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+      >
+        <Image
+          source={require("../../my-expo-app/assets/images/Sun.png")}
+          style={{ width: 60, height: 60, resizeMode: "contain" }}
+        />
+        <Text style={{ fontSize: 8, color: '#FBFFD3', fontWeight: '600' }}>
+          TODAY'S NEWS
+        </Text>
+      </TouchableOpacity>
 
       <TodayNewsModal
         visible={showModal}
