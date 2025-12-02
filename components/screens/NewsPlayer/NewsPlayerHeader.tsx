@@ -15,7 +15,10 @@ export const NewsPlayerHeader = memo(function NewsPlayerHeader({
       <View className="px-4 pt-2 flex-row items-center justify-between">
         {/* 뒤로가기 버튼 */}
         <TouchableOpacity
-          onPress={onBack}
+          onPress={() => {
+            console.log('[NewsPlayerHeader] 백버튼 터치됨');
+            onBack?.();
+          }}
           activeOpacity={0.7}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} // ✅ 추가: 터치 영역 확대
         >
