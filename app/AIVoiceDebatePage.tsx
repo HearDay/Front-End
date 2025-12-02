@@ -1,4 +1,5 @@
 import axiosInstance from "@/services/api/axiosInstance";
+import { fetchUserInfo } from "@/services/api/userInfo";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Audio } from "expo-av";
 import * as FileSystem from "expo-file-system/legacy";
@@ -22,14 +23,30 @@ export default function AIVoiceDebatePage() {
     discussionId?: string;
   }>();
 
-  // discussionId를 URL에서 우선 읽기
+  // URL에서 discussionId 가져오기
   const [discussionId, setDiscussionId] = useState<number | null>(
     paramDiscussionId ? Number(paramDiscussionId) : null
   );
 
+  const [nickname, setNickname] = useState<string>(""); // ⭐ 닉네임
+
   const [currentSpeaker, setCurrentSpeaker] = useState<Speaker>("None");
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [sound, setSound] = useState<Audio.Sound | null>(null);
+
+  // 페이지 진입 시 닉네임 불러오기
+  useEffect(() => {
+    const loadUserInfo = async () => {
+      try {
+        const res = await fetchUserInfo();
+        setNickname(res.data.nickname);
+      } catch (err) {
+        console.log("닉네임 조회 실패:", err);
+      }
+    };
+
+    loadUserInfo();
+  }, []);
 
   // iOS 재생 설정
   useEffect(() => {
@@ -46,7 +63,7 @@ export default function AIVoiceDebatePage() {
     };
   }, []);
 
-  // 녹음/재생 모두 정리
+  // 녹음·재생 리소스 정리
   const cleanUpAudio = async () => {
     try {
       if (recording) {
@@ -143,7 +160,6 @@ export default function AIVoiceDebatePage() {
 
       const newId = response.data.data.discussionId;
 
-      // discussionId 최초 생성 시 URL에 저장
       if (newId && !discussionId) {
         setDiscussionId(newId);
         router.setParams({ discussionId: String(newId) });
@@ -158,7 +174,7 @@ export default function AIVoiceDebatePage() {
     }
   };
 
-  // Base64 → wav 재생
+  // Base64 → wav 파일 재생
   const playBase64Wav = async (base64: string) => {
     try {
       const path = FileSystem.cacheDirectory + `ai_reply.wav`;
@@ -215,11 +231,11 @@ export default function AIVoiceDebatePage() {
           </Text>
         ) : currentSpeaker === "User" ? (
           <Text className="text-[#002C09] text-3xl font-normal mt-2">
-            <Text className="font-black">서진님</Text> 차례예요!
+            <Text className="font-black">{nickname || "사용자"}님</Text> 차례예요!
           </Text>
         ) : currentSpeaker === "None" ? (
           <Text className="text-[#002C09] text-3xl font-normal mt-2">
-            <Text className="font-black">서진님</Text>이 준비되면 시작해요!
+            <Text className="font-black">{nickname || "사용자"}님</Text>이 준비되면 시작해요!
           </Text>
         ) : (
           <Text className="text-[#002C09] text-3xl font-normal mt-2">
