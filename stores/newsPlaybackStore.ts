@@ -20,6 +20,9 @@ interface NewsPlaybackStore {
   currentAutoPlayIndex: number;
   currentAutoPlayPage: number;
 
+  // 5→100 전환 관련
+  isTransitioningToAutoPlay: boolean; // 추천 5개 끝나고 100개 로딩 중
+
   // Actions
   setRecommendedArticles: (articles: NewsArticle[]) => void;
 
@@ -31,6 +34,7 @@ interface NewsPlaybackStore {
   enterAutoPlayMode: () => void;
   setAutoPlayArticles: (articles: NewsArticle[], page: number) => void;
   moveToNextAutoPlay: () => void;
+  completeTransitionToAutoPlay: () => void; // 전환 완료
 
   // 뉴스 종료 통합 핸들러
   handleNewsEnd: () => void;
@@ -55,6 +59,8 @@ export const useNewsPlaybackStore = create<NewsPlaybackStore>((set, get) => ({
   autoPlayArticles: [],
   currentAutoPlayIndex: 0,
   currentAutoPlayPage: 0,
+
+  isTransitioningToAutoPlay: false,
 
   // 추천 기사 설정
   setRecommendedArticles: (articles) => {
@@ -98,25 +104,51 @@ export const useNewsPlaybackStore = create<NewsPlaybackStore>((set, get) => ({
   // 자동재생 모드 진입
   enterAutoPlayMode: () => {
     console.log('[NewsPlayback] 자동재생 모드 진입 (TanStack Query 활성화)');
+    console.log('[NewsPlayback] 5->100 전환 시작 - isTransitioningToAutoPlay: true');
     set({
       isPlayingRecommended: false,
       isAutoPlayMode: true,
+      isTransitioningToAutoPlay: true, // 전환 중 플래그 설정
       currentAutoPlayIndex: 0,
       currentAutoPlayPage: 0,
     });
   },
 
+  // 자동재생 전환 완료
+  completeTransitionToAutoPlay: () => {
+    console.log('[NewsPlayback] 자동재생 전환 완료 - isTransitioningToAutoPlay: false');
+    set({
+      isTransitioningToAutoPlay: false,
+    });
+  },
+
   // 자동재생 기사 설정 (TanStack Query에서 호출)
   setAutoPlayArticles: (articles, page) => {
+    const state = get();
     console.log('[NewsPlayback] 자동재생 기사 설정:', {
       count: articles.length,
       page,
+      currentPage: state.currentAutoPlayPage,
+      currentIndex: state.currentAutoPlayIndex,
     });
-    set({
-      autoPlayArticles: articles,
-      currentAutoPlayPage: page,
-      currentAutoPlayIndex: 0,
-    });
+
+    // 같은 페이지 데이터가 다시 들어오면 인덱스를 유지
+    // (다른 페이지로 변경되는 경우에만 인덱스 초기화)
+    if (state.currentAutoPlayPage === page && state.autoPlayArticles.length > 0) {
+      console.log('[NewsPlayback] 같은 페이지 데이터 재설정 - 인덱스 유지');
+      set({
+        autoPlayArticles: articles,
+        currentAutoPlayPage: page,
+        // currentAutoPlayIndex는 유지
+      });
+    } else {
+      console.log('[NewsPlayback] 새 페이지 데이터 설정 - 인덱스 초기화');
+      set({
+        autoPlayArticles: articles,
+        currentAutoPlayPage: page,
+        currentAutoPlayIndex: 0,
+      });
+    }
   },
 
   // 다음 자동재생 기사로 이동
@@ -170,7 +202,19 @@ export const useNewsPlaybackStore = create<NewsPlaybackStore>((set, get) => ({
     const state = get();
     if (!state.isAutoPlayMode) return false;
 
-    return state.currentAutoPlayIndex >= state.autoPlayArticles.length - 1;
+    // 자동재생 기사가 아직 로드되지 않았으면 false (전환 중)
+    if (state.autoPlayArticles.length === 0) {
+      console.log('[NewsPlayback] autoPlayArticles가 비어있음 - 마지막 기사 아님');
+      return false;
+    }
+
+    const isLast = state.currentAutoPlayIndex >= state.autoPlayArticles.length - 1;
+    console.log('[NewsPlayback] isLastArticleInPage:', {
+      currentAutoPlayIndex: state.currentAutoPlayIndex,
+      articlesLength: state.autoPlayArticles.length,
+      isLast,
+    });
+    return isLast;
   },
 
   // 다음 기사 ID 가져오기
@@ -213,6 +257,7 @@ export const useNewsPlaybackStore = create<NewsPlaybackStore>((set, get) => ({
       autoPlayArticles: [],
       currentAutoPlayIndex: 0,
       currentAutoPlayPage: 0,
+      isTransitioningToAutoPlay: false,
     });
   },
 }));

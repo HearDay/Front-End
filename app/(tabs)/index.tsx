@@ -3,21 +3,21 @@ import HeroSection from "@/components/screens/HomePage/HeroSection";
 import NewsCardList from "@/components/screens/HomePage/NewsCardList";
 import NewsCardSlider from "@/components/screens/HomePage/NewsCardSlider";
 import { TodayNewsModal } from "@/components/screens/HomePage/TodayNewsModal";
-import { newsService } from "@/services";
 import { fetchCategoryRecommendNews } from "@/services/api/categoryRecommendNews";
 import { fetchRecommendNews } from "@/services/api/recommendNews";
 import { todayNewsService } from "@/services/api/todayNews";
 import { useCategoryStore } from "@/services/utils/categoryStore";
-import { usePlaylistStore } from "@/stores/playlistStore";
 import { useTodayNewsStore } from "@/stores/todayNewsStore";
 import { RecommendArticle } from "@/types/auth/recommendNews";
-import { useLocalSearchParams, usePathname, useFocusEffect, useRouter } from "expo-router";
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import { useFocusEffect, usePathname, useRouter } from "expo-router";
+import React, { useCallback, useEffect, useState } from "react";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
+  useDerivedValue,
+  runOnJS,
 } from "react-native-reanimated";
 
 export default function Index() {
@@ -67,17 +67,27 @@ export default function Index() {
     setShowModal,
     setHasShownInitialModal,
     dismissModal,
-    onNewsCardClick,
     checkAndShowOnReturn,
     setHasTriggeredInitialPopup,
   } = useTodayNewsStore();
   const [todayNewsItems, setTodayNewsItems] = useState<any[]>([]);
   const [userGender, setUserGender] = useState<string>("");
   const [userAge, setUserAge] = useState<string>("");
+  const [showSunIcon, setShowSunIcon] = useState(!selectedCategory); // 해 아이콘 표시 여부
 
   const offset = useSharedValue(selectedCategory ? 1 : 0);
   const pathname = usePathname();
   const router = useRouter();
+
+  // 애니메이션 완료 감지
+  useDerivedValue(() => {
+    // offset이 0에 가까우면 (홈 화면) 해 아이콘 표시
+    if (offset.value < 0.1 && !selectedCategory) {
+      runOnJS(setShowSunIcon)(true);
+    } else {
+      runOnJS(setShowSunIcon)(false);
+    }
+  });
 
   // 유저 정보 로드
   useEffect(() => {
@@ -274,10 +284,9 @@ export default function Index() {
   };
 
   const handleNewsCardPress = async (newsId: string) => {
-    console.log('[Index] 뉴스 카드 클릭 - ID:', newsId);
-
-    // Zustand에 백버튼 예약 및 완료 ID 저장
-    onNewsCardClick(newsId);
+    console.log('[Index] ===== 뉴스 카드 클릭 =====');
+    console.log('[Index] 클릭한 기사 ID:', newsId);
+    console.log('[Index] todayNewsItems 배열:', todayNewsItems.map(item => ({ id: item.id, title: item.title })));
 
     // 연속 재생 설정
     const { setRecommendedArticles, startRecommendedPlayback } = await import('@/stores/newsPlaybackStore').then(m => m.useNewsPlaybackStore.getState());
@@ -292,11 +301,13 @@ export default function Index() {
     }));
 
     console.log('[Index] 추천 기사 설정:', recommendedArticles.length, '개');
+    console.log('[Index] 추천 기사 순서:', recommendedArticles.map((a, i) => `${i}: ${a.title.substring(0, 10)}`));
     setRecommendedArticles(recommendedArticles);
 
     // 클릭한 기사의 인덱스 찾기
     const clickedIndex = todayNewsItems.findIndex(item => item.id === newsId);
     console.log('[Index] 클릭한 기사 인덱스:', clickedIndex);
+    console.log('[Index] 클릭한 기사 제목:', todayNewsItems[clickedIndex]?.title);
 
     // 추천 기사 재생 시작
     startRecommendedPlayback(clickedIndex);
@@ -314,31 +325,33 @@ export default function Index() {
         onTodayNewsPress={handleTodayNewsPress}
       />
 
-      {/* 해 아이콘 - 별도로 렌더링 (원래 HeroSection 내부 위치와 동일하게) */}
-      <TouchableOpacity
-        onPress={handleTodayNewsPress}
-        style={{
-          position: 'absolute',
-          top: 100,
-          right: 10,
-          width: 80,
-          height: 80,
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 9999,
-          elevation: 9999,
-        }}
-        activeOpacity={0.7}
-        hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
-      >
-        <Image
-          source={require("../../my-expo-app/assets/images/Sun.png")}
-          style={{ width: 60, height: 60, resizeMode: "contain" }}
-        />
-        <Text style={{ fontSize: 8, color: '#FBFFD3', fontWeight: '600' }}>
-          TODAY'S NEWS
-        </Text>
-      </TouchableOpacity>
+      {/* 해 아이콘 - 애니메이션 완료 후에만 표시 */}
+      {showSunIcon && (
+        <TouchableOpacity
+          onPress={handleTodayNewsPress}
+          style={{
+            position: 'absolute',
+            top: 100,
+            right: 10,
+            width: 80,
+            height: 80,
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 9999,
+            elevation: 9999,
+          }}
+          activeOpacity={0.7}
+          hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+        >
+          <Image
+            source={require("../../my-expo-app/assets/images/Sun.png")}
+            style={{ width: 60, height: 60, resizeMode: "contain" }}
+          />
+          <Text style={{ fontSize: 8, color: '#FBFFD3', fontWeight: '600' }}>
+            TODAY'S NEWS
+          </Text>
+        </TouchableOpacity>
+      )}
 
       <TodayNewsModal
         visible={showModal}

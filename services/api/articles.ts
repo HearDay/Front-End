@@ -29,3 +29,47 @@ export const fetchArticles = async (title: string, category: string) => {
     return [];
   }
 };
+
+/**
+ * 자동재생용 기사 페이지네이션 API
+ * @param page - 페이지 번호 (0부터 시작)
+ * @param size - 페이지당 기사 개수 (기본 100개)
+ */
+export const fetchArticlesWithPagination = async (page: number = 0, size: number = 100) => {
+  try {
+    console.log(`[API] fetchArticlesWithPagination 호출: page=${page}, size=${size}`);
+
+    const response = await axiosInstance.post(
+      `/api/articles?page=${page}&size=${size}&sort=latest`,
+      {
+        categories: [],
+        title: "",
+      }
+    );
+
+    console.log(`[API] fetchArticlesWithPagination 응답:`, {
+      status: response.status,
+      dataLength: response.data?.data?.length || 0,
+    });
+
+    // 정상 응답인데 data가 비어있는 경우 안전하기 처리
+    if (!response.data?.data || response.data.data.length === 0) {
+      return [];
+    }
+
+    return response.data.data;
+  } catch (error: any) {
+    const status = error?.response?.status;
+    console.error(`[API] fetchArticlesWithPagination 실패:`, {
+      status,
+      message: error?.message,
+    });
+
+    if (status === 403 || status === 404) {
+      return [];
+    }
+
+    console.error("페이지네이션 기사 조회 중 알 수 없는 오류:", error?.message);
+    return [];
+  }
+};
