@@ -31,7 +31,7 @@ const KakaoLoginView = () => {
           router.replace("/(tabs)");
         }
       } catch (err) {
-        console.error("❌ 토큰 저장 실패:", err);
+        console.error("토큰 저장 실패:", err);
       }
     }
 

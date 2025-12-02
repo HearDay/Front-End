@@ -1,3 +1,4 @@
+
 import { CategoryChipGroup } from "@/components/common";
 import HeroSection from "@/components/screens/HomePage/HeroSection";
 import NewsCardList from "@/components/screens/HomePage/NewsCardList";
@@ -13,11 +14,11 @@ import { useFocusEffect, usePathname, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import Animated, {
+  runOnJS,
   useAnimatedStyle,
+  useDerivedValue,
   useSharedValue,
   withTiming,
-  useDerivedValue,
-  runOnJS,
 } from "react-native-reanimated";
 
 export default function Index() {
@@ -161,7 +162,7 @@ export default function Index() {
               });
 
               if (!state.userDismissed) {
-                console.log('[Index] ✅ 최초 로그인 팝업 표시');
+                console.log('[Index] 최초 로그인 팝업 표시');
                 setShowModal(true);
                 setHasShownInitialModal(true);
               } else {

@@ -188,7 +188,7 @@ export default function SearchNewsPage() {
                 console.log('[SearchNewsPage] 클릭한 기사 ID:', id);
 
                 if (clickedIndex === -1) {
-                  console.error('[SearchNewsPage] ❌ 기사를 찾을 수 없음!');
+                  console.error('[SearchNewsPage] 기사를 찾을 수 없음!');
                   return;
                 }
 
