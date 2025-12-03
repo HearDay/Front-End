@@ -67,7 +67,6 @@ const ResetPasswordPage = () => {
         setIsSuccess(false);
       }
     } catch (err) {
-      console.error(err);
       setModalMessage("서버 오류가 발생했습니다. 다시 시도해주세요.");
       setIsSuccess(false);
     }

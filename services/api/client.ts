@@ -26,7 +26,6 @@ apiClient.interceptors.request.use(
         config.headers.Authorization = `Bearer ${token}`
       }
     } catch (error) {
-      console.error('토큰 가져오기 실패:', error)
     }
     return config
   },
@@ -66,7 +65,6 @@ apiClient.interceptors.response.use(
         return apiClient(originalRequest)
       } catch (refreshError) {
         await storage.clearTokens()
-        console.error('토큰 갱신 실패:', refreshError)
         return Promise.reject(refreshError)
       }
     }

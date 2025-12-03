@@ -46,7 +46,6 @@ export default function AIChatDebatePage() {
         ]);
       }
     } catch (e) {
-      console.error("AI 메시지 전송 실패:", e);
     }
   };
 

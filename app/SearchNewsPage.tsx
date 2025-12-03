@@ -159,8 +159,6 @@ export default function SearchNewsPage() {
               background="white"
               articles={articles}
               onPressArticle={async (id: string) => {
-                console.log('[SearchNewsPage] ===== 기사 클릭 시작 =====');
-                console.log('[SearchNewsPage] 기사 선택 - Article ID:', id);
 
                 // 연속 재생 설정
                 const store = await import('@/stores/newsPlaybackStore').then(m => m.useNewsPlaybackStore);
@@ -175,37 +173,24 @@ export default function SearchNewsPage() {
                   category: article.category,
                 }));
 
-                console.log('[SearchNewsPage] playbackArticles 생성:', playbackArticles.length, '개');
-                console.log('[SearchNewsPage] 첫 번째 기사:', playbackArticles[0]?.id);
-                console.log('[SearchNewsPage] 두 번째 기사:', playbackArticles[1]?.id);
 
                 // 클릭한 기사의 인덱스 찾기
-                console.log('[SearchNewsPage] 원본 articles 첫 번째:', articles[0]?.id, typeof articles[0]?.id);
-                console.log('[SearchNewsPage] 클릭한 id:', id, typeof id);
 
                 const clickedIndex = articles.findIndex(article => String(article.id) === String(id));
-                console.log('[SearchNewsPage] 클릭한 기사 인덱스:', clickedIndex);
-                console.log('[SearchNewsPage] 클릭한 기사 ID:', id);
 
                 if (clickedIndex === -1) {
-                  console.error('[SearchNewsPage] ❌ 기사를 찾을 수 없음!');
                   return;
                 }
 
                 // 상태 업데이트 전 확인
-                console.log('[SearchNewsPage] setRecommendedArticles 호출 전 상태:', store.getState().recommendedArticles.length);
 
                 setRecommendedArticles(playbackArticles);
 
-                console.log('[SearchNewsPage] setRecommendedArticles 호출 후 상태:', store.getState().recommendedArticles.length);
 
                 // 연속 재생 시작
-                console.log('[SearchNewsPage] startRecommendedPlayback 호출 - 인덱스:', clickedIndex);
-                console.log('[SearchNewsPage] startRecommendedPlayback 호출 전 currentRecommendedIndex:', store.getState().currentRecommendedIndex);
 
                 startRecommendedPlayback(clickedIndex);
 
-                console.log('[SearchNewsPage] startRecommendedPlayback 호출 후 즉시 상태:', {
                   currentRecommendedIndex: store.getState().currentRecommendedIndex,
                   isPlayingRecommended: store.getState().isPlayingRecommended,
                   recommendedArticlesCount: store.getState().recommendedArticles.length,
@@ -215,14 +200,12 @@ export default function SearchNewsPage() {
                 await new Promise(resolve => setTimeout(resolve, 100));
 
                 const finalState = store.getState();
-                console.log('[SearchNewsPage] 100ms 대기 후 최종 상태:', {
                   currentRecommendedIndex: finalState.currentRecommendedIndex,
                   isPlayingRecommended: finalState.isPlayingRecommended,
                   recommendedArticlesCount: finalState.recommendedArticles.length,
                   currentArticle: finalState.recommendedArticles[finalState.currentRecommendedIndex],
                 });
 
-                console.log('[SearchNewsPage] ===== 라우팅 시작 =====');
 
                 // 라우팅
                 router.push({

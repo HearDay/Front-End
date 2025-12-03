@@ -114,7 +114,6 @@ export function NewsArticleScreen({ articleId }: NewsArticleScreenProps) {
       }, 1500);
 
     } catch (error) {
-      console.error('단어 저장 실패:', error)
       setSaveState('IDLE'); // 에러 발생 시 상태 초기화
       setShowDictionaryModal(false);
       setShowSaveErrorModal(true);

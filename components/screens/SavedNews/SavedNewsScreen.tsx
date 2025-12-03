@@ -50,7 +50,6 @@ export function SavedNewsScreen() {
       setSavedNews(savedNewsItems)
     } catch (err) {
       setError('저장된 뉴스를 불러올 수 없습니다.')
-      console.error('저장된 뉴스 로드 실패:', err)
     } finally {
       setLoading(false)
     }
@@ -79,7 +78,6 @@ export function SavedNewsScreen() {
 
   const handleNewsPress = useCallback(
     (articleId: string) => {
-      console.log('기사 선택 - Article ID:', articleId);
       router.push(`/newsplayer/${articleId}?from=savednews`)
     },
     [router]
@@ -96,7 +94,6 @@ export function SavedNewsScreen() {
       await newsService.deleteSavedNews(deletingNewsId)
       setSavedNews(prev => prev.filter(news => news.id !== deletingNewsId))
     } catch (error) {
-      console.error('삭제 실패:', error)
       setShowDeleteErrorModal(true)
     } finally {
       setShowDeleteConfirmModal(false)

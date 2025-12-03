@@ -71,7 +71,6 @@ export const TodayNewsModal = ({
           setCurrentIndex(viewedIndex)
           currentIndexRef.current = viewedIndex
           position.setValue(0)
-          console.log('[TodayNewsModal] lastViewedNewsId로 이동:', lastViewedNewsId, '인덱스:', viewedIndex)
           return
         }
       }

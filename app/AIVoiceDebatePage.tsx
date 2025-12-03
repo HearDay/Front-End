@@ -28,7 +28,7 @@ export default function AIVoiceDebatePage() {
     paramDiscussionId ? Number(paramDiscussionId) : null
   );
 
-  const [nickname, setNickname] = useState<string>(""); // ⭐ 닉네임
+  const [nickname, setNickname] = useState<string>(""); //  닉네임
 
   const [currentSpeaker, setCurrentSpeaker] = useState<Speaker>("None");
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
@@ -41,7 +41,6 @@ export default function AIVoiceDebatePage() {
         const res = await fetchUserInfo();
         setNickname(res.data.nickname);
       } catch (err) {
-        console.log("닉네임 조회 실패:", err);
       }
     };
 
@@ -75,7 +74,6 @@ export default function AIVoiceDebatePage() {
         setSound(null);
       }
     } catch (e) {
-      console.error("오디오 정리 오류:", e);
     }
   };
 
@@ -96,7 +94,6 @@ export default function AIVoiceDebatePage() {
 
       setRecording(recording);
     } catch (err) {
-      console.error("녹음 시작 실패:", err);
     }
   };
 
@@ -111,7 +108,6 @@ export default function AIVoiceDebatePage() {
 
       if (uri) sendVoice(uri);
     } catch (err) {
-      console.error("녹음 종료 실패:", err);
     }
   };
 
@@ -169,7 +165,6 @@ export default function AIVoiceDebatePage() {
 
       setCurrentSpeaker("AI");
     } catch (error) {
-      console.error("음성 토론 실패:", error);
       setCurrentSpeaker("User");
     }
   };
@@ -192,7 +187,6 @@ export default function AIVoiceDebatePage() {
 
       setSound(newSound);
     } catch (err) {
-      console.error("AI 음성 재생 실패:", err);
     }
   };
 

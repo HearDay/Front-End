@@ -53,39 +53,32 @@ export const useTodayNewsStore = create<TodayNewsStore>()(
       _hasHydrated: false,
 
       setShowModal: (value) => {
-        console.log('[Store] setShowModal:', value);
         set({ showModal: value });
       },
 
       setHasShownInitialModal: (value) => {
-        console.log('[Store] setHasShownInitialModal:', value);
         set({ hasShownInitialModal: value });
       },
 
       setUserDismissed: (value) => {
-        console.log('[Store] setUserDismissed:', value);
         set({ userDismissed: value });
       },
 
       setPendingReturn: (value) => {
-        console.log('[Store] setPendingReturn:', value);
         set({ pendingReturn: value });
       },
 
       setCompletedNewsIds: (ids) => {
-        console.log('[Store] setCompletedNewsIds:', ids);
         set({ completedNewsIds: ids });
       },
 
       setLastViewedNewsId: (id) => {
-        console.log('[Store] setLastViewedNewsId:', id);
         set({ lastViewedNewsId: id });
       },
 
       addCompletedNewsId: (id) => {
         const state = get();
         if (!state.completedNewsIds.includes(id)) {
-          console.log('[Store] addCompletedNewsId:', id);
           set({ completedNewsIds: [...state.completedNewsIds, id] });
         }
       },
@@ -93,13 +86,11 @@ export const useTodayNewsStore = create<TodayNewsStore>()(
       setHasHydrated: (value) => set({ _hasHydrated: value }),
 
       setHasTriggeredInitialPopup: (value) => {
-        console.log('[Store] setHasTriggeredInitialPopup:', value);
         set({ hasTriggeredInitialPopup: value });
       },
 
       // 사용자가 직접 모달을 닫음 (백그라운드 클릭)
       dismissModal: () => {
-        console.log('[Store] dismissModal - 사용자가 직접 닫음');
         set({
           showModal: false,
           userDismissed: true, // 사용자가 닫았다고 표시
@@ -108,7 +99,6 @@ export const useTodayNewsStore = create<TodayNewsStore>()(
 
       // 카드 클릭 시
       onNewsCardClick: (newsId) => {
-        console.log('[Store] onNewsCardClick:', newsId);
         const state = get();
         // 완료 목록에 추가
         if (!state.completedNewsIds.includes(newsId)) {
@@ -132,7 +122,6 @@ export const useTodayNewsStore = create<TodayNewsStore>()(
       // 백버튼으로 돌아왔을 때
       checkAndShowOnReturn: () => {
         const state = get();
-        console.log('[Store] checkAndShowOnReturn - pendingReturn:', state.pendingReturn);
 
         if (state.pendingReturn) {
           // 모달 띄우기
@@ -160,7 +149,6 @@ export const useTodayNewsStore = create<TodayNewsStore>()(
         lastViewedNewsId: state.lastViewedNewsId,
       }),
       onRehydrateStorage: () => (state) => {
-        console.log('[Store] Hydration 완료:', {
           pendingReturn: state?.pendingReturn,
           completedNewsIds: state?.completedNewsIds,
           lastViewedNewsId: state?.lastViewedNewsId,

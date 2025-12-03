@@ -112,7 +112,6 @@ const LoginPage = () => {
         setIsModalVisible(true);
       }
     } catch (err: any) {
-      console.error("로그인 오류:", err.response?.data || err.message);
       setModalMessage("서버 요청 중 오류가 발생했습니다.");
       setIsSuccess(false);
       setIsModalVisible(true);

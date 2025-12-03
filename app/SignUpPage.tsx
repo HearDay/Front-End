@@ -92,7 +92,6 @@ const SignUpPage = () => {
         showModal(res.message || "이메일 전송에 실패했습니다.");
       }
     } catch (err) {
-      console.error("이메일 인증 전송 실패:", err);
       showModal("서버 요청 중 문제가 발생했습니다.");
     }
   };
@@ -112,7 +111,6 @@ const SignUpPage = () => {
         showModal(res.message || "잘못된 인증번호입니다.");
       }
     } catch (err) {
-      console.error("인증번호 확인 실패:", err);
       showModal("서버 요청 중 문제가 발생했습니다.");
     }
   };
@@ -158,7 +156,6 @@ const SignUpPage = () => {
         showModal(res.message || "회원가입 중 오류가 발생했습니다.");
       }
     } catch (err: any) {
-      console.error("회원가입 실패:", err.response?.data || err.message);
       showModal(err.response?.data?.message || "요청 중 오류가 발생했습니다.");
     }
   };

@@ -19,7 +19,6 @@ const NewsCardList = ({
   const router = useRouter();
 
   const handleNewsPress = (articleId: string) => {
-    console.log('기사 선택 - Article ID:', articleId);
     if (onPressArticle) {
       onPressArticle(articleId);
     } else {

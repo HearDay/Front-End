@@ -1,3 +1,4 @@
+
 import { CategoryChipGroup } from "@/components/common";
 import HeroSection from "@/components/screens/HomePage/HeroSection";
 import NewsCardList from "@/components/screens/HomePage/NewsCardList";
@@ -13,11 +14,11 @@ import { useFocusEffect, usePathname, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import Animated, {
+  runOnJS,
   useAnimatedStyle,
+  useDerivedValue,
   useSharedValue,
   withTiming,
-  useDerivedValue,
-  runOnJS,
 } from "react-native-reanimated";
 
 export default function Index() {
@@ -111,7 +112,6 @@ export default function Index() {
           setRecommendedArticles(res.data.recommendedArticles);
         }
       } catch (err) {
-        console.error("유저 정보 로드 실패:", err);
       }
     };
 
@@ -122,19 +122,12 @@ export default function Index() {
   useEffect(() => {
     const loadTodayNewsAndUserInfo = async () => {
       try {
-        console.log('========================================');
-        console.log('오늘의 뉴스 API 호출 시작');
-        console.log('========================================');
 
         // 로그인 시 userDismissed 초기화 (매번 팝업 표시를 위해)
         useTodayNewsStore.getState().setUserDismissed(false);
-        console.log('[Index] userDismissed 초기화됨');
 
         // 맞춤 기사 가져오기
         const articles = await todayNewsService.getTopByDemographic();
-        console.log('맞춤 기사 API 응답 성공');
-        console.log('받아온 기사 개수:', articles?.length || 0);
-        console.log('기사 데이터:', JSON.stringify(articles, null, 2));
 
         if (articles && articles.length > 0) {
           const news = articles.map((article) => ({
@@ -145,43 +138,32 @@ export default function Index() {
             category: article.category,
           }));
           setTodayNewsItems(news);
-          console.log('todayNewsItems 설정 완료:', news.length, '개');
 
           // 최초 1회만 로그인 팝업 표시 (Zustand에서 관리)
           if (!hasTriggeredInitialPopup) {
-            console.log('[Index] 최초 데이터 로드 완료 - 팝업 표시 트리거');
             setHasTriggeredInitialPopup(true);
 
             // hydration과 userDismissed 상태를 기다린 후 팝업 표시
             setTimeout(() => {
               const state = useTodayNewsStore.getState();
-              console.log('[Index] 팝업 표시 조건 체크:', {
                 _hasHydrated: state._hasHydrated,
                 userDismissed: state.userDismissed,
               });
 
               if (!state.userDismissed) {
-                console.log('[Index] ✅ 최초 로그인 팝업 표시');
                 setShowModal(true);
                 setHasShownInitialModal(true);
               } else {
-                console.log('[Index] ❌ userDismissed=true, 팝업 표시 안함');
               }
             }, 800);
           }
         } else {
-          console.log('받아온 기사가 없음 (빈 배열 또는 null)');
           setTodayNewsItems([]);
         }
 
-        console.log('========================================');
-        console.log('사용자 정보 API 호출 시작');
-        console.log('========================================');
 
         // 사용자 성별/나이 가져오기
         // const userDemographic = await todayNewsService.getUserDemographic();
-        // console.log('사용자 정보 API 응답 성공');
-        // console.log('사용자 데이터:', JSON.stringify(userDemographic, null, 2));
 
         // const genderText = userDemographic.gender === "M" ? "남성" : "여성";
         // const ageText = Math.floor(userDemographic.age / 10) * 10;
@@ -192,22 +174,10 @@ export default function Index() {
 
         setUserGender(genderText);
         setUserAge(ageText.toString());
-        console.log('사용자 정보 설정 완료:', ageText, '대', genderText);
 
-        console.log('========================================');
-        console.log('모든 API 호출 완료');
-        console.log('========================================');
       } catch (error) {
-        console.log('========================================');
-        console.error("API 호출 실패");
-        console.error("에러 타입:", error?.constructor?.name);
-        console.error("에러 메시지:", error?.message);
-        console.error("에러 상세:", error);
         if (error?.response) {
-          console.error("HTTP 상태:", error.response.status);
-          console.error("응답 데이터:", JSON.stringify(error.response.data, null, 2));
         }
-        console.log('========================================');
       }
     };
 
@@ -217,20 +187,10 @@ export default function Index() {
   // 백버튼으로 돌아왔을 때 모달 표시 (오늘의 뉴스 카드에서 돌아온 경우만)
   useFocusEffect(
     useCallback(() => {
-      console.log('========================================');
-      console.log('[Index] useFocusEffect 실행');
-      console.log('[Index] _hasHydrated:', _hasHydrated);
-      console.log('[Index] pendingReturn:', pendingReturn);
-      console.log('[Index] todayNewsItems.length:', todayNewsItems.length);
-      console.log('[Index] showModal:', showModal);
-      console.log('[Index] userDismissed:', userDismissed);
-      console.log('========================================');
 
       if (_hasHydrated && pendingReturn && todayNewsItems.length > 0) {
-        console.log('[Index] ✅ 오늘의 뉴스에서 백버튼 - 팝업 표시');
         checkAndShowOnReturn();
       } else {
-        console.log('[Index] ❌ 일반 포커스 - 팝업 표시 조건 불충족');
       }
     }, [_hasHydrated, pendingReturn, todayNewsItems.length, checkAndShowOnReturn, showModal, userDismissed])
   );
@@ -248,7 +208,6 @@ export default function Index() {
         setCategoryArticles(res.data);
       }
     } catch (err) {
-      console.error("카테고리별 뉴스 로드 실패:", err);
     }
   };
 
@@ -265,28 +224,18 @@ export default function Index() {
   }));
 
   const handleTodayNewsPress = () => {
-    console.log('[Index] 해 아이콘 클릭 - 팝업 표시');
-    console.log('[Index] todayNewsItems:', todayNewsItems.length, '개');
-    console.log('[Index] completedNewsIds:', completedNewsIds);
-    console.log('[Index] lastViewedNewsId:', lastViewedNewsId);
-    console.log('[Index] showModal 상태:', showModal);
 
     // 해 아이콘을 직접 클릭한 경우이므로 userDismissed를 false로 리셋
     const { setUserDismissed, setLastViewedNewsId } = useTodayNewsStore.getState();
     setUserDismissed(false);
-    console.log('[Index] userDismissed를 false로 리셋');
 
     // lastViewedNewsId를 null로 초기화하여 첫 번째 카드부터 보이도록
     setLastViewedNewsId(null);
-    console.log('[Index] lastViewedNewsId를 null로 초기화 - 첫 번째 카드부터 표시');
 
     setShowModal(true);
   };
 
   const handleNewsCardPress = async (newsId: string) => {
-    console.log('[Index] ===== 뉴스 카드 클릭 =====');
-    console.log('[Index] 클릭한 기사 ID:', newsId);
-    console.log('[Index] todayNewsItems 배열:', todayNewsItems.map(item => ({ id: item.id, title: item.title })));
 
     // 연속 재생 설정
     const { setRecommendedArticles, startRecommendedPlayback } = await import('@/stores/newsPlaybackStore').then(m => m.useNewsPlaybackStore.getState());
@@ -300,20 +249,15 @@ export default function Index() {
       category: item.category,
     }));
 
-    console.log('[Index] 추천 기사 설정:', recommendedArticles.length, '개');
-    console.log('[Index] 추천 기사 순서:', recommendedArticles.map((a, i) => `${i}: ${a.title.substring(0, 10)}`));
     setRecommendedArticles(recommendedArticles);
 
     // 클릭한 기사의 인덱스 찾기
     const clickedIndex = todayNewsItems.findIndex(item => item.id === newsId);
-    console.log('[Index] 클릭한 기사 인덱스:', clickedIndex);
-    console.log('[Index] 클릭한 기사 제목:', todayNewsItems[clickedIndex]?.title);
 
     // 추천 기사 재생 시작
     startRecommendedPlayback(clickedIndex);
 
     // 라우팅
-    console.log('[Index] 라우팅: /newsplayer/' + newsId);
     router.push(`/newsplayer/${newsId}?mode=recommended&from=todaynews`);
   };
 
@@ -398,7 +342,6 @@ export default function Index() {
                 background="green"
                 articles={categoryArticles}
                 onPressArticle={async (id) => {
-                  console.log('[Index] 카테고리 기사 선택 - ID:', id);
 
                   // 연속 재생 설정
                   const { setRecommendedArticles, startRecommendedPlayback } = await import('@/stores/newsPlaybackStore').then(m => m.useNewsPlaybackStore.getState());
@@ -416,7 +359,6 @@ export default function Index() {
 
                   // 클릭한 기사의 인덱스 찾기
                   const clickedIndex = categoryArticles.findIndex(article => String(article.id) === id);
-                  console.log('[Index] 클릭한 기사 인덱스:', clickedIndex);
 
                   // 연속 재생 시작
                   startRecommendedPlayback(clickedIndex);
