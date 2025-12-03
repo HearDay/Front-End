@@ -42,7 +42,6 @@ const CertificationPage = () => {
         Alert.alert("발송 실패", res.message || "이메일 전송에 실패했습니다.");
       }
     } catch (err) {
-      console.error("이메일 인증 전송 실패:", err);
       Alert.alert("오류", "서버 요청 중 문제가 발생했습니다.");
     }
   };
@@ -69,7 +68,6 @@ const CertificationPage = () => {
         Alert.alert("인증 실패", res.message || "잘못된 인증번호입니다.");
       }
     } catch (err) {
-      console.error("인증번호 확인 실패:", err);
       Alert.alert("오류", "서버 요청 중 문제가 발생했습니다.");
     }
   };

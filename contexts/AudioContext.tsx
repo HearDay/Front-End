@@ -71,7 +71,6 @@ export const AudioProvider = ({ children }: { children: React.ReactNode }) => {
 
           // 뉴스 재생 종료 감지
           if (status.didJustFinish) {
-            console.log('[AudioContext] 오디오 재생 완료 - 콜백 실행');
             if (onAudioEndCallback.current) {
               onAudioEndCallback.current();
             }
@@ -79,7 +78,6 @@ export const AudioProvider = ({ children }: { children: React.ReactNode }) => {
         }
       })
     } catch (err) {
-      console.error('오디오 로드 실패:', err);
     }
   }, [currentArticleId])
 
@@ -89,7 +87,6 @@ export const AudioProvider = ({ children }: { children: React.ReactNode }) => {
       await soundRef.current.playAsync()
       setIsPlaying(true)
     } catch (err) {
-      console.error('재생 실패:', err)
     }
   }, [])
 
@@ -99,7 +96,6 @@ export const AudioProvider = ({ children }: { children: React.ReactNode }) => {
       await soundRef.current.pauseAsync()
       setIsPlaying(false)
     } catch (err) {
-      console.error('일시정지 실패:', err)
     }
   }, [])
 
@@ -114,7 +110,6 @@ export const AudioProvider = ({ children }: { children: React.ReactNode }) => {
   }, [])
 
   const setOnAudioEnd = useCallback((callback: (() => void) | null) => {
-    console.log('[AudioContext] 오디오 종료 콜백 설정:', !!callback);
     onAudioEndCallback.current = callback;
   }, [])
 

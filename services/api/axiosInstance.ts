@@ -21,7 +21,6 @@ axiosInstance.interceptors.request.use(
         config.headers.Authorization = `Bearer ${token}`;
       }
     } catch (error) {
-      console.error("토큰 가져오기 실패:", error);
     }
     return config;
   },
@@ -34,15 +33,12 @@ axiosInstance.interceptors.response.use(
   async (err) => {
     const status = err.response?.status;
 
-    console.error("API Error:", err.response?.data || err.message);
 
     if (status === 403) {
-      console.log("🔒 토큰 만료됨 → 자동 로그아웃 처리");
 
       try {
         await AsyncStorage.removeItem("accessToken");
       } catch (e) {
-        console.error("토큰 삭제 실패:", e);
       }
 
       // 로그인 화면으로 이동 (히스토리 초기화)

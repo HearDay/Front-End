@@ -40,7 +40,6 @@ export const sendVoiceMessage = async (
 
     return response.data;
   } catch (error: any) {
-    console.error("🧠 음성 토론 API 실패:", error.response?.data || error.message);
     throw error;
   }
 };

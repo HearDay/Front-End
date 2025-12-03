@@ -23,20 +23,17 @@ export function DictionaryModal({
 
   const fetchDefinition = useCallback(async () => {
     if (!word) return;
-    console.log('DictionaryModal 검색 시작:', word)
     try {
       setLoading(true)
       setError(null)
       setDefinition(null)
       const response = await dictionaryService.getDefinition(word)
-      console.log('DictionaryModal 검색 결과:', {
         word,
         definitionsCount: response.definitions.length,
         definitions: response.definitions
       });
       setDefinition(response)
     } catch (err) {
-      console.log('DictionaryModal 검색 에러:', word);
       setDefinition(null)
       if (axios.isAxiosError(err) && err.response?.data?.message) {
         setError(err.response.data.message)
@@ -82,7 +79,6 @@ export function DictionaryModal({
           definition.definitions[0].includes("검색 결과가 없습니다")
         );
         const isDisabled = loading || !definition || !!error || hasNoResult;
-        console.log('DictionaryModal 버튼 상태:', { loading, definition: !!definition, definitionsLength: definition?.definitions.length, error, hasNoResult, isDisabled })
         return {
           buttonText: '단어장에 넣기',
           buttonColor: isDisabled ? '#9CA3AF' : '#006716',

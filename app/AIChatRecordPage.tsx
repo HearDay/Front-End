@@ -22,7 +22,6 @@ export default function AIChatRecordPage() {
 
         setChatList(res.data.contentList);
       } catch (error) {
-        console.error("기록 조회 실패:", error);
       }
     })();
   }, [discussionId]);
