@@ -42,6 +42,8 @@ export const resetScrollStorage = async () => {
       KEY_X,
       KEY_CAT
     ]);
+    console.log("스크롤/카테고리 저장 삭제 완료");
   } catch (err) {
+    console.error("스크롤 초기화 실패:", err);
   }
 };

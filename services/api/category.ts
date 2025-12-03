@@ -19,6 +19,7 @@ export const registerUserCategories = async (categories: string[]) => {
 
     return res.data;
   } catch (error: any) {
+    console.error("카테고리 등록 오류:", error.response?.data || error.message);
     throw error;
   }
 };

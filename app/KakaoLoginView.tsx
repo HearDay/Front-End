@@ -31,6 +31,7 @@ const KakaoLoginView = () => {
           router.replace("/(tabs)");
         }
       } catch (err) {
+        console.error("❌ 토큰 저장 실패:", err);
       }
     }
 
@@ -56,7 +57,7 @@ const KakaoLoginView = () => {
             originWhitelist={["*"]}
           />
 
-          {/*  중앙에 고정되는 로딩 스피너 */}
+          {/* 🔥 중앙에 고정되는 로딩 스피너 */}
           {loading && (
             <View
               style={{

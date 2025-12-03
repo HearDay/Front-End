@@ -15,6 +15,7 @@ export const signup = async (body: SignUpRequest): Promise<SignUpResponse> => {
 
     return res.data;
   } catch (error: any) {
+    console.error("signup API error:", error.response?.data || error.message);
     throw error;
   }
 };

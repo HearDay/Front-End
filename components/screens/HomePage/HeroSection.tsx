@@ -90,6 +90,7 @@ const HeroSection = ({ offset, userLevel, onTodayNewsPress }: HeroSectionProps) 
             <TouchableOpacity
               className="w-[24px] h-[24px] mt-4"
               onPress={() => {
+                console.log('[HeroSection] 검색 버튼 클릭 - pendingReturn 초기화');
                 setPendingReturn(false);
                 router.push("/SearchNewsPage");
               }}

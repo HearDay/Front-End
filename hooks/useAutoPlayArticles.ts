@@ -29,10 +29,12 @@ export const useAutoPlayArticles = ({
     queryKey: ['autoPlayArticles', pageSize],
 
     queryFn: async ({ pageParam = 0 }) => {
+      console.log('[useAutoPlayArticles] 페이지 로드:', pageParam, 'size:', pageSize);
 
       // API는 page가 0부터 시작
       const articles = await fetchArticlesWithPagination(pageParam, pageSize);
 
+      console.log('[useAutoPlayArticles] 로드 완료:', {
         page: pageParam,
         count: articles.length,
       });

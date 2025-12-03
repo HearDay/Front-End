@@ -29,6 +29,7 @@ export const fetchDiscussionDetail = async (
 
     return response.data;
   } catch (error: any) {
+    console.error("🧠 토론 기록 조회 실패:", error.response?.data || error.message);
     throw error;
   }
 };

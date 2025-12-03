@@ -30,6 +30,7 @@ const NewsCardSlider = ({ updateTime, articles = [] }: NewsCardSliderProps) => {
   };
 
   const handleNewsPress = async (articleId: number) => {
+    console.log('[NewsCardSlider] 기사 선택 - Article ID:', articleId);
 
     // 연속 재생 설정
     const { setRecommendedArticles, startRecommendedPlayback } = await import('@/stores/newsPlaybackStore').then(m => m.useNewsPlaybackStore.getState());
@@ -47,6 +48,7 @@ const NewsCardSlider = ({ updateTime, articles = [] }: NewsCardSliderProps) => {
 
     // 클릭한 기사의 인덱스 찾기
     const clickedIndex = articles.findIndex(article => article.id === articleId);
+    console.log('[NewsCardSlider] 클릭한 기사 인덱스:', clickedIndex);
 
     // 연속 재생 시작
     startRecommendedPlayback(clickedIndex);

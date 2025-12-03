@@ -29,8 +29,10 @@ const SettingPage = () => {
       await resetScrollStorage();
       await AsyncStorage.removeItem("hasShownTodayNewsModal");
 
+      console.log("로그아웃 완료!");
       router.replace("/LoginPage");
     } catch (error) {
+      console.error("로그아웃 오류:", error);
     }
   };
 
@@ -43,8 +45,10 @@ const SettingPage = () => {
       await resetScrollStorage();
       await AsyncStorage.removeItem("hasShownTodayNewsModal");
 
+      console.log("회원탈퇴 완료!");
       router.replace("/LoginPage");
     } catch (error) {
+      console.error("탈퇴 오류:", error);
     }
   };
 

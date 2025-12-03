@@ -12,6 +12,7 @@ export const fetchRecommendNews = async (): Promise<RecommendNewsResponse> => {
 
     return res.data;
   } catch (err: any) {
+    console.error("추천 뉴스 조회 실패:", err.response?.data || err.message);
     throw err;
   }
 };
