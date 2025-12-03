@@ -80,6 +80,7 @@ export const QuizScreen = ({ articleId }: QuizScreenProps) => {
         } else {
           setError('퀴즈를 불러올 수 없습니다.')
         }
+        console.error('퀴즈 로드 실패:', err)
       } finally {
         setLoading(false)
       }
@@ -119,6 +120,7 @@ export const QuizScreen = ({ articleId }: QuizScreenProps) => {
       try {
         await quizService.solveQuiz(quizData.id)
       } catch (error) {
+        console.error('퀴즈 제출 실패:', error)
       }
 
       // 맞았을 때 O 애니메이션
@@ -273,19 +275,19 @@ export const QuizScreen = ({ articleId }: QuizScreenProps) => {
                   >
                   <View className="mr-4 w-[24px] items-center justify-center">
                     {!isAnswered && selectedOption === option.id && (
-                      <Text className="text-[20px] text-[#006716] leading-[20px]"></Text>
+                      <Text className="text-[20px] text-[#006716] leading-[20px]">✓</Text>
                     )}
                     {!isAnswered && selectedOption !== option.id && (
-                      <Text className="text-[20px] text-[#B3D7BB] leading-[20px]"></Text>
+                      <Text className="text-[20px] text-[#B3D7BB] leading-[20px]">✓</Text>
                     )}
                     {isAnswered && selectedOption === option.id && option.isCorrect && (
-                      <Text className="text-[20px] text-[#006716] leading-[20px]"></Text>
+                      <Text className="text-[20px] text-[#006716] leading-[20px]">✓</Text>
                     )}
                     {isAnswered && selectedOption === option.id && !option.isCorrect && (
                       <Text className="text-[20px] text-red-500 leading-[20px]">✕</Text>
                     )}
                     {isAnswered && selectedOption !== option.id && (
-                      <Text className="text-[20px] text-[#B3D7BB] leading-[20px]"></Text>
+                      <Text className="text-[20px] text-[#B3D7BB] leading-[20px]">✓</Text>
                     )}
                   </View>
                   <Text className="text-[16px] flex-1">{option.text}</Text>
@@ -315,7 +317,7 @@ export const QuizScreen = ({ articleId }: QuizScreenProps) => {
                   selectedOption && !isAnswered ? 'bg-[#006716]' : 'bg-[#B3D7BB]'
                 }`}
               >
-                <Text className="text-white text-[16px] font-bold mr-2"></Text>
+                <Text className="text-white text-[16px] font-bold mr-2">✓</Text>
                 <Text className="text-white text-[16px] font-bold">정답 확인</Text>
               </TouchableOpacity>
             </View>

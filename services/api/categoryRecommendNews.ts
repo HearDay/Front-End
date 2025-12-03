@@ -17,6 +17,7 @@ export const fetchCategoryRecommendNews = async (
 
     return res.data;
   } catch (err: any) {
+    console.error(
       "카테고리별 추천 뉴스 조회 실패:",
       err.response?.data || err.message
     );

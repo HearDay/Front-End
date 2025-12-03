@@ -24,6 +24,7 @@ const Profile = () => {
         const res = await fetchProfile(year, month);
         setUser(res.data);
       } catch (err) {
+        console.error("프로필 조회 실패:", err);
       }
     };
 

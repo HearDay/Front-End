@@ -33,6 +33,7 @@ export default function RootLayout() {
         const token = await AsyncStorage.getItem("accessToken");
         setIsAuthenticated(!!token);
       } catch (err) {
+        console.error("토큰 확인 중 오류:", err);
       } finally {
         setIsLoading(false);
       }

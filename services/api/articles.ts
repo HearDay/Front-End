@@ -25,6 +25,7 @@ export const fetchArticles = async (title: string, category: string) => {
     }
 
     // 그 외 예기치 않은 오류만 콘솔에 표시
+    console.error("기사 조회 중 알 수 없는 오류:", error?.message);
     return [];
   }
 };
@@ -36,6 +37,7 @@ export const fetchArticles = async (title: string, category: string) => {
  */
 export const fetchArticlesWithPagination = async (page: number = 0, size: number = 100) => {
   try {
+    console.log(`[API] fetchArticlesWithPagination 호출: page=${page}, size=${size}`);
 
     const response = await axiosInstance.post(
       `/api/articles?page=${page}&size=${size}&sort=latest`,
@@ -45,6 +47,7 @@ export const fetchArticlesWithPagination = async (page: number = 0, size: number
       }
     );
 
+    console.log(`[API] fetchArticlesWithPagination 응답:`, {
       status: response.status,
       dataLength: response.data?.data?.length || 0,
     });
@@ -57,6 +60,7 @@ export const fetchArticlesWithPagination = async (page: number = 0, size: number
     return response.data.data;
   } catch (error: any) {
     const status = error?.response?.status;
+    console.error(`[API] fetchArticlesWithPagination 실패:`, {
       status,
       message: error?.message,
     });
@@ -65,6 +69,7 @@ export const fetchArticlesWithPagination = async (page: number = 0, size: number
       return [];
     }
 
+    console.error("페이지네이션 기사 조회 중 알 수 없는 오류:", error?.message);
     return [];
   }
 };
