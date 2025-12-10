@@ -17,24 +17,38 @@ const KakaoLoginView = () => {
   const handleNavigationStateChange = async (navState: any) => {
     const { url } = navState;
 
-    if (url.includes("accessToken=") && url.includes("refreshToken=")) {
+    // accessToken, refreshToken, isNewUser 모두 들어온 URL인지 검사
+    if (
+      url.includes("accessToken=") &&
+      url.includes("refreshToken=") &&
+      url.includes("isNewUser=")
+    ) {
       try {
         const queryString = url.split("?")[1];
         const params = new URLSearchParams(queryString);
 
         const accessToken = params.get("accessToken");
         const refreshToken = params.get("refreshToken");
+        const isNewUser = params.get("isNewUser"); // 신규 유저 여부
 
         if (accessToken && refreshToken) {
           await AsyncStorage.setItem("accessToken", accessToken);
           await AsyncStorage.setItem("refreshToken", refreshToken);
-          router.replace("/(tabs)");
+
+          // 신규 유저라면 SelectCategoryPage로 이동
+          if (isNewUser === "true") {
+            router.replace("/SelectCategoryPage");
+          } else {
+            // 기존 유저라면 바로 홈 화면으로 이동
+            router.replace("/(tabs)");
+          }
         }
       } catch (err) {
         console.error("❌ 토큰 저장 실패:", err);
       }
     }
 
+    // 오류 발생 시 LoginPage로 이동
     if (url.includes("error")) {
       router.replace("/LoginPage");
     }
@@ -46,8 +60,7 @@ const KakaoLoginView = () => {
 
       <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
         <View style={{ flex: 1 }}>
-          
-          {/* WebView */}
+          {/* 카카오 로그인 WebView */}
           <WebView
             source={{ uri: kakaoAuthUrl }}
             onLoadEnd={() => setLoading(false)}
@@ -57,7 +70,7 @@ const KakaoLoginView = () => {
             originWhitelist={["*"]}
           />
 
-          {/* 🔥 중앙에 고정되는 로딩 스피너 */}
+          {/* 로딩 스피너 */}
           {loading && (
             <View
               style={{
