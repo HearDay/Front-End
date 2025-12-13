@@ -1,22 +1,34 @@
-import { useState } from 'react'
-import { ScrollView, Text, TouchableOpacity, View } from 'react-native'
-import { DiscussionNewsListProps } from '../../../types/screens'
-import { DiscussionNewsCard } from './DiscussionNewsCard'
+import { useMemo, useState } from "react";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { DiscussionNewsListProps } from "../../../types/screens";
+import { DiscussionNewsCard } from "./DiscussionNewsCard";
 
-export function DiscussionNewsList({ 
-  news, 
-  sortBy, 
-  onSortChange, 
-  onNewsPress 
+export function DiscussionNewsList({
+  news,
+  sortBy,
+  onSortChange,
+  onNewsPress,
 }: DiscussionNewsListProps) {
-  const [showDropdown, setShowDropdown] = useState(false)
+  const [showDropdown, setShowDropdown] = useState(false);
 
   const sortOptions = [
-    { value: 'latest', label: '최신순' },
-    { value: 'oldest', label: '오래된순' },
-  ] as const
+    { value: "latest", label: "최신순" },
+    { value: "oldest", label: "오래된순" },
+  ] as const;
 
-  const currentLabel = sortOptions.find(opt => opt.value === sortBy)?.label || '최신순'
+  const currentLabel =
+    sortOptions.find((opt) => opt.value === sortBy)?.label || "최신순";
+
+  // id 기준 중복 제거
+  const uniqueNews = useMemo(() => {
+    const map = new Map<string, typeof news[number]>();
+
+    news.forEach((item) => {
+      map.set(String(item.id), item);
+    });
+
+    return Array.from(map.values());
+  }, [news]);
 
   return (
     <View className="flex-1">
@@ -28,28 +40,35 @@ export function DiscussionNewsList({
           {/* 정렬 드롭다운 */}
           <View>
             <TouchableOpacity
-              onPress={() => setShowDropdown(!showDropdown)}
+              onPress={() => setShowDropdown((prev) => !prev)}
               className="flex-row items-center"
             >
-              <Text className="text-sm text-[#00801A] mr-1">{currentLabel}</Text>
-              <Text className="text-[#00801A]">{showDropdown ? '▲' : '▼'}</Text>
+              <Text className="text-sm text-[#00801A] mr-1">
+                {currentLabel}
+              </Text>
+              <Text className="text-[#00801A]">
+                {showDropdown ? "▲" : "▼"}
+              </Text>
             </TouchableOpacity>
 
-            {/* 드롭다운 메뉴 */}
             {showDropdown && (
               <View className="absolute top-8 right-0 bg-white rounded-lg shadow-lg py-2 w-24 z-10">
                 {sortOptions.map((option) => (
                   <TouchableOpacity
                     key={option.value}
                     onPress={() => {
-                      onSortChange(option.value)
-                      setShowDropdown(false)
+                      onSortChange(option.value);
+                      setShowDropdown(false);
                     }}
                     className="py-2 px-4"
                   >
-                    <Text className={`text-sm ${
-                      sortBy === option.value ? 'text-[#00801A] font-bold' : 'text-gray-700'
-                    }`}>
+                    <Text
+                      className={`text-sm ${
+                        sortBy === option.value
+                          ? "text-[#00801A] font-bold"
+                          : "text-gray-700"
+                      }`}
+                    >
                       {option.label}
                     </Text>
                   </TouchableOpacity>
@@ -58,8 +77,8 @@ export function DiscussionNewsList({
             )}
           </View>
         </View>
-        
-        {/* 초록색 언더라인 */}
+
+        {/* 언더라인 */}
         <View className="h-px bg-[#00801A]" />
       </View>
 
@@ -69,14 +88,16 @@ export function DiscussionNewsList({
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 0 }}
       >
-        {news.length === 0 ? (
+        {uniqueNews.length === 0 ? (
           <View className="flex-1 items-center justify-center py-20">
-            <Text className="text-gray-400 text-base">본 뉴스가 없습니다</Text>
+            <Text className="text-gray-400 text-base">
+              본 뉴스가 없습니다
+            </Text>
           </View>
         ) : (
-          news.map((item) => (
+          uniqueNews.map((item) => (
             <DiscussionNewsCard
-              key={item.id}
+              key={String(item.id)}
               news={item}
               onPress={() => onNewsPress(item.id)}
             />
@@ -84,5 +105,5 @@ export function DiscussionNewsList({
         )}
       </ScrollView>
     </View>
-  )
+  );
 }
