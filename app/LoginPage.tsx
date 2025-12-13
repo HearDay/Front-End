@@ -3,7 +3,7 @@ import InputBox from "@/components/common/InputBox";
 import PrimaryButton from "@/components/common/PrimaryButton";
 import { useAuthStore } from "@/services/api/authStore";
 import { login } from "@/services/api/login";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { saveAccessToken } from "@/services/utils/tokenStorage";
 import { LinearGradient } from "expo-linear-gradient";
 import { Stack, useRouter } from "expo-router";
 import { Eye, EyeOff } from "lucide-react-native";
@@ -106,8 +106,8 @@ const LoginPage = () => {
       const res = await login({ email, password });
 
       if (res.success && res.data?.accessToken) {
-        // 토큰 저장
-        await AsyncStorage.setItem("accessToken", res.data.accessToken);
+        // SecureStore에 토큰 저장
+        await saveAccessToken(res.data.accessToken);
 
         // 로그인 완료 신호
         setAuthReady(true);

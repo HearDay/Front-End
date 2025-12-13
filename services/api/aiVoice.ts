@@ -1,6 +1,6 @@
 import axiosInstance from "@/services/api/axiosInstance";
+import { getAccessToken } from "@/services/utils/tokenStorage";
 import { AIVoiceResponse } from "@/types/auth/aiVoice";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const sendVoiceMessage = async (
   fileUri: string,
@@ -9,7 +9,7 @@ export const sendVoiceMessage = async (
   discussionId?: number
 ): Promise<AIVoiceResponse> => {
   try {
-    const rawToken = await AsyncStorage.getItem("accessToken");
+    const rawToken = await getAccessToken();
     const token = rawToken ? rawToken.replace(/"/g, "") : "";
 
     // 파일 확장자 추출

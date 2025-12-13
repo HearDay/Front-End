@@ -1,6 +1,6 @@
 import axiosInstance from "@/services/api/axiosInstance";
+import { getAccessToken } from "@/services/utils/tokenStorage";
 import { DiscussionDetailResponse } from "@/types/auth/chat";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const fetchDiscussionDetail = async (
   discussionId: number,
@@ -9,7 +9,7 @@ export const fetchDiscussionDetail = async (
   sort = "asc"
 ): Promise<DiscussionDetailResponse> => {
   try {
-    const rawToken = await AsyncStorage.getItem("accessToken");
+    const rawToken = await getAccessToken();
     const token = rawToken ? rawToken.replace(/"/g, "") : ""; // 토큰문자열 따옴표 제거
 
     const response = await axiosInstance.get(

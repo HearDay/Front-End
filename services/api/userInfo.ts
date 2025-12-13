@@ -1,11 +1,11 @@
 import axiosInstance from "@/services/api/axiosInstance";
+import { getAccessToken } from "@/services/utils/tokenStorage";
 import { UserInfo } from "@/types/auth/userInfo";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const fetchUserInfo = async (): Promise<UserInfo> => {
   try {
-    // AsyncStorage에서 토큰 꺼내오기
-    const token = await AsyncStorage.getItem("accessToken");
+    // SecureStore에서 토큰 꺼내오기
+    const token = await getAccessToken();
     if (!token) {
       throw new Error("토큰이 없습니다. 로그인 후 다시 시도해주세요.");
     }

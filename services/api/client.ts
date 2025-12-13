@@ -1,14 +1,24 @@
-import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
-import { storage } from '../../utils/storage'
+import {
+  clearTokens,
+  getAccessToken,
+  getRefreshToken,
+  saveAccessToken,
+} from '@/services/utils/tokenStorage'
+import axios, {
+  AxiosError,
+  AxiosInstance,
+  AxiosRequestConfig,
+  AxiosResponse,
+} from 'axios'
 
-// .env 파일에서 환경변수 가져오기 (필수)
+// API 기본 설정
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL
 if (!BASE_URL) {
   throw new Error('EXPO_PUBLIC_API_BASE_URL이 .env 파일에 정의되지 않았습니다!')
 }
 const TIMEOUT = 10000
 
-// API 클라이언트 인스턴스 생성
+// Axios 인스턴스 생성
 const apiClient: AxiosInstance = axios.create({
   baseURL: BASE_URL,
   timeout: TIMEOUT,
@@ -17,11 +27,11 @@ const apiClient: AxiosInstance = axios.create({
   },
 })
 
-// 요청 인터셉터
+// 요청 인터셉터: accessToken을 Authorization 헤더에 추가
 apiClient.interceptors.request.use(
   async (config) => {
     try {
-      const token = await storage.getAccessToken()
+      const token = await getAccessToken()
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`
       }
@@ -30,24 +40,26 @@ apiClient.interceptors.request.use(
     }
     return config
   },
-  (error) => {
-    return Promise.reject(error)
-  }
+  (error) => Promise.reject(error)
 )
 
-// 응답 인터셉터
+// 응답 인터셉터: accessToken 만료 시 refreshToken으로 재발급
 apiClient.interceptors.response.use(
-  (response: AxiosResponse) => {
-    return response
-  },
+  (response: AxiosResponse) => response,
   async (error: AxiosError) => {
-    const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean }
+    const originalRequest = error.config as AxiosRequestConfig & {
+      _retry?: boolean
+    }
 
-    if (error.response?.status === 401 && !originalRequest._retry && originalRequest) {
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      originalRequest
+    ) {
       originalRequest._retry = true
 
       try {
-        const refreshToken = await storage.getRefreshToken()
+        const refreshToken = await getRefreshToken()
         if (!refreshToken) {
           throw new Error('No refresh token')
         }
@@ -58,15 +70,19 @@ apiClient.interceptors.response.use(
         )
 
         const { accessToken } = response.data
-        await storage.setAccessToken(accessToken)
 
+        // 재발급된 accessToken 저장
+        await saveAccessToken(accessToken)
+
+        // 실패했던 요청에 새 토큰 적용 후 재요청
         if (originalRequest.headers) {
           originalRequest.headers.Authorization = `Bearer ${accessToken}`
         }
+
         return apiClient(originalRequest)
       } catch (refreshError) {
-        await storage.clearTokens()
-        console.error('토큰 갱신 실패:', refreshError)
+        // 토큰 갱신 실패 시 모든 토큰 제거
+        await clearTokens()
         return Promise.reject(refreshError)
       }
     }

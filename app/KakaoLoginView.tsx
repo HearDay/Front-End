@@ -1,6 +1,7 @@
 import { useAuthStore } from "@/services/api/authStore";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { saveAccessToken } from "@/services/utils/tokenStorage";
 import { Stack, useRouter } from "expo-router";
+import * as SecureStore from "expo-secure-store";
 import React, { useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -8,6 +9,8 @@ import { WebView } from "react-native-webview";
 
 const CLIENT_ID = process.env.EXPO_PUBLIC_CLIENT_ID;
 const REDIRECT_URI = process.env.EXPO_PUBLIC_REDIRECT_URI;
+
+const REFRESH_TOKEN_KEY = "refreshToken";
 
 const KakaoLoginView = () => {
   const router = useRouter();
@@ -33,10 +36,11 @@ const KakaoLoginView = () => {
         const isNewUser = params.get("isNewUser");
 
         if (accessToken && refreshToken) {
-          await AsyncStorage.setItem("accessToken", accessToken);
-          await AsyncStorage.setItem("refreshToken", refreshToken);
+          // SecureStore에 토큰 저장
+          await saveAccessToken(accessToken);
+          await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refreshToken);
 
-          // 🔥 로그인 완료 신호
+          // 로그인 완료 신호
           setAuthReady(true);
 
           if (isNewUser === "true") {
