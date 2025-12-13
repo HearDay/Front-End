@@ -38,7 +38,7 @@ export const NewsPlayerScreen = ({
 }: NewsPlayerScreenProps) => {
   const router = useRouter();
   const { category, mode } = useLocalSearchParams<{ category?: string; mode?: string }>();
-  const { isPlaying, currentPosition, loadAudio, play, pause, setOnAudioEnd } = useAudio();
+  const { isPlaying, currentPosition, playbackRate, loadAudio, play, pause, setOnAudioEnd, setPlaybackRate } = useAudio();
   const { goToNext, goToPrev } = usePlaylistStore();
 
   // 연속 재생 스토어
@@ -847,6 +847,8 @@ export const NewsPlayerScreen = ({
           onPause={handlePause}
           onNext={handleNext}
           onPrev={handlePrev}
+          playbackSpeed={playbackRate}
+          onSpeedChange={setPlaybackRate}
         />
 
         {/* 차량 모드 / 토론 / 저장 */}
