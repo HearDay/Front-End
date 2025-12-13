@@ -148,7 +148,7 @@ const LoginPage = () => {
       >
         <SafeAreaView style={{ flex: 1 }}>
           {/* 로고 */}
-          <View style={{ alignItems: "center", marginTop: 50, marginBottom: 10 }}>
+          <View style={{ alignItems: "center", marginTop: 100, marginBottom: 10 }}>
             <Image
               source={require("../my-expo-app/assets/images/HEARDAY.png")}
               className="w-[156px] h-[56px]"

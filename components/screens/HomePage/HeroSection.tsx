@@ -1,3 +1,4 @@
+import { useTodayNewsStore } from "@/stores/todayNewsStore";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React from "react";
@@ -7,7 +8,6 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
 } from "react-native-reanimated";
-import { useTodayNewsStore } from "@/stores/todayNewsStore";
 
 interface HeroSectionProps {
   offset: any;
@@ -80,7 +80,7 @@ const HeroSection = ({ offset, userLevel, onTodayNewsPress }: HeroSectionProps) 
       >
         <View className="flex-row justify-between items-start px-1 pt-12 mt-2">
           <Image
-            className="w-[130px] h-[40px] mt-3 ml-4"
+            className="w-[130px] h-[40px] ml-4"
             style={{ resizeMode: "contain" }}
             source={require("../../../my-expo-app/assets/images/HEARDAY.png")}
           />
@@ -88,7 +88,7 @@ const HeroSection = ({ offset, userLevel, onTodayNewsPress }: HeroSectionProps) 
    
           <View className="flex-col items-end mr-4" style={{ zIndex: 1000 }}>
             <TouchableOpacity
-              className="w-[24px] h-[24px] mt-4"
+              className="w-[24px] h-[24px] mt-1"
               onPress={() => {
                 console.log('[HeroSection] 검색 버튼 클릭 - pendingReturn 초기화');
                 setPendingReturn(false);

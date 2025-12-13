@@ -48,7 +48,7 @@ const Profile = () => {
       <TouchableOpacity
         onPress={() => router.push("/SettingPage")}
         className="absolute"
-        style={{ top: 73, right: 20 }}
+        style={{top: 33, right: 25 }}
       >
         <Image
           source={require("../../my-expo-app/assets/images/Setting.png")}
@@ -56,7 +56,7 @@ const Profile = () => {
         />
       </TouchableOpacity>
 
-      <View className="w-full items-center">
+      <View className="w-full items-center mt-2">
 
         {/* 사용자 정보 영역 */}
         <UserInfo
@@ -67,7 +67,7 @@ const Profile = () => {
         />
 
         {/* 프로필 편집 버튼 */}
-        <View className="w-[350px] h-[40px] justify-center mt-4 mb-6 border border-[#006716] rounded-[10px] overflow-hidden">
+        <View className="w-[350px] h-[43px] justify-center mt-4 mb-6 border border-[#006716] rounded-[10px] overflow-hidden">
           <PrimaryButton
             title="프로필 편집"
             variant="white"
@@ -76,7 +76,7 @@ const Profile = () => {
         </View>
 
         {/* 출석 현황 타이틀 */}
-        <Text className="w-full px-6 ml-5 text-[18px] font-bold text-[#002C09] mt-3">
+        <Text className="w-full px-6 ml-5 text-[18px] font-bold text-[#002C09] mt-5 mb-1 ml-2">
           출석 현황
         </Text>
 

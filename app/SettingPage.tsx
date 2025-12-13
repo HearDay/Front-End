@@ -73,12 +73,12 @@ const SettingPage = () => {
 
       <TopBar showBackButton onBackPress={() => router.push("/ProfilePage")} />
 
-      <Text className="text-[22px] font-bold text-[#002C09] px-6">
+      <Text className="text-[22px] font-bold text-[#002C09] px-8 mt-6">
         설정
       </Text>
 
       {/* 리스트 */}
-      <View className="w-[350px] self-center mt-4">
+      <View className="w-[350px] self-center mt-3">
         {[
           { label: "알림", onPress: () => {} },
           { label: "Premium", onPress: () => {} },
@@ -91,7 +91,7 @@ const SettingPage = () => {
             onPress={item.onPress}
             className="flex-row justify-between items-center h-[55px] border-b border-[#E5E5E5]"
           >
-            <Text className="text-[18px] text-[#1F1F1F]">{item.label}</Text>
+            <Text className="text-[19px] text-[#1F1F1F]">{item.label}</Text>
             <Image
               source={require("../my-expo-app/assets/images/ArrowRight.png")}
               className="w-[20px] h-[20px]"
