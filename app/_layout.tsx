@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Slot, usePathname } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { AudioProvider } from "../contexts/AudioContext";
 import { SavedNewsScrollProvider } from "../contexts/SavedNewsScrollContext";
 import "../global.css";
@@ -57,12 +58,14 @@ export default function RootLayout() {
 
   // 인증 여부 확인 후 Slot 렌더링
   return (
-    <QueryClientProvider client={queryClient}>
-      <AudioProvider>
-        <SavedNewsScrollProvider>
-          <Slot />
-        </SavedNewsScrollProvider>
-      </AudioProvider>
-    </QueryClientProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <QueryClientProvider client={queryClient}>
+        <AudioProvider>
+          <SavedNewsScrollProvider>
+            <Slot />
+          </SavedNewsScrollProvider>
+        </AudioProvider>
+      </QueryClientProvider>
+    </GestureHandlerRootView>
   );
 }

@@ -1,5 +1,5 @@
 import { memo } from 'react'; // 추가: 성능 최적화
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Platform, Text, TouchableOpacity, View } from 'react-native';
 import { LyricsDisplayProps } from '../../../types/screens';
 
 // 개선: memo로 컴포넌트 감싸기
@@ -31,7 +31,7 @@ export const LyricsDisplay = memo(function LyricsDisplay({
       activeOpacity={0.9}
       disabled={!onPress}
     >
-      <View className="px-6 pt-6">
+      <View className={`px-6 ${Platform.OS === 'android' ? 'pt-20' : 'pt-14'}`}>
         {currentLines.map((line, index) => (
           <Text
             key={index}

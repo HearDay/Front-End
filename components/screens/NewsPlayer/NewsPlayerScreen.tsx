@@ -3,9 +3,9 @@ import { DiscussionLevelModal } from "../Discussion/DiscussionLevelModal";
 import { DiscussionModal } from "../Discussion/DiscussionModal";
 
 import { useAudio } from "@/contexts/AudioContext";
-import { usePlaylistStore } from "@/stores/playlistStore";
-import { useNewsPlaybackStore, NewsArticle } from "@/stores/newsPlaybackStore";
 import { useAutoPlayArticles } from "@/hooks/useAutoPlayArticles";
+import { NewsArticle, useNewsPlaybackStore } from "@/stores/newsPlaybackStore";
+import { usePlaylistStore } from "@/stores/playlistStore";
 import { Audio } from "expo-av";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -38,7 +38,7 @@ export const NewsPlayerScreen = ({
 }: NewsPlayerScreenProps) => {
   const router = useRouter();
   const { category, mode } = useLocalSearchParams<{ category?: string; mode?: string }>();
-  const { isPlaying, currentPosition, loadAudio, play, pause, setOnAudioEnd } = useAudio();
+  const { isPlaying, currentPosition, playbackRate, loadAudio, play, pause, setOnAudioEnd, setPlaybackRate } = useAudio();
   const { goToNext, goToPrev } = usePlaylistStore();
 
   // 연속 재생 스토어
@@ -137,7 +137,7 @@ export const NewsPlayerScreen = ({
       // 전체 텍스트를 공백 기준으로 단어 분할
       const allWords = newsData.fullText.split(/\s+/).filter(w => w.length > 0);
 
-      let wordTimings: Array<{ word: string; startTime: number; endTime: number }> = [];
+      let wordTimings: { word: string; startTime: number; endTime: number }[] = [];
 
       if (newsData.ttsAlignment) {
         // ttsAlignment가 있는 경우 파싱 시도
@@ -847,6 +847,8 @@ export const NewsPlayerScreen = ({
           onPause={handlePause}
           onNext={handleNext}
           onPrev={handlePrev}
+          playbackSpeed={playbackRate}
+          onSpeedChange={setPlaybackRate}
         />
 
         {/* 차량 모드 / 토론 / 저장 */}
