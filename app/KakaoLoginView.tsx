@@ -1,3 +1,4 @@
+import { useAuthStore } from "@/services/api/authStore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Stack, useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -10,6 +11,7 @@ const REDIRECT_URI = process.env.EXPO_PUBLIC_REDIRECT_URI;
 
 const KakaoLoginView = () => {
   const router = useRouter();
+  const setAuthReady = useAuthStore((s) => s.setAuthReady);
   const [loading, setLoading] = useState(true);
 
   const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}`;
@@ -17,7 +19,6 @@ const KakaoLoginView = () => {
   const handleNavigationStateChange = async (navState: any) => {
     const { url } = navState;
 
-    // accessToken, refreshToken, isNewUser 모두 들어온 URL인지 검사
     if (
       url.includes("accessToken=") &&
       url.includes("refreshToken=") &&
@@ -29,17 +30,18 @@ const KakaoLoginView = () => {
 
         const accessToken = params.get("accessToken");
         const refreshToken = params.get("refreshToken");
-        const isNewUser = params.get("isNewUser"); // 신규 유저 여부
+        const isNewUser = params.get("isNewUser");
 
         if (accessToken && refreshToken) {
           await AsyncStorage.setItem("accessToken", accessToken);
           await AsyncStorage.setItem("refreshToken", refreshToken);
 
-          // 신규 유저라면 SelectCategoryPage로 이동
+          // 🔥 로그인 완료 신호
+          setAuthReady(true);
+
           if (isNewUser === "true") {
             router.replace("/SelectCategoryPage");
           } else {
-            // 기존 유저라면 바로 홈 화면으로 이동
             router.replace("/(tabs)");
           }
         }
@@ -48,7 +50,6 @@ const KakaoLoginView = () => {
       }
     }
 
-    // 오류 발생 시 LoginPage로 이동
     if (url.includes("error")) {
       router.replace("/LoginPage");
     }
@@ -57,10 +58,8 @@ const KakaoLoginView = () => {
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
-
       <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
         <View style={{ flex: 1 }}>
-          {/* 카카오 로그인 WebView */}
           <WebView
             source={{ uri: kakaoAuthUrl }}
             onLoadEnd={() => setLoading(false)}
@@ -70,7 +69,6 @@ const KakaoLoginView = () => {
             originWhitelist={["*"]}
           />
 
-          {/* 로딩 스피너 */}
           {loading && (
             <View
               style={{
@@ -81,7 +79,6 @@ const KakaoLoginView = () => {
                 bottom: 0,
                 justifyContent: "center",
                 alignItems: "center",
-                backgroundColor: "rgba(255,255,255,0.3)",
               }}
             >
               <ActivityIndicator size="large" color="#006716" />
