@@ -20,6 +20,8 @@ export interface SavedNewsCardProps {
   news: SavedNewsItem
   onPress: () => void
   onDelete: (id: string) => void
+  onSwipeableOpen?: (id: string) => void
+  onCardTouch?: (id: string) => void
 }
 
 export interface SavedNewsListProps {
@@ -94,6 +96,8 @@ export interface AudioControlsProps {
   onPause: () => void
   onNext: () => void
   onPrev: () => void
+  playbackSpeed?: number
+  onSpeedChange?: (speed: number) => void
 }
 
 export interface BottomActionsProps {

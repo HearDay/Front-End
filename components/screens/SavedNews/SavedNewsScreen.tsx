@@ -5,7 +5,7 @@ import { newsService } from '@/services'
 import { useSavedCategoryScrollStore } from '@/services/utils/savedCategoryStore'
 import { useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Platform, Text, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { SavedNewsItem } from '../../../types/screens'
 import { SavedNewsList, SavedNewsListRef } from './SavedNewsList'
@@ -28,8 +28,8 @@ export function SavedNewsScreen() {
   const { scrollPosition } = useSavedNewsScroll()
 
   // 삭제 모달 상태
-  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false)
-  const [deletingNewsId, setDeletingNewsId] = useState<string | null>(null)
+  // const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false) // 주석처리
+  // const [deletingNewsId, setDeletingNewsId] = useState<string | null>(null) // 주석처리
   const [showDeleteErrorModal, setShowDeleteErrorModal] = useState(false)
 
   const fetchSavedNews = useCallback(async () => {
@@ -85,24 +85,36 @@ export function SavedNewsScreen() {
     [router]
   )
 
-  const handleDeletePress = useCallback((articleId: string) => {
-    setDeletingNewsId(articleId)
-    setShowDeleteConfirmModal(true)
-  }, [])
-
-  const handleConfirmDelete = useCallback(async () => {
-    if (!deletingNewsId) return
+  const handleDeletePress = useCallback(async (articleId: string) => {
+    // 모달 없이 바로 삭제
     try {
-      await newsService.deleteSavedNews(deletingNewsId)
-      setSavedNews(prev => prev.filter(news => news.id !== deletingNewsId))
+      await newsService.deleteSavedNews(articleId)
+      setSavedNews(prev => prev.filter(news => news.id !== articleId))
     } catch (error) {
       console.error('삭제 실패:', error)
       setShowDeleteErrorModal(true)
-    } finally {
-      setShowDeleteConfirmModal(false)
-      setDeletingNewsId(null)
     }
-  }, [deletingNewsId])
+  }, [])
+
+  // 모달 사용 시 (주석처리)
+  // const handleDeletePress = useCallback((articleId: string) => {
+  //   setDeletingNewsId(articleId)
+  //   setShowDeleteConfirmModal(true)
+  // }, [])
+
+  // const handleConfirmDelete = useCallback(async () => {
+  //   if (!deletingNewsId) return
+  //   try {
+  //     await newsService.deleteSavedNews(deletingNewsId)
+  //     setSavedNews(prev => prev.filter(news => news.id !== deletingNewsId))
+  //   } catch (error) {
+  //     console.error('삭제 실패:', error)
+  //     setShowDeleteErrorModal(true)
+  //   } finally {
+  //     setShowDeleteConfirmModal(false)
+  //     setDeletingNewsId(null)
+  //   }
+  // }, [deletingNewsId])
 
   if (loading) {
     return (
@@ -137,7 +149,7 @@ export function SavedNewsScreen() {
     >
       <TopBar showBackButton={false} />
 
-      <View className="-mt-8 -mb-2">
+      <View className={`-mb-2 ${Platform.OS === 'android' ? '-mt-5' : '-mt-8'}`}>
         <CategoryChipGroup
           categories={[
             '전체',
@@ -164,8 +176,8 @@ export function SavedNewsScreen() {
         onDelete={handleDeletePress}
       />
 
-      {/* 삭제 확인 모달 */}
-      <Modal
+      {/* 삭제 확인 모달 (주석처리) */}
+      {/* <Modal
         visible={showDeleteConfirmModal}
         title={`이 뉴스를 삭제하시겠어요?
 저장된 뉴스 목록에서 사라집니다.`}
@@ -190,7 +202,7 @@ export function SavedNewsScreen() {
             </Text>
           </TouchableOpacity>
         </View>
-      </Modal>
+      </Modal> */}
 
       {/* 삭제 실패 모달 */}
       <Modal
