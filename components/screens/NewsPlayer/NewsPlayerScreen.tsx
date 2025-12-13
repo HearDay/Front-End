@@ -3,9 +3,9 @@ import { DiscussionLevelModal } from "../Discussion/DiscussionLevelModal";
 import { DiscussionModal } from "../Discussion/DiscussionModal";
 
 import { useAudio } from "@/contexts/AudioContext";
-import { usePlaylistStore } from "@/stores/playlistStore";
-import { useNewsPlaybackStore, NewsArticle } from "@/stores/newsPlaybackStore";
 import { useAutoPlayArticles } from "@/hooks/useAutoPlayArticles";
+import { NewsArticle, useNewsPlaybackStore } from "@/stores/newsPlaybackStore";
+import { usePlaylistStore } from "@/stores/playlistStore";
 import { Audio } from "expo-av";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -137,7 +137,7 @@ export const NewsPlayerScreen = ({
       // 전체 텍스트를 공백 기준으로 단어 분할
       const allWords = newsData.fullText.split(/\s+/).filter(w => w.length > 0);
 
-      let wordTimings: Array<{ word: string; startTime: number; endTime: number }> = [];
+      let wordTimings: { word: string; startTime: number; endTime: number }[] = [];
 
       if (newsData.ttsAlignment) {
         // ttsAlignment가 있는 경우 파싱 시도
@@ -870,7 +870,7 @@ export const NewsPlayerScreen = ({
         />
 
         {/* 난이도 선택 모달 */}
-        {selectedMode && (
+        {selectedMode && newsData && (
           <DiscussionLevelModal
             visible={showLevelModal}
             onClose={() => setShowLevelModal(false)}
@@ -882,13 +882,22 @@ export const NewsPlayerScreen = ({
                   ? "/AIVoiceDebatePage"
                   : "/AIChatDebatePage";
 
-              router.push(
-                `${target}?articleId=${articleId}&mode=${selectedMode}&level=${level}`
-              );
-              setShowLevelModal(false);
+              router.push({
+                pathname: target,
+                params: {
+                  articleId,
+                  title: newsData.title,
+                  mode: selectedMode,
+                  level,
+                },
+              });
+
+setShowLevelModal(false);
+
             }}
           />
         )}
+
 
         {/* 차량 모드 오류 모달 */}
         <Modal
