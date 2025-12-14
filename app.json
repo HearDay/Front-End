@@ -20,7 +20,8 @@
     "android": {
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.HEARDAY"
+      "package": "com.anonymous.HEARDAY",
+      "usesCleartextTraffic": true
     },
     "web": {
       "output": "static",
