@@ -14,7 +14,7 @@
 - **Language:** `TypeScript`
 - **Routing:** `expo-router`
 - **Styling:** `NativeWind + TailwindCSS`
-- **State Management:** `Recoil` or `Zustand`
+- **State Management:** `Zustand`or `Tanstack-Query`
 - **API Communication:** `Axios`
 
 ---
