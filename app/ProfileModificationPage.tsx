@@ -1,10 +1,30 @@
 import TopBar from "@/components/common/TopBar";
+import { getProfileInfo } from "@/services/api/profileInfo";
+import { ProfileInfo } from "@/types/auth/profileInfo";
 import { Stack, useRouter } from "expo-router";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
 const ProfileModificationPage = () => {
   const router = useRouter();
+  const [profile, setProfile] = useState<ProfileInfo | null>(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await getProfileInfo();
+        if (res.success) {
+          setProfile(res.data);
+        }
+      } catch (e) {
+        console.error("프로필 조회 실패", e);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  if (!profile) return null; // 로딩 처리 (원하면 스피너로 바꿔도 됨)
 
   return (
     <View className="flex-1 bg-white">
@@ -18,14 +38,14 @@ const ProfileModificationPage = () => {
 
       {/* 계정 정보 카드 */}
       <View
-        className="bg-white rounded-[20px] mt-4 self-center px-6 pt-6 pb-4 "
+        className="bg-white rounded-[20px] mt-4 self-center px-6 pt-6 pb-4"
         style={{
-            width: 350,
-            shadowColor: "#000",
-            shadowOpacity: 0.08,
-            shadowOffset: { width: 0, height: 4 },
-            shadowRadius: 12,
-            elevation: 6,
+          width: 350,
+          shadowColor: "#000",
+          shadowOpacity: 0.08,
+          shadowOffset: { width: 0, height: 4 },
+          shadowRadius: 12,
+          elevation: 6,
         }}
       >
         {/* 프로필 사진 + 닉네임 */}
@@ -38,7 +58,7 @@ const ProfileModificationPage = () => {
           <View className="flex-1 ml-7">
             <View className="flex-row items-center justify-between">
               <Text className="text-[24px] font-semibold text-[#1F1F1F]">
-                지호
+                {profile.nickname}
               </Text>
 
               <TouchableOpacity>
@@ -58,37 +78,43 @@ const ProfileModificationPage = () => {
           계정 정보
         </Text>
 
-        {/* 항목 1 - 성별 */}
+        {/* 성별 */}
         <View className="flex-row justify-between items-center mt-4">
           <Text className="text-[18px] text-gray-400">성별</Text>
-          <Text className="text-[18px] text-[#1F1F1F]">여</Text>
-        </View>
-        <View className="w-full h-[1px] bg-[#EFEFEF] mt-2" />
-
-        {/* 항목 2 - 나이 */}
-        <View className="flex-row justify-between items-center mt-4">
-          <Text className="text-[18px] text-gray-400">나이</Text>
-          <Text className="text-[18px] text-[#1F1F1F]">22세</Text>
-        </View>
-        <View className="w-full h-[1px] bg-[#EFEFEF] mt-2" />
-
-        {/* 항목 3 - 전화번호 */}
-        <View className="flex-row justify-between items-center mt-4">
-          <Text className="text-[18px] text-gray-400">전화번호</Text>
-          <Text className="text-[18px] text-[#1F1F1F]">010-1111-2222</Text>
-        </View>
-        <View className="w-full h-[1px] bg-[#EFEFEF] mt-2" />
-
-        {/* 항목 4 - 이메일 */}
-        <View className="flex-row justify-between items-center mt-4">
-          <Text className="text-[18px] text-gray-400">이메일</Text>
           <Text className="text-[18px] text-[#1F1F1F]">
-            hearday@naver.com
+            {profile.gender === "F" ? "여" : "남"}
           </Text>
         </View>
         <View className="w-full h-[1px] bg-[#EFEFEF] mt-2" />
 
-        {/* 항목 5 - 비밀번호 */}
+        {/* 나이 */}
+        <View className="flex-row justify-between items-center mt-4">
+          <Text className="text-[18px] text-gray-400">나이</Text>
+          <Text className="text-[18px] text-[#1F1F1F]">
+            {profile.age}세
+          </Text>
+        </View>
+        <View className="w-full h-[1px] bg-[#EFEFEF] mt-2" />
+
+        {/* 전화번호 */}
+        <View className="flex-row justify-between items-center mt-4">
+          <Text className="text-[18px] text-gray-400">전화번호</Text>
+          <Text className="text-[18px] text-[#1F1F1F]">
+            {profile.phone}
+          </Text>
+        </View>
+        <View className="w-full h-[1px] bg-[#EFEFEF] mt-2" />
+
+        {/* 이메일 */}
+        <View className="flex-row justify-between items-center mt-4">
+          <Text className="text-[18px] text-gray-400">이메일</Text>
+          <Text className="text-[18px] text-[#1F1F1F]">
+            {profile.email}
+          </Text>
+        </View>
+        <View className="w-full h-[1px] bg-[#EFEFEF] mt-2" />
+
+        {/* 비밀번호 */}
         <View className="flex-row justify-between items-center mt-4 mb-3">
           <Text className="text-[18px] text-gray-400">비밀번호</Text>
           <TouchableOpacity
@@ -98,7 +124,6 @@ const ProfileModificationPage = () => {
             <Text className="text-[18px] text-[#E35B5B]">변경</Text>
           </TouchableOpacity>
         </View>
-
       </View>
     </View>
   );
