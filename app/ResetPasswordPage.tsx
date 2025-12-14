@@ -9,7 +9,7 @@ import { Platform, Text, TextInput, TouchableOpacity, View } from "react-native"
 
 const ResetPasswordPage = () => {
   const router = useRouter();
-  const { email } = useLocalSearchParams<{ email: string }>(); // CertificationPage에서 전달됨
+  const { email } = useLocalSearchParams<{ email: string }>();
 
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -22,7 +22,6 @@ const ResetPasswordPage = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
-
 
   useEffect(() => {
     if (Platform.OS === "ios") {
@@ -66,18 +65,12 @@ const ResetPasswordPage = () => {
         setModalMessage(res.message || "비밀번호 변경에 실패했습니다.");
         setIsSuccess(false);
       }
-    } catch (err) {
-      console.error(err);
+    } catch {
       setModalMessage("서버 오류가 발생했습니다. 다시 시도해주세요.");
       setIsSuccess(false);
     }
 
     setModalVisible(true);
-  };
-
-  const handleModalConfirm = () => {
-    setModalVisible(false);
-    if (isSuccess) router.replace("/LoginPage");
   };
 
   return (
@@ -94,84 +87,51 @@ const ResetPasswordPage = () => {
         }
       />
 
-      <View className="flex-[0.8] items-center justify-center">
-        <Text className="text-2xl font-bold mb-6 text-[#002C09]">
+      <View className="flex-1 items-center px-6 pt-40">
+        <Text className="text-xl sm:text-xl font-bold mb-6 text-[#002C09]">
           비밀번호 변경하기
         </Text>
 
-        {/* 첫 번째 비밀번호 입력 */}
-        <View
-          className="flex-row items-center w-[350px] h-[50px] bg-[#FEFFF5] rounded-[10px] px-6"
-          style={{
-            paddingVertical: Platform.OS === "ios" ? 10 : 6,
-          }}
-        >
+        {/* 새 비밀번호 */}
+        <View className="flex-row items-center w-full max-w-[350px] h-[50px] bg-[#FEFFF5] rounded-[10px] px-5">
           <TextInput
             placeholder="새 비밀번호"
             placeholderTextColor="#8AA989"
             value={newPassword}
             onChangeText={setNewPassword}
             secureTextEntry={delayedSecure1}
-            style={{
-              flex: 1,
-              fontSize: 17,
-              color: "#1F2D1F",
-              includeFontPadding: false,
-              textAlignVertical: "center",
-              paddingVertical: 0,
-            }}
+            className="flex-1 text-[#1F2D1F]"
             autoCapitalize="none"
-            autoCorrect={false}
-            autoComplete="off"
-            importantForAutofill="no"
-            textContentType="none"
           />
           <TouchableOpacity onPress={() => setIsSecure1(!isSecure1)}>
             {isSecure1 ? (
-              <EyeOff size={22} color="#8AA989" />
+              <EyeOff size={20} color="#8AA989" />
             ) : (
-              <Eye size={22} color="#8AA989" />
+              <Eye size={20} color="#8AA989" />
             )}
           </TouchableOpacity>
         </View>
 
-        {/* 두 번째 비밀번호 확인 입력 */}
-        <View
-          className="flex-row items-center w-[350px] h-[50px] bg-[#FEFFF5] rounded-[10px] px-6 mt-6"
-          style={{
-            paddingVertical: Platform.OS === "ios" ? 10 : 6,
-          }}
-        >
+        {/* 비밀번호 확인 */}
+        <View className="flex-row items-center w-full max-w-[350px] h-[50px] bg-[#FEFFF5] rounded-[10px] px-5 mt-3">
           <TextInput
             placeholder="새 비밀번호 확인"
             placeholderTextColor="#8AA989"
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             secureTextEntry={delayedSecure2}
-            style={{
-              flex: 1,
-              fontSize: 17,
-              color: "#1F2D1F",
-              includeFontPadding: false,
-              textAlignVertical: "center",
-              paddingVertical: 0,
-            }}
-            autoCapitalize="none"
-            autoCorrect={false}
-            autoComplete="off"
-            importantForAutofill="no"
-            textContentType="none"
+            className="flex-1 text-[#1F2D1F]"
           />
           <TouchableOpacity onPress={() => setIsSecure2(!isSecure2)}>
             {isSecure2 ? (
-              <EyeOff size={22} color="#8AA989" />
+              <EyeOff size={20} color="#8AA989" />
             ) : (
-              <Eye size={22} color="#8AA989" />
+              <Eye size={20} color="#8AA989" />
             )}
           </TouchableOpacity>
         </View>
 
-        <View className="mt-6">
+        <View className="mt-4 w-full max-w-[350px]">
           <PrimaryButton title="다음" variant="primary" onPress={handleNext} />
         </View>
       </View>
@@ -180,7 +140,10 @@ const ResetPasswordPage = () => {
         visible={modalVisible}
         title={modalMessage}
         confirmText="확인"
-        onConfirm={handleModalConfirm}
+        onConfirm={() => {
+          setModalVisible(false);
+          if (isSuccess) router.replace("/LoginPage");
+        }}
         onClose={() => setModalVisible(false)}
       />
     </View>

@@ -218,7 +218,7 @@ export default function AIVoiceDebatePage() {
 
         {/* 제목 */}
         <View className="items-center px-4">
-          <Text className="text-left text-2xl font-semibold text-black mb-10">
+          <Text className="text-left text-xl font-semibold text-black mb-10">
             <Text className="font-black">{title ?? ""}</Text>
             <Text className="font-light"> 로 토론 중이에요!</Text>
           </Text>
@@ -226,26 +226,26 @@ export default function AIVoiceDebatePage() {
 
         {/* 상태 문구 */}
         {currentSpeaker === "AI" ? (
-          <Text className="text-[#002C09] text-3xl font-normal mt-2">
+          <Text className="text-[#002C09] text-2xl font-normal mt-2">
             <Text className="font-black">AI</Text>가 말하고 있어요!
           </Text>
         ) : currentSpeaker === "User" ? (
-          <Text className="text-[#002C09] text-3xl font-normal mt-2">
+          <Text className="text-[#002C09] text-2xl font-normal mt-2">
             <Text className="font-black">{nickname || "사용자"}님</Text> 차례예요!
           </Text>
         ) : currentSpeaker === "None" ? (
-          <Text className="text-[#002C09] text-3xl font-normal mt-2">
+          <Text className="text-[#002C09] text-2xl font-normal mt-2">
             <Text className="font-black">{nickname || "사용자"}님</Text>이 준비되면 시작해요!
           </Text>
         ) : (
-          <Text className="text-[#002C09] text-3xl font-normal mt-2">
+          <Text className="text-[#002C09] text-2xl font-normal mt-2">
             <Text className="font-black">AI</Text>가 답변을 생각하고 있어요!
           </Text>
         )}
 
         <Image
           source={getImageSource()}
-          className="w-[310px] h-[310px] my-8"
+          className="w-[290px] h-[290px] my-8"
           resizeMode="contain"
         />
 

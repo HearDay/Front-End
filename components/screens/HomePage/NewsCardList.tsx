@@ -29,14 +29,14 @@ const NewsCardList = ({
 
   if (!articles || articles.length === 0) {
     return (
-      <View className="flex-1 items-center justify-center mt-10">
+      <View className="flex-1 items-center justify-center mt-5">
         <Text className="text-gray-500">검색 결과가 없습니다.</Text>
       </View>
     );
   }
 
   return (
-    <View style={{ paddingHorizontal: 20, paddingBottom: 20, marginTop: 16 }}>
+    <View style={{ paddingHorizontal: 20, paddingBottom: 20, marginTop: 10 }}>
       {articles.map((item) => {
         const imageUrl = item.imageUrl || item.image_url || "";
         const title = item.title || "(제목 없음)";

@@ -1,13 +1,13 @@
-import { useState } from 'react'
-import { Image, Text, TouchableOpacity, View } from 'react-native'
-import { DiscussionNewsCardProps } from '../../../types/screens'
+import { useState } from "react";
+import { Image, Text, TouchableOpacity, View } from "react-native";
+import { DiscussionNewsCardProps } from "../../../types/screens";
 
 export function DiscussionNewsCard({ news, onPress }: DiscussionNewsCardProps) {
-  const [imageError, setImageError] = useState(false)
+  const [imageError, setImageError] = useState(false);
 
   const imageSource = imageError
-    ? require('../../../my-expo-app/assets/images/DefaultCard.png')
-    : { uri: news.imageUrl }
+    ? require("../../../my-expo-app/assets/images/DefaultCard.png")
+    : { uri: news.imageUrl };
 
   return (
     <TouchableOpacity
@@ -20,12 +20,10 @@ export function DiscussionNewsCard({ news, onPress }: DiscussionNewsCardProps) {
         elevation: 4,
         borderRadius: 16,
       }}
-      className="self-center mb-3"
+      className="self-center mb-3 w-full max-w-[350px]"
       activeOpacity={0.7}
     >
-      <View
-        className="flex-row items-center w-[350px] h-[106px] px-4 py-3 rounded-2xl overflow-hidden bg-white"
-      >
+      <View className="flex-row items-center h-[106px] px-4 py-3 rounded-2xl overflow-hidden bg-white">
         {/* 이미지 */}
         <View
           className="mr-4 rounded-md overflow-hidden"
@@ -49,13 +47,13 @@ export function DiscussionNewsCard({ news, onPress }: DiscussionNewsCardProps) {
         {/* 텍스트 */}
         <View className="flex-1 justify-center">
           <Text
-            className="text-[15px] font-extrabold text-black mb-[3px]"
+            className="text-[13px] sm:text-[13px] lg:text-[14px] font-extrabold text-black mb-[3px]"
             numberOfLines={2}
           >
             {news.title}
           </Text>
           <Text
-            className="text-[13px] text-[#4B5563] leading-snug"
+            className="text-xs sm:text-[13px] lg:text-[14px] text-[#4B5563] leading-snug"
             numberOfLines={2}
           >
             {news.summary}
@@ -63,5 +61,5 @@ export function DiscussionNewsCard({ news, onPress }: DiscussionNewsCardProps) {
         </View>
       </View>
     </TouchableOpacity>
-  )
+  );
 }

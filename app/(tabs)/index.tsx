@@ -319,35 +319,36 @@ export default function Index() {
 
   return (
     <View className="flex-1 bg-white">
+      {/* HeroSection은 내부에서 이미 높이 조절 중 */}
       <HeroSection
         offset={offset}
         userLevel={level}
         onTodayNewsPress={handleTodayNewsPress}
       />
 
-      {/* 해 아이콘 - 애니메이션 완료 후에만 표시 */}
+      {/* 해 아이콘 */}
       {showSunIcon && (
         <TouchableOpacity
           onPress={handleTodayNewsPress}
           style={{
-            position: 'absolute',
-            top: 100,
-            right: 10,
-            width: 80,
-            height: 80,
-            justifyContent: 'center',
-            alignItems: 'center',
+            position: "absolute",
+            top: 90,             
+            right: 12,     
+            width: 64,      
+            height: 64,
+            justifyContent: "center",
+            alignItems: "center",
             zIndex: 9999,
             elevation: 9999,
           }}
           activeOpacity={0.7}
-          hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+          hitSlop={{ top: 16, bottom: 16, left: 16, right: 16 }}
         >
           <Image
             source={require("../../my-expo-app/assets/images/Sun.png")}
-            style={{ width: 60, height: 60, resizeMode: "contain" }}
+            style={{ width: 48, height: 48, resizeMode: "contain" }}
           />
-          <Text style={{ fontSize: 8, color: '#FBFFD3', fontWeight: '600' }}>
+          <Text className="text-[8px] text-[#FBFFD3] font-semibold">
             TODAY'S NEWS
           </Text>
         </TouchableOpacity>
@@ -365,20 +366,21 @@ export default function Index() {
 
       {selectedCategory ? (
         <Animated.View style={[{ flex: 1 }, listStyle]}>
-          <View className="flex-row justify-between items-center px-6 mt-7 mb-2">
-            <Text className="text-[17px] font-extrabold text-[#002C14]">
+          {/* 타이틀 */}
+          <View className="flex-row justify-between items-center px-5 mt-6 mb-2">
+            <Text className="text-[16px] font-extrabold text-[#002C14]">
               {selectedCategory} 관련 추천 뉴스
             </Text>
 
             <Text
-              className="text-[14px] text-gray-600 pr-2"
+              className="text-[13px] text-gray-600"
               onPress={handleBackToHome}
             >
               돌아가기
             </Text>
           </View>
 
-          <View className="mb-4 mt-3">
+          <View>
             <CategoryChipGroup
               categories={categories}
               selectedCategory={selectedCategory}
@@ -388,39 +390,40 @@ export default function Index() {
             />
           </View>
 
-          <View style={{ flex: 1 }}>
+          <View className="flex-1">
             <ScrollView
               scrollEventThrottle={16}
               showsVerticalScrollIndicator={false}
-              contentContainerStyle={{ paddingBottom: 50 }}
+              contentContainerStyle={{ paddingBottom: 20 }}
             >
               <NewsCardList
                 background="green"
                 articles={categoryArticles}
                 onPressArticle={async (id) => {
-                  console.log('[Index] 카테고리 기사 선택 - ID:', id);
+                  const {
+                    setRecommendedArticles,
+                    startRecommendedPlayback,
+                  } = await import("@/stores/newsPlaybackStore").then(
+                    (m) => m.useNewsPlaybackStore.getState()
+                  );
 
-                  // 연속 재생 설정
-                  const { setRecommendedArticles, startRecommendedPlayback } = await import('@/stores/newsPlaybackStore').then(m => m.useNewsPlaybackStore.getState());
-
-                  // 카테고리 기사들을 추천 기사로 설정 (최대 100개)
-                  const playbackArticles = categoryArticles.slice(0, 100).map(article => ({
-                    id: String(article.id),
-                    title: article.title,
-                    imageUrl: article.imageUrl,
-                    summary: article.description,
-                    category: article.category,
-                  }));
+                  const playbackArticles = categoryArticles
+                    .slice(0, 100)
+                    .map((article) => ({
+                      id: String(article.id),
+                      title: article.title,
+                      imageUrl: article.imageUrl,
+                      summary: article.description,
+                      category: article.category,
+                    }));
 
                   setRecommendedArticles(playbackArticles);
 
-                  // 클릭한 기사의 인덱스 찾기
-                  const clickedIndex = categoryArticles.findIndex(article => String(article.id) === id);
-                  console.log('[Index] 클릭한 기사 인덱스:', clickedIndex);
+                  const clickedIndex = categoryArticles.findIndex(
+                    (article) => String(article.id) === id
+                  );
 
-                  // 연속 재생 시작
                   startRecommendedPlayback(clickedIndex);
-
                   router.push(`/newsplayer/${id}?from=home&mode=recommended`);
                 }}
               />
@@ -429,18 +432,21 @@ export default function Index() {
         </Animated.View>
       ) : (
         <>
-          <View className="px-6 mt-4">
-            <Text className="text-[16px] text-right font-extrabold text-[#002C14] mt-2 mr-2">
+          <View className="px-5 mt-4">
+            <Text className="text-ls text-right font-extrabold text-[#002C14]">
               {nickname
                 ? `${nickname}님이 좋아할 만한 오늘의 추천 뉴스`
                 : "오늘의 추천 뉴스"}
             </Text>
           </View>
 
-          <NewsCardSlider updateTime={updateTime} articles={recommendedArticles} />
+          <NewsCardSlider
+            updateTime={updateTime}
+            articles={recommendedArticles}
+          />
 
-          <View className="px-6 mt-9">
-            <Text className="text-[16px] text-right font-extrabold text-[#002C14] mt-2 mb-4 mr-2">
+          <View className="px-5 mt-6">
+            <Text className="text-ls text-right font-extrabold text-[#002C14] mb-2">
               카테고리별로 추천 뉴스 골라보기
             </Text>
           </View>
@@ -455,5 +461,6 @@ export default function Index() {
         </>
       )}
     </View>
-  );
+);
+
 }

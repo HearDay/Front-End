@@ -32,7 +32,7 @@ export default function ScrollButton({
         ref={scrollRef}
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}
+        contentContainerStyle={{ paddingHorizontal: 10, gap: 4 }}
         onScroll={(e) => onScrollX(e.nativeEvent.contentOffset.x)}
         scrollEventThrottle={16}
       >
@@ -43,12 +43,12 @@ export default function ScrollButton({
               key={idx}
               activeOpacity={0.8}
               onPress={() => onSelect(category)}
-              className={`px-5 ml-2 h-[38px] rounded-full items-center justify-center ${
+              className={`px-5 ml-2 h-[35px] rounded-full items-center justify-center ${
                 isSelected ? "bg-[#B3D7BB]" : "bg-[#F5FCE9]"
               }`}
             >
               <Text
-                className={`text-lg ${
+                className={`text-md ${
                   isSelected ? "text-[#006716] font-semibold" : "text-black"
                 }`}
               >

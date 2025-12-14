@@ -24,8 +24,10 @@ export function DiscussionScreen() {
   const [viewedNews, setViewedNews] = useState<DiscussionNewsItem[]>([])
   const [sortBy, setSortBy] = useState<'latest' | 'oldest'>('latest')
 
-  const [discussionRecords, setDiscussionRecords] = useState<DiscussionRecordItem[]>([])
-  const [recordSortBy, setRecordSortBy] = useState<'latest' | 'oldest'>('latest')
+  const [discussionRecords, setDiscussionRecords] =
+    useState<DiscussionRecordItem[]>([])
+  const [recordSortBy, setRecordSortBy] =
+    useState<'latest' | 'oldest'>('latest')
 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -35,11 +37,13 @@ export function DiscussionScreen() {
 
   const [showDiscussionModal, setShowDiscussionModal] = useState(false)
   const [showLevelModal, setShowLevelModal] = useState(false)
-  const [selectedMode, setSelectedMode] = useState<'voice' | 'chat' | null>(null)
-  const [selectedArticleId, setSelectedArticleId] = useState<string | null>(null)
+  const [selectedMode, setSelectedMode] =
+    useState<'voice' | 'chat' | null>(null)
+  const [selectedArticleId, setSelectedArticleId] =
+    useState<string | null>(null)
   const [selectedTitle, setSelectedTitle] = useState<string | null>(null)
 
-  // 데이터 로딩 함수
+  // ===== 데이터 로딩 =====
   const fetchViewedNews = useCallback(async () => {
     try {
       setLoading(true)
@@ -69,7 +73,8 @@ export function DiscussionScreen() {
       setLoading(true)
       setError(null)
 
-      const response = await discussionService.getDiscussionRecords(recordSortBy)
+      const response =
+        await discussionService.getDiscussionRecords(recordSortBy)
       setDiscussionRecords(response)
     } catch {
       setError('토론 기록을 불러올 수 없습니다.')
@@ -78,7 +83,7 @@ export function DiscussionScreen() {
     }
   }, [recordSortBy])
 
-  // 탭 전환 시 로드
+  // ===== 탭 전환 =====
   useEffect(() => {
     if (activeButton === 'discussion') fetchViewedNews()
   }, [activeButton, sortBy, fetchViewedNews])
@@ -87,7 +92,7 @@ export function DiscussionScreen() {
     if (activeButton === 'record') fetchDiscussionRecords()
   }, [activeButton, recordSortBy, fetchDiscussionRecords])
 
-  // 뉴스 클릭 → 모달 열기
+  // ===== 뉴스 클릭 =====
   const handleNewsPress = (articleId: string) => {
     const news = viewedNews.find(item => item.id === articleId)
 
@@ -96,26 +101,30 @@ export function DiscussionScreen() {
     setShowDiscussionModal(true)
   }
 
-  // 기록 클릭 → 페이지 이동
+  // ===== 기록 클릭 =====
   const handleRecordItemPress = (discussionId: string | number) => {
     router.push(`/AIChatRecordPage?discussionId=${discussionId}`)
   }
 
-  // 로딩 화면
+  // ===== 로딩 =====
   if (loading) {
     return (
       <SafeAreaView className="flex-1 bg-[#F5FCE9] justify-center items-center">
         <ActivityIndicator size="large" color="#16a34a" />
-        <Text className="text-gray-500 mt-4">데이터를 불러오는 중...</Text>
+        <Text className="text-[14px] sm:text-[15px] lg:text-[16px] text-gray-500 mt-4">
+          데이터를 불러오는 중...
+        </Text>
       </SafeAreaView>
     )
   }
 
-  // 에러 화면
+  // ===== 에러 =====
   if (error) {
     return (
-      <SafeAreaView className="flex-1 bg-[#F5FCE9] justify-center items-center px-4">
-        <Text className="text-red-500 text-center mb-4">{error}</Text>
+      <SafeAreaView className="flex-1 bg-[#F5FCE9] justify-center items-center px-6">
+        <Text className="text-[14px] sm:text-[15px] lg:text-[16px] text-red-500 text-center mb-4">
+          {error}
+        </Text>
         <TouchableOpacity
           onPress={
             activeButton === 'discussion'
@@ -124,13 +133,15 @@ export function DiscussionScreen() {
           }
           className="bg-green-600 px-6 py-3 rounded-xl"
         >
-          <Text className="text-white font-semibold">다시 시도</Text>
+          <Text className="text-[14px] sm:text-[15px] lg:text-[16px] text-white font-semibold">
+            다시 시도
+          </Text>
         </TouchableOpacity>
       </SafeAreaView>
     )
   }
 
-  // 정상 화면
+  // ===== 정상 화면 =====
   return (
     <SafeAreaView className="flex-1 bg-[#F5FCE9]" edges={['left', 'right']}>
       <TopBar showBackButton={false} />
@@ -160,7 +171,7 @@ export function DiscussionScreen() {
         />
       )}
 
-      {/* ===== (1) 토론 방식 선택 모달 ===== */}
+      {/* ===== 토론 방식 선택 ===== */}
       <DiscussionModal
         visible={showDiscussionModal}
         articleId={selectedArticleId}
@@ -172,7 +183,7 @@ export function DiscussionScreen() {
         }}
       />
 
-      {/* ===== (2) 난이도 선택 모달 ===== */}
+      {/* ===== 난이도 선택 ===== */}
       {selectedMode && selectedArticleId && (
         <DiscussionLevelModal
           visible={showLevelModal}
@@ -196,7 +207,7 @@ export function DiscussionScreen() {
         />
       )}
 
-      {/* 에러 모달 */}
+      {/* ===== 에러 모달 ===== */}
       <Modal
         visible={showErrorModal}
         title={errorMessage}

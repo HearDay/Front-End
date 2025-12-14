@@ -1,6 +1,6 @@
 import { EyeOff } from "lucide-react-native";
 import React from "react";
-import { StyleProp, TextInput, TouchableOpacity, View, ViewStyle } from "react-native";
+import { TextInput, TouchableOpacity, View } from "react-native";
 
 type InputVariant = "transparent" | "default" | "password";
 
@@ -9,8 +9,7 @@ interface InputBoxProps {
   value?: string;
   onChangeText?: (text: string) => void;
   variant?: InputVariant;
-  editable?: boolean;            
-  style?: StyleProp<ViewStyle>; 
+  editable?: boolean;
 }
 
 const InputBox = ({
@@ -18,11 +17,10 @@ const InputBox = ({
   value,
   onChangeText,
   variant = "default",
-  editable = true,               
-  style,
+  editable = true,
 }: InputBoxProps) => {
   const baseStyle =
-    "flex-row items-center w-[350px] h-[50px] rounded-[10px] px-6";
+    "flex-row items-center w-full max-w-[380px] h-[48px] rounded-[10px] px-5";
 
   const getVariantStyle = () => {
     switch (variant) {
@@ -33,22 +31,24 @@ const InputBox = ({
     }
   };
 
+  const getTextColor = () => {
+    if (!editable) return "#8A8A8A";
+    return variant === "transparent" ? "#FFFFFF" : "#1F2D1F";
+  };
+
   return (
-    <View className={`${baseStyle} ${getVariantStyle()}`} style={style}>
+    <View className={`${baseStyle} ${getVariantStyle()}`}>
       <TextInput
         placeholder={placeholder}
         placeholderTextColor={
-          variant === "transparent" ? "#FFFFFF" : "#8AA989"
+          variant === "transparent" ? "#FFFFFFB3" : "#8AA989"
         }
         value={value}
         onChangeText={onChangeText}
-        editable={editable}        
+        editable={editable}
+        className="flex-1 text-[16px]"
         style={{
-          flex: 1,
-          fontSize: 17,
-          color: editable
-            ? (variant === "transparent" ? "#FFFFFF" : "#1F2D1F")
-            : "#8A8A8A",          
+          color: getTextColor(),
           includeFontPadding: false,
           textAlignVertical: "center",
           paddingVertical: 0,
@@ -56,12 +56,11 @@ const InputBox = ({
         keyboardType="default"
       />
 
-      {/* 패스워드 아이콘 */}
       {variant === "password" && (
         <TouchableOpacity disabled={!editable}>
           <EyeOff
-            size={22}
-            color={editable ? "#8AA989" : "#B5B5B5"} 
+            size={20}
+            color={editable ? "#8AA989" : "#B5B5B5"}
           />
         </TouchableOpacity>
       )}
