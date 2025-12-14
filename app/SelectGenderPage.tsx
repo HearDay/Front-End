@@ -87,7 +87,7 @@ const SelectGenderPage = () => {
           <View
             style={{
               position: "absolute",
-              bottom: 180,
+              bottom: 350,
               left: 0,
               right: 0,
             }}

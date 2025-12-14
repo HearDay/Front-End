@@ -1,6 +1,9 @@
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
-import { View } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Platform
+} from "react-native";
 
 import TopBar from "@/components/common/TopBar";
 import ChatInputBar from "@/components/screens/AIDebate/ChatInputBar";
@@ -18,10 +21,14 @@ export default function AIChatDebatePage() {
   const handleSend = async (message: string) => {
     if (!articleId) return;
 
-    // 사용자 메시지 표시
-    setChatList(prev => [
+    // 사용자 메시지 먼저 추가
+    setChatList((prev) => [
       ...prev,
-      { contentId: Date.now(), role: "USER", content: message }
+      {
+        contentId: Date.now(),
+        role: "USER",
+        content: message,
+      },
     ]);
 
     try {
@@ -32,11 +39,13 @@ export default function AIChatDebatePage() {
       );
 
       if (res.success) {
-        // 최초 discussionId 세팅
-        if (!discussionId) setDiscussionId(res.data.discussionId);
+        // 최초 discussionId 저장
+        if (!discussionId) {
+          setDiscussionId(res.data.discussionId);
+        }
 
-        // AI 답변 추가
-        setChatList(prev => [
+        // AI 응답 추가
+        setChatList((prev) => [
           ...prev,
           {
             contentId: Date.now() + 1,
@@ -51,12 +60,16 @@ export default function AIChatDebatePage() {
   };
 
   return (
-    <View className="flex-1 bg-[#FEFFF5]">
+    <KeyboardAvoidingView
+      className="flex-1 bg-[#FEFFF5]"
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
+    >
       <Stack.Screen options={{ headerShown: false }} />
       <TopBar showBackButton onBackPress={() => router.replace("/AiPage")} />
 
-      <ChatList chatList={chatList}/>
+      <ChatList chatList={chatList} />
       <ChatInputBar onSend={handleSend} />
-    </View>
+    </KeyboardAvoidingView>
   );
 }
