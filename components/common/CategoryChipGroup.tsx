@@ -18,13 +18,15 @@ export const CategoryChipGroup = ({
   onScrollXChange,
 }: ChipGroupProps) => {
   const scrollRef = useRef<ScrollView>(null);
+  const hasRestored = useRef(false);
 
-  // 진입 시 또는 scrollX 변경 시 위치 복원
+  // 진입 시 1번만 위치 복원
   useEffect(() => {
-    if (scrollRef.current && scrollX >= 0) {
+    if (!hasRestored.current && scrollRef.current) {
       scrollRef.current.scrollTo({ x: scrollX, animated: false });
+      hasRestored.current = true;
     }
-  }, [scrollX]);
+  }, []);
 
   return (
     <View className="h-16 items-center">
@@ -33,10 +35,9 @@ export const CategoryChipGroup = ({
         horizontal
         showsHorizontalScrollIndicator={false}
         scrollEventThrottle={16}
-        onScroll={(e) => {
-          if (onScrollXChange) {
-            onScrollXChange(e.nativeEvent.contentOffset.x);
-          }
+        // ❌ onScroll 제거
+        onMomentumScrollEnd={(e) => {
+          onScrollXChange?.(e.nativeEvent.contentOffset.x);
         }}
         contentContainerStyle={{
           alignItems: "center",
