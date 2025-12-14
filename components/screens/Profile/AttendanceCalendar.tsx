@@ -18,7 +18,6 @@ interface AttendanceCalendarProps {
 }
 
 const WEEKDAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
-
 const AttendanceCalendar = ({ attendance }: AttendanceCalendarProps) => {
   const [currentDate, setCurrentDate] = useState(new Date());
 

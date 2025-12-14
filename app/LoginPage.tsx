@@ -1,8 +1,9 @@
 import { Modal } from "@/components/common";
 import InputBox from "@/components/common/InputBox";
 import PrimaryButton from "@/components/common/PrimaryButton";
+import { useAuthStore } from "@/services/api/authStore";
 import { login } from "@/services/api/login";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { saveAccessToken } from "@/services/utils/tokenStorage";
 import { LinearGradient } from "expo-linear-gradient";
 import { Stack, useRouter } from "expo-router";
 import { Eye, EyeOff } from "lucide-react-native";
@@ -24,6 +25,7 @@ import {
 
 const LoginPage = () => {
   const router = useRouter();
+  const setAuthReady = useAuthStore((s) => s.setAuthReady);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -33,12 +35,12 @@ const LoginPage = () => {
   const [isSecure, setIsSecure] = useState(true);
   const [delayedSecure, setDelayedSecure] = useState(true);
 
-  // 애니메이션 값 (Tree 전용)
+  // 애니메이션 값
   const fadeTree = useRef(new Animated.Value(1)).current;
   const moveTree = useRef(new Animated.Value(0)).current;
   const moveForm = useRef(new Animated.Value(0)).current;
 
-  // 키보드 상태 감지
+  // 키보드 애니메이션
   useEffect(() => {
     const showSub = Keyboard.addListener("keyboardDidShow", () => {
       Animated.parallel([
@@ -91,6 +93,7 @@ const LoginPage = () => {
     return () => clearTimeout(t);
   }, [isSecure]);
 
+  // 로그인 처리
   const handleLogin = async () => {
     if (!email || !password) {
       setModalMessage("아이디와 비밀번호를 모두 입력해주세요.");
@@ -101,8 +104,14 @@ const LoginPage = () => {
 
     try {
       const res = await login({ email, password });
+
       if (res.success && res.data?.accessToken) {
-        await AsyncStorage.setItem("accessToken", res.data.accessToken);
+        // SecureStore에 토큰 저장
+        await saveAccessToken(res.data.accessToken);
+
+        // 로그인 완료 신호
+        setAuthReady(true);
+
         setModalMessage("로그인에 성공했습니다!");
         setIsSuccess(true);
         setIsModalVisible(true);
@@ -119,9 +128,12 @@ const LoginPage = () => {
     }
   };
 
+  // 모달 확인 → 홈 이동
   const handleModalConfirm = () => {
     setIsModalVisible(false);
-    if (isSuccess) router.replace("/(tabs)");
+    if (isSuccess) {
+      router.replace("/(tabs)");
+    }
   };
 
   return (
@@ -135,9 +147,8 @@ const LoginPage = () => {
         style={{ flex: 1 }}
       >
         <SafeAreaView style={{ flex: 1 }}>
-          
-          {/* 로고 완전 고정! */}
-          <View style={{ alignItems: "center", marginTop: 50, marginBottom: 10 }}>
+          {/* 로고 */}
+          <View style={{ alignItems: "center", marginTop: 100, marginBottom: 10 }}>
             <Image
               source={require("../my-expo-app/assets/images/HEARDAY.png")}
               className="w-[156px] h-[56px]"
@@ -160,8 +171,7 @@ const LoginPage = () => {
               }}
               keyboardShouldPersistTaps="handled"
             >
-
-              {/* Tree만 애니메이션 */}
+              {/* Tree */}
               <Animated.View
                 style={{
                   opacity: fadeTree,
@@ -177,7 +187,7 @@ const LoginPage = () => {
                 </View>
               </Animated.View>
 
-              {/* 입력창/버튼 */}
+              {/* 입력 영역 */}
               <Animated.View
                 style={{
                   transform: [{ translateY: moveForm }],
@@ -193,7 +203,7 @@ const LoginPage = () => {
                     variant="transparent"
                   />
 
-                  <View className="flex-row items-center text-white w-[350px] h-[50px] rounded-[10px] px-6 bg-white/20">
+                  <View className="flex-row items-center w-[350px] h-[50px] rounded-[10px] px-6 bg-white/20">
                     <TextInput
                       placeholder="비밀번호를 입력해 주세요"
                       placeholderTextColor="white"
@@ -231,7 +241,6 @@ const LoginPage = () => {
                   </TouchableOpacity>
                 </View>
               </Animated.View>
-
             </ScrollView>
           </KeyboardAvoidingView>
         </SafeAreaView>

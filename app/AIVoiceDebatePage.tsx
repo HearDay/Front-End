@@ -1,6 +1,6 @@
 import axiosInstance from "@/services/api/axiosInstance";
 import { fetchUserInfo } from "@/services/api/userInfo";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getAccessToken } from "@/services/utils/tokenStorage";
 import { Audio } from "expo-av";
 import * as FileSystem from "expo-file-system/legacy";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
@@ -120,7 +120,7 @@ export default function AIVoiceDebatePage() {
     try {
       setCurrentSpeaker("Pending");
 
-      const rawToken = await AsyncStorage.getItem("accessToken");
+      const rawToken = await getAccessToken();
       const token = rawToken ? rawToken.replace(/"/g, "") : "";
 
       if (!articleId) return;

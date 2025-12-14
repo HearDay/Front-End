@@ -1,9 +1,9 @@
+import { getAccessToken } from "@/services/utils/tokenStorage";
 import { ProfileResponse } from "@/types/auth/profile";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import axiosInstance from "./axiosInstance";
 
 export const fetchProfile = async (year: number, month: number): Promise<ProfileResponse> => {
-  const token = await AsyncStorage.getItem("accessToken");
+  const token = await getAccessToken();
 
   const res = await axiosInstance.get(`/api/users/profile`, {
     params: { year, month },

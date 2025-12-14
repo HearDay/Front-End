@@ -1,5 +1,5 @@
+import { getAccessToken } from "@/services/utils/tokenStorage";
 import { ApiResponse, SendChatRequest, SendChatResponse } from "@/types/auth/aiChat";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import axiosInstance from "./axiosInstance";
 
 export const sendChatMessage = async (
@@ -9,7 +9,7 @@ export const sendChatMessage = async (
 ): Promise<ApiResponse<SendChatResponse>> => {
 
   // 여기서만 토큰을 읽어서 넣기
-  const token = await AsyncStorage.getItem("accessToken");
+  const token = await getAccessToken();
 
   const params = discussionId !== undefined ? { discussionId } : {};
 

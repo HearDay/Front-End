@@ -65,6 +65,7 @@ const styles = StyleSheet.create({
   safeArea: { backgroundColor: "transparent" },
   gradientLine: {
     position: "absolute",
+    top: 54,
     bottom: 0,
     left: 0,
     right: 0,

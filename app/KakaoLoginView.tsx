@@ -1,5 +1,7 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useAuthStore } from "@/services/api/authStore";
+import { saveAccessToken } from "@/services/utils/tokenStorage";
 import { Stack, useRouter } from "expo-router";
+import * as SecureStore from "expo-secure-store";
 import React, { useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -8,8 +10,11 @@ import { WebView } from "react-native-webview";
 const CLIENT_ID = process.env.EXPO_PUBLIC_CLIENT_ID;
 const REDIRECT_URI = process.env.EXPO_PUBLIC_REDIRECT_URI;
 
+const REFRESH_TOKEN_KEY = "refreshToken";
+
 const KakaoLoginView = () => {
   const router = useRouter();
+  const setAuthReady = useAuthStore((s) => s.setAuthReady);
   const [loading, setLoading] = useState(true);
 
   const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}`;
@@ -17,18 +22,32 @@ const KakaoLoginView = () => {
   const handleNavigationStateChange = async (navState: any) => {
     const { url } = navState;
 
-    if (url.includes("accessToken=") && url.includes("refreshToken=")) {
+    if (
+      url.includes("accessToken=") &&
+      url.includes("refreshToken=") &&
+      url.includes("isNewUser=")
+    ) {
       try {
         const queryString = url.split("?")[1];
         const params = new URLSearchParams(queryString);
 
         const accessToken = params.get("accessToken");
         const refreshToken = params.get("refreshToken");
+        const isNewUser = params.get("isNewUser");
 
         if (accessToken && refreshToken) {
-          await AsyncStorage.setItem("accessToken", accessToken);
-          await AsyncStorage.setItem("refreshToken", refreshToken);
-          router.replace("/(tabs)");
+          // SecureStore에 토큰 저장
+          await saveAccessToken(accessToken);
+          await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refreshToken);
+
+          // 로그인 완료 신호
+          setAuthReady(true);
+
+          if (isNewUser === "true") {
+            router.replace("/SelectCategoryPage");
+          } else {
+            router.replace("/(tabs)");
+          }
         }
       } catch (err) {
         console.error("❌ 토큰 저장 실패:", err);
@@ -43,11 +62,8 @@ const KakaoLoginView = () => {
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
-
       <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
         <View style={{ flex: 1 }}>
-          
-          {/* WebView */}
           <WebView
             source={{ uri: kakaoAuthUrl }}
             onLoadEnd={() => setLoading(false)}
@@ -57,7 +73,6 @@ const KakaoLoginView = () => {
             originWhitelist={["*"]}
           />
 
-          {/* 🔥 중앙에 고정되는 로딩 스피너 */}
           {loading && (
             <View
               style={{
@@ -68,7 +83,6 @@ const KakaoLoginView = () => {
                 bottom: 0,
                 justifyContent: "center",
                 alignItems: "center",
-                backgroundColor: "rgba(255,255,255,0.3)",
               }}
             >
               <ActivityIndicator size="large" color="#006716" />

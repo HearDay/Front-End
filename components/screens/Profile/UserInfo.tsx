@@ -55,7 +55,7 @@ const UserInfo = ({ nickname, email, level, point }: UserInfoProps) => {
       <View className="flex-row items-center gap-4">
         <Image
           source={require("../../../my-expo-app/assets/images/DefaultProfile.png")}
-          className="w-[85px] h-[85px] rounded-full"
+          className="w-[83px] h-[83px] rounded-full ml-2"
         />
 
         <View className="flex-col ml-2">
@@ -63,7 +63,7 @@ const UserInfo = ({ nickname, email, level, point }: UserInfoProps) => {
             {nickname}
           </Text>
 
-          <Text className="text-green-700 font-medium text-[17px] mt-2">
+          <Text className="text-green-700 font- text-[17px] mt-2">
             {email}
           </Text>
 

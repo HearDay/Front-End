@@ -1,12 +1,12 @@
 import axiosInstance from "@/services/api/axiosInstance";
+import { getAccessToken } from "@/services/utils/tokenStorage";
 import { RegisterInfoRequest, RegisterInfoResponse } from "@/types/auth/registerInfo";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const registerUserInfo = async (
   body: RegisterInfoRequest
 ): Promise<RegisterInfoResponse> => {
   
-  const token = await AsyncStorage.getItem("accessToken");
+  const token = await getAccessToken();
 
   const res = await axiosInstance.post("/api/users/category", body, {
     headers: token ? { Authorization: `Bearer ${token}` } : {},

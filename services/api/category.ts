@@ -1,9 +1,9 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getAccessToken } from "@/services/utils/tokenStorage";
 import axiosInstance from "./axiosInstance";
 
 export const registerUserCategories = async (categories: string[]) => {
   try {
-    const token = await AsyncStorage.getItem("accessToken");
+    const token = await getAccessToken();
    
 
     if (!token) {

@@ -2,10 +2,18 @@ import TopBar from "@/components/common/TopBar";
 import { useCategoryStore } from "@/services/utils/categoryStore";
 import { useSavedCategoryScrollStore } from "@/services/utils/savedCategoryStore";
 import { resetScrollStorage } from "@/services/utils/scrollStore";
+import { clearTokens } from "@/services/utils/tokenStorage";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Stack, useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Image, Modal, Pressable, Text, TouchableOpacity, View } from "react-native";
+import {
+  Image,
+  Modal,
+  Pressable,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 const SettingPage = () => {
   const router = useRouter();
@@ -20,13 +28,18 @@ const SettingPage = () => {
     (state) => state.resetSavedCategory
   );
 
-  // 로그아웃 실행 
+  // 로그아웃 실행
   const handleLogout = async () => {
     try {
-      await AsyncStorage.removeItem("accessToken");
+      // SecureStore 토큰 삭제
+      await clearTokens();
+
+      // 상태 초기화
       clearCategory();
       resetSavedCategory();
       await resetScrollStorage();
+
+      // UI 상태용 AsyncStorage는 유지
       await AsyncStorage.removeItem("hasShownTodayNewsModal");
 
       console.log("로그아웃 완료!");
@@ -36,10 +49,12 @@ const SettingPage = () => {
     }
   };
 
-  // 회원탈퇴 실행 
+  // 회원탈퇴 실행
   const handleWithdraw = async () => {
     try {
-      await AsyncStorage.removeItem("accessToken");
+      // SecureStore 토큰 삭제
+      await clearTokens();
+
       clearCategory();
       resetSavedCategory();
       await resetScrollStorage();
@@ -58,14 +73,12 @@ const SettingPage = () => {
 
       <TopBar showBackButton onBackPress={() => router.push("/ProfilePage")} />
 
-      <Text className="text-[22px] font-bold text-[#002C09] px-6">
+      <Text className="text-[22px] font-bold text-[#002C09] px-8 mt-6">
         설정
       </Text>
 
       {/* 리스트 */}
-      <View className="w-[350px] self-center mt-4">
-
-        {/* 공통 메뉴 */}
+      <View className="w-[350px] self-center mt-3">
         {[
           { label: "알림", onPress: () => {} },
           { label: "Premium", onPress: () => {} },
@@ -78,7 +91,7 @@ const SettingPage = () => {
             onPress={item.onPress}
             className="flex-row justify-between items-center h-[55px] border-b border-[#E5E5E5]"
           >
-            <Text className="text-[18px] text-[#1F1F1F]">{item.label}</Text>
+            <Text className="text-[19px] text-[#1F1F1F]">{item.label}</Text>
             <Image
               source={require("../my-expo-app/assets/images/ArrowRight.png")}
               className="w-[20px] h-[20px]"

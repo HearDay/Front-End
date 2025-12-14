@@ -872,7 +872,7 @@ export const NewsPlayerScreen = ({
         />
 
         {/* 난이도 선택 모달 */}
-        {selectedMode && (
+        {selectedMode && newsData && (
           <DiscussionLevelModal
             visible={showLevelModal}
             onClose={() => setShowLevelModal(false)}
@@ -884,13 +884,22 @@ export const NewsPlayerScreen = ({
                   ? "/AIVoiceDebatePage"
                   : "/AIChatDebatePage";
 
-              router.push(
-                `${target}?articleId=${articleId}&mode=${selectedMode}&level=${level}`
-              );
-              setShowLevelModal(false);
+              router.push({
+                pathname: target,
+                params: {
+                  articleId,
+                  title: newsData.title,
+                  mode: selectedMode,
+                  level,
+                },
+              });
+
+setShowLevelModal(false);
+
             }}
           />
         )}
+
 
         {/* 차량 모드 오류 모달 */}
         <Modal
