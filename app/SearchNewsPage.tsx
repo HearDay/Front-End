@@ -9,7 +9,6 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Image,
   ScrollView,
-  StyleSheet,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -87,9 +86,7 @@ export default function SearchNewsPage() {
         const y = await getScrollY(pathname);
 
         setTimeout(() => {
-          if (listScrollRef.current) {
-            listScrollRef.current.scrollTo({ y, animated: false });
-          }
+          listScrollRef.current?.scrollTo({ y, animated: false });
         }, 0);
       })();
     }, [pathname])
@@ -104,8 +101,9 @@ export default function SearchNewsPage() {
         locations={[0, 0, 0.12, 0.85]}
         style={{ flex: 1 }}
       >
-        <SafeAreaView style={{ flex: 1 }}>
-          <View className="px-4 pb-1">
+        <SafeAreaView className="flex-1">
+          <View className="px-4 pb-1 mt-3">
+            {/* 헤더 */}
             <View className="w-full items-center justify-center pb-2 relative">
               <TouchableOpacity
                 onPress={() => router.push("/")}
@@ -113,19 +111,19 @@ export default function SearchNewsPage() {
               >
                 <Image
                   source={require("../my-expo-app/assets/images/BackButton.png")}
-                  className="w-[12px] h-[18px] mt-3"
+                  className="w-[12px] h-[18px] mt-2"
                 />
               </TouchableOpacity>
 
               <Image
                 source={require("../my-expo-app/assets/images/HEARDAY.png")}
-                className="w-[130px] h-[45px]"
+                className="w-[120px] sm:w-[130px] h-[42px] sm:h-[45px]"
                 resizeMode="contain"
               />
             </View>
 
             {/* 검색창 */}
-            <View className="items-center">
+            <View className="items-center mt-4">
               <SearchBar
                 value={searchText}
                 onChangeText={setSearchText}
@@ -133,7 +131,7 @@ export default function SearchNewsPage() {
               />
             </View>
 
-            {/* 카테고리 버튼들 */}
+            {/* 카테고리 */}
             <View className="mt-3">
               <ScrollButton
                 categories={categories}
@@ -148,26 +146,25 @@ export default function SearchNewsPage() {
             </View>
           </View>
 
+          {/* 뉴스 리스트 */}
           <ScrollView
             ref={listScrollRef}
             onScroll={handleScrollListY}
             scrollEventThrottle={16}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 50 }}
+            contentContainerStyle={{ paddingBottom: 30 }}
           >
             <NewsCardList
               background="white"
               articles={articles}
               onPressArticle={async (id: string) => {
-                console.log('[SearchNewsPage] ===== 기사 클릭 시작 =====');
-                console.log('[SearchNewsPage] 기사 선택 - Article ID:', id);
+                const store = await import("@/stores/newsPlaybackStore").then(
+                  (m) => m.useNewsPlaybackStore
+                );
+                const { setRecommendedArticles, startRecommendedPlayback } =
+                  store.getState();
 
-                // 연속 재생 설정
-                const store = await import('@/stores/newsPlaybackStore').then(m => m.useNewsPlaybackStore);
-                const { setRecommendedArticles, startRecommendedPlayback } = store.getState();
-
-                // 검색 결과 기사들을 추천 기사로 설정 (최대 100개)
-                const playbackArticles = articles.slice(0, 100).map(article => ({
+                const playbackArticles = articles.slice(0, 100).map((article) => ({
                   id: String(article.id),
                   title: article.title,
                   imageUrl: article.imageUrl,
@@ -175,56 +172,14 @@ export default function SearchNewsPage() {
                   category: article.category,
                 }));
 
-                console.log('[SearchNewsPage] playbackArticles 생성:', playbackArticles.length, '개');
-                console.log('[SearchNewsPage] 첫 번째 기사:', playbackArticles[0]?.id);
-                console.log('[SearchNewsPage] 두 번째 기사:', playbackArticles[1]?.id);
-
-                // 클릭한 기사의 인덱스 찾기
-                console.log('[SearchNewsPage] 원본 articles 첫 번째:', articles[0]?.id, typeof articles[0]?.id);
-                console.log('[SearchNewsPage] 클릭한 id:', id, typeof id);
-
-                const clickedIndex = articles.findIndex(article => String(article.id) === String(id));
-                console.log('[SearchNewsPage] 클릭한 기사 인덱스:', clickedIndex);
-                console.log('[SearchNewsPage] 클릭한 기사 ID:', id);
-
-                if (clickedIndex === -1) {
-                  console.error('[SearchNewsPage] ❌ 기사를 찾을 수 없음!');
-                  return;
-                }
-
-                // 상태 업데이트 전 확인
-                console.log('[SearchNewsPage] setRecommendedArticles 호출 전 상태:', store.getState().recommendedArticles.length);
+                const clickedIndex = articles.findIndex(
+                  (article) => String(article.id) === String(id)
+                );
+                if (clickedIndex === -1) return;
 
                 setRecommendedArticles(playbackArticles);
-
-                console.log('[SearchNewsPage] setRecommendedArticles 호출 후 상태:', store.getState().recommendedArticles.length);
-
-                // 연속 재생 시작
-                console.log('[SearchNewsPage] startRecommendedPlayback 호출 - 인덱스:', clickedIndex);
-                console.log('[SearchNewsPage] startRecommendedPlayback 호출 전 currentRecommendedIndex:', store.getState().currentRecommendedIndex);
-
                 startRecommendedPlayback(clickedIndex);
 
-                console.log('[SearchNewsPage] startRecommendedPlayback 호출 후 즉시 상태:', {
-                  currentRecommendedIndex: store.getState().currentRecommendedIndex,
-                  isPlayingRecommended: store.getState().isPlayingRecommended,
-                  recommendedArticlesCount: store.getState().recommendedArticles.length,
-                });
-
-                // 약간 대기 후 다시 확인
-                await new Promise(resolve => setTimeout(resolve, 100));
-
-                const finalState = store.getState();
-                console.log('[SearchNewsPage] 100ms 대기 후 최종 상태:', {
-                  currentRecommendedIndex: finalState.currentRecommendedIndex,
-                  isPlayingRecommended: finalState.isPlayingRecommended,
-                  recommendedArticlesCount: finalState.recommendedArticles.length,
-                  currentArticle: finalState.recommendedArticles[finalState.currentRecommendedIndex],
-                });
-
-                console.log('[SearchNewsPage] ===== 라우팅 시작 =====');
-
-                // 라우팅
                 router.push({
                   pathname: "/newsplayer/[id]",
                   params: { id, from: "category", mode: "recommended" },
@@ -237,9 +192,3 @@ export default function SearchNewsPage() {
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    backgroundColor: "transparent",
-  },
-});

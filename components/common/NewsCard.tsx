@@ -1,14 +1,19 @@
 import React from "react";
-import { Image, Text, View } from "react-native";
+import { Dimensions, Image, Text, View } from "react-native";
 
 type BackgroundVariant = "green" | "white";
 
 interface NewsCardProps {
   title: string;
   description: string;
-  imageUrl?: any; //
+  imageUrl?: any;
   background?: BackgroundVariant;
 }
+
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+
+const CARD_MAX_WIDTH = 380;
+const IMAGE_WIDTH_RATIO = 0.42; // 카드 대비 이미지 비율
 
 const NewsCard = ({
   title,
@@ -18,7 +23,6 @@ const NewsCard = ({
 }: NewsCardProps) => {
   const backgroundColor = background === "green" ? "#F1F6EF" : "#FFFFFF";
 
-  //
   const imageSource =
     typeof imageUrl === "string"
       ? { uri: imageUrl }
@@ -26,9 +30,16 @@ const NewsCard = ({
       ? imageUrl
       : require("../../my-expo-app/assets/images/DefaultCard.png");
 
+  const cardWidth = Math.min(SCREEN_WIDTH - 32, CARD_MAX_WIDTH);
+  const imageWidth = cardWidth * IMAGE_WIDTH_RATIO;
+  const imageHeight = imageWidth * (83 / 148);
+
   return (
     <View
       style={{
+        width: cardWidth,
+        alignSelf: "center",
+        marginBottom: 13,
         shadowColor: "#000",
         shadowOffset: { width: 2, height: 2 },
         shadowOpacity: 0.15,
@@ -36,39 +47,54 @@ const NewsCard = ({
         elevation: 4,
         borderRadius: 16,
       }}
-      className="self-center mb-5"
     >
       <View
-        className="flex-row items-center w-[350px] h-[106px] px-4 py-3 rounded-2xl overflow-hidden"
-        style={{ backgroundColor }}
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          paddingHorizontal: 14,
+          paddingVertical: 12,
+          borderRadius: 16,
+          backgroundColor,
+        }}
       >
+        {/* 이미지 */}
         <View
-          className="mr-4 rounded-md overflow-hidden"
           style={{
-            width: 148,
-            aspectRatio: 148 / 83,
+            width: imageWidth,
+            height: imageHeight,
+            borderRadius: 8,
+            overflow: "hidden",
+            marginRight: 14,
           }}
         >
           <Image
-            source={imageSource} 
+            source={imageSource}
             resizeMode="cover"
-            style={{
-              width: "100%",
-              height: "100%",
-              borderRadius: 8,
-            }}
+            style={{ width: "100%", height: "100%" }}
           />
         </View>
 
-        <View className="flex-1 justify-center">
+        {/* 텍스트 */}
+        <View style={{ flex: 1, justifyContent: "center" }}>
           <Text
-            className="text-[15px] font-extrabold text-black mb-[3px]"
+            style={{
+              fontSize: 13,
+              fontWeight: "800",
+              color: "#000",
+              marginBottom: 4,
+            }}
             numberOfLines={2}
           >
             {title}
           </Text>
+
           <Text
-            className="text-[13px] text-[#4B5563] leading-snug"
+            style={{
+              fontSize: 11,
+              color: "#4B5563",
+              lineHeight: 18,
+            }}
             numberOfLines={2}
           >
             {description}

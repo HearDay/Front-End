@@ -1,7 +1,6 @@
 import React from "react";
 import { Image, Text, TouchableOpacity } from "react-native";
 
-// primary(초록색), secondary(연두색), kakao(노란색), white(흰색)
 type ButtonVariant = "primary" | "secondary" | "kakao" | "white";
 
 interface PrimaryButtonProps {
@@ -10,8 +9,11 @@ interface PrimaryButtonProps {
   onPress?: () => void;
 }
 
-const PrimaryButton = ({ title, variant = "primary", onPress }: PrimaryButtonProps) => {
-  // 타입에 따른 스타일 매핑
+const PrimaryButton = ({
+  title,
+  variant = "primary",
+  onPress,
+}: PrimaryButtonProps) => {
   const getButtonStyle = (type: ButtonVariant) => {
     switch (type) {
       case "primary":
@@ -33,16 +35,18 @@ const PrimaryButton = ({ title, variant = "primary", onPress }: PrimaryButtonPro
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.8}
-      className={`w-[350px] h-[50px] ${bg} rounded-[10px] flex-row justify-center items-center`}
+      className={`w-full max-w-[380px] h-[48px] ${bg} rounded-[10px] flex-row justify-center items-center`}
     >
       {variant === "kakao" && (
         <Image
           source={require("../../my-expo-app/assets/images/kakao.png")}
-          className="w-5 h-5 mr-2"
+          className="w-4 h-4 mr-2"
           resizeMode="contain"
         />
       )}
-      <Text className={`${text} text-[18px] font-medium`}>{title}</Text>
+      <Text className={`${text} text-[16px] font-medium`}>
+        {title}
+      </Text>
     </TouchableOpacity>
   );
 };

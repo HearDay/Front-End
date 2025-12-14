@@ -2,7 +2,8 @@ import { router, Stack, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import {
   KeyboardAvoidingView,
-  Platform
+  Platform,
+  View,
 } from "react-native";
 
 import TopBar from "@/components/common/TopBar";
@@ -21,7 +22,6 @@ export default function AIChatDebatePage() {
   const handleSend = async (message: string) => {
     if (!articleId) return;
 
-    // 사용자 메시지 먼저 추가
     setChatList((prev) => [
       ...prev,
       {
@@ -39,12 +39,10 @@ export default function AIChatDebatePage() {
       );
 
       if (res.success) {
-        // 최초 discussionId 저장
         if (!discussionId) {
           setDiscussionId(res.data.discussionId);
         }
 
-        // AI 응답 추가
         setChatList((prev) => [
           ...prev,
           {
@@ -62,13 +60,18 @@ export default function AIChatDebatePage() {
   return (
     <KeyboardAvoidingView
       className="flex-1 bg-[#FEFFF5]"
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      behavior={Platform.OS === "ios" ? "padding" : "padding"}
       keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
     >
       <Stack.Screen options={{ headerShown: false }} />
       <TopBar showBackButton onBackPress={() => router.replace("/AiPage")} />
 
-      <ChatList chatList={chatList} />
+      {/* 핵심: ChatList는 flex-1 */}
+      <View className="flex-1">
+        <ChatList chatList={chatList} />
+      </View>
+
+      {/* 입력창은 항상 맨 아래 */}
       <ChatInputBar onSend={handleSend} />
     </KeyboardAvoidingView>
   );

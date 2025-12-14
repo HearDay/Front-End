@@ -164,146 +164,136 @@ const SignUpPage = () => {
   };
 
   return (
-    <View className="flex-1 bg-[#F5FCE9]">
-      <Stack.Screen options={{ headerShown: false }} />
-      <TopBar showBackButton onBackPress={() => router.push("/LoginPage")} />
+      <View className="flex-1 bg-[#F5FCE9]">
+        <Stack.Screen options={{ headerShown: false }} />
+        <TopBar showBackButton onBackPress={() => router.push("/LoginPage")} />
 
-      {/* ScrollView */}
-      <View className="flex-1 items-center">
-        <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
+        <View className="flex-1 items-center px-5">
+          <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
 
-        {/* 이메일 입력 */}
-        <View>
-          <EmailInputWithSelect
-            emailId={emailId}
-            onChangeEmailId={setEmailId}
-            emailDomain={emailDomain}
-            onChangeEmailDomain={setEmailDomain}
-            onPressVerify={handleVerify}
-            disabled={isEmailVerified} 
-          />
-        </View>
-
-        {/* 인증번호 입력 */}
-        {showCodeInput && (
-          <View className="mb-3">
-            <InputBoxWithButton
-              placeholder="인증번호"
-              value={certificationCode}
-              onChangeText={setCertificationCode}
-              buttonText="확인"
-              onPressButton={handleCodeConfirm}
-              disabled={isEmailVerified} 
+          {/* 이메일 입력 */}
+          <View className="w-full max-w-[380px]">
+            <EmailInputWithSelect
+              emailId={emailId}
+              onChangeEmailId={setEmailId}
+              emailDomain={emailDomain}
+              onChangeEmailDomain={setEmailDomain}
+              onPressVerify={handleVerify}
+              disabled={isEmailVerified}
             />
           </View>
-        )}
 
-        {/* 닉네임 */}
-        <View>
-          <InputBox placeholder="닉네임" value={nickname} onChangeText={setNickname} />
+          {/* 인증번호 */}
+          {showCodeInput && (
+            <View className="w-full max-w-[380px] mt-3">
+              <InputBoxWithButton
+                placeholder="인증번호"
+                value={certificationCode}
+                onChangeText={setCertificationCode}
+                buttonText="확인"
+                onPressButton={handleCodeConfirm}
+                disabled={isEmailVerified}
+              />
+            </View>
+          )}
+
+          {/* 닉네임 */}
+          <View className="w-full max-w-[380px] mt-3">
+            <InputBox
+              placeholder="닉네임"
+              value={nickname}
+              onChangeText={setNickname}
+            />
+          </View>
+
+          {/* 비밀번호 */}
+          <View className="w-full max-w-[380px] mt-3">
+            <View className="flex-row items-center h-[48px] rounded-[10px] px-5 bg-[#FEFFF5]">
+              <TextInput
+                placeholder="비밀번호"
+                placeholderTextColor="#8AA989"
+                value={pwd}
+                onChangeText={setPwd}
+                secureTextEntry={delayedSecure1}
+                className="flex-1 text-[16px] text-[#1F2D1F]"
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+              <TouchableOpacity onPress={() => setIsSecure1(!isSecure1)}>
+                {isSecure1 ? (
+                  <EyeOff size={20} color="#8AA989" />
+                ) : (
+                  <Eye size={20} color="#8AA989" />
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* 비밀번호 확인 */}
+          <View className="w-full max-w-[380px] mt-3">
+            <View className="flex-row items-center h-[48px] rounded-[10px] px-5 bg-[#FEFFF5]">
+              <TextInput
+                placeholder="비밀번호 확인"
+                placeholderTextColor="#8AA989"
+                value={confirmPw}
+                onChangeText={setConfirmPw}
+                secureTextEntry={delayedSecure2}
+                className="flex-1 text-[16px] text-[#1F2D1F]"
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+              <TouchableOpacity onPress={() => setIsSecure2(!isSecure2)}>
+                {isSecure2 ? (
+                  <EyeOff size={20} color="#8AA989" />
+                ) : (
+                  <Eye size={20} color="#8AA989" />
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* 전화번호 */}
+          <View className="w-full max-w-[380px] mt-3">
+            <InputBox
+              placeholder="전화번호 (-없이 번호 입력)"
+              value={phone}
+              onChangeText={setPhone}
+            />
+          </View>
+
+          {/* 안내 문구 */}
+          <View className="w-full max-w-[380px] mt-2 mb-2 px-1">
+            <Text className="text-[10px] text-[#B7B7B7] leading-5">
+              • 앱의 모든 기능을 원활하게 사용하기 위해서 정확한 정보를 입력해야 합니다{"\n"}
+              • 본인확인 및 보안을 위한 정보이며, 다른 용도로 사용되지 않습니다
+            </Text>
+          </View>
+
+          {/* 약관 */}
+          <View className="w-full max-w-[380px] mt-2">
+            <TermsAgreement value={terms} onChange={setTerms} />
+          </View>
+
+          {/* 회원가입 버튼 */}
+          <View className="w-full max-w-[380px] mt-4">
+            <PrimaryButton
+              title="회원가입"
+              variant={isSignUpEnabled ? "primary" : "secondary"}
+              onPress={handleSignUp}
+            />
+          </View>
         </View>
 
-        {/* 비밀번호 */}
-        <View
-          className="flex-row items-center w-[350px] h-[50px] bg-[#FEFFF5] rounded-[10px] px-6 mt-3"
-          style={{ paddingVertical: Platform.OS === "ios" ? 10 : 6 }}
-        >
-          <TextInput
-            placeholder="비밀번호"
-            placeholderTextColor="#8AA989"
-            value={pwd}
-            onChangeText={setPwd}
-            secureTextEntry={delayedSecure1}
-            style={{
-              flex: 1,
-              fontSize: 17,
-              color: "#1F2D1F",
-              paddingVertical: 0,
-            }}
-            autoCapitalize="none"
-            autoCorrect={false}
-            autoComplete="off"
-            importantForAutofill="no"
-            textContentType="oneTimeCode"
-          />
-          <TouchableOpacity onPress={() => setIsSecure1(!isSecure1)}>
-            {isSecure1 ? (
-              <EyeOff size={22} color="#8AA989" />
-            ) : (
-              <Eye size={22} color="#8AA989" />
-            )}
-          </TouchableOpacity>
-        </View>
-
-        {/* 비밀번호 확인 */}
-        <View
-          className="flex-row items-center w-[350px] h-[50px] bg-[#FEFFF5] rounded-[10px] px-6 mt-3"
-          style={{ paddingVertical: Platform.OS === "ios" ? 10 : 6 }}
-        >
-          <TextInput
-            placeholder="비밀번호 확인"
-            placeholderTextColor="#8AA989"
-            value={confirmPw}
-            onChangeText={setConfirmPw}
-            secureTextEntry={delayedSecure2}
-            style={{
-              flex: 1,
-              fontSize: 17,
-              color: "#1F2D1F",
-              paddingVertical: 0,
-            }}
-            autoCapitalize="none"
-            autoCorrect={false}
-            autoComplete="off"
-            importantForAutofill="no"
-            textContentType="oneTimeCode"
-          />
-          <TouchableOpacity onPress={() => setIsSecure2(!isSecure2)}>
-            {isSecure2 ? (
-              <EyeOff size={22} color="#8AA989" />
-            ) : (
-              <Eye size={22} color="#8AA989" />
-            )}
-          </TouchableOpacity>
-        </View>
-
-        {/* 전화번호 */}
-        <View className="mt-3">
-          <InputBox
-            placeholder="전화번호 (-없이 번호 입력)"
-            value={phone}
-            onChangeText={setPhone}
-          />
-        </View>
-
-        {/* 안내 문구 */}
-        <View className="w-[350px] mt-2 mb-2">
-          <Text className="text-[11px] text-[#B7B7B7] leading-5 ml-3">
-            • 앱의 모든 기능을 원활하게 사용하기 위해서 정확한 정보를 입력해야 합니다{"\n"}
-            • 본인확인 및 보안을 위한 정보이며, 다른 용도로 사용되지 않습니다
-          </Text>
-        </View>
-
-        {/* 약관 */}
-        <TermsAgreement value={terms} onChange={setTerms} />
-
-        {/* 회원가입 버튼 */}
-        <PrimaryButton
-          title="회원가입"
-          variant={isSignUpEnabled ? "primary" : "secondary"}
-          onPress={handleSignUp}
+        <Modal
+          visible={modalVisible}
+          title={modalMessage}
+          confirmText="확인"
+          onConfirm={handleModalConfirm}
+          onClose={() => setModalVisible(false)}
         />
       </View>
+    );
 
-      <Modal
-        visible={modalVisible}
-        title={modalMessage}
-        confirmText="확인"
-        onConfirm={handleModalConfirm}
-        onClose={() => setModalVisible(false)}
-      />
-    </View>
-  );
 };
 
 export default SignUpPage;

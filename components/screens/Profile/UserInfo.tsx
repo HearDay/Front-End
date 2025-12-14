@@ -4,8 +4,8 @@ import { Image, Text, View } from "react-native";
 interface UserInfoProps {
   nickname: string;
   email: string;
-  level: number;  
-  point: number;   // 누적 포인트 
+  level: number;
+  point: number;
 }
 
 // 레벨별 기준 누적 포인트
@@ -25,7 +25,7 @@ const LEVEL_REQUIRE = {
   4: 120,
   5: 180,
   6: 250,
-  max: 350, // 6레벨 최고 포인트
+  max: 350,
 };
 
 const UserInfo = ({ nickname, email, level, point }: UserInfoProps) => {
@@ -33,10 +33,8 @@ const UserInfo = ({ nickname, email, level, point }: UserInfoProps) => {
   let nextRequire = 0;
   let remain = 0;
 
-  // 현재 레벨의 기준점
   const basePoint = LEVEL_THRESHOLDS[level];
 
-  // 6레벨 만렙 처리
   if (level === 6) {
     currentPoint = point - basePoint;
     nextRequire = LEVEL_REQUIRE.max;
@@ -47,33 +45,36 @@ const UserInfo = ({ nickname, email, level, point }: UserInfoProps) => {
     remain = nextRequire - currentPoint;
   }
 
-  // 게이지바 진행률
   const progress = currentPoint / nextRequire;
 
   return (
-    <View className="w-full px-6">
-      <View className="flex-row items-center gap-4">
+    <View className="w-full max-w-[380px]">
+      {/* 프로필 상단 */}
+      <View className="flex-row items-center gap-4 px-2">
         <Image
           source={require("../../../my-expo-app/assets/images/DefaultProfile.png")}
-          className="w-[83px] h-[83px] rounded-full ml-2"
+          className="w-[76px] h-[76px] rounded-full"
+          resizeMode="contain"
         />
 
-        <View className="flex-col ml-2">
-          <Text className="text-black font-semibold text-[19px]">
+        <View className="flex-1">
+          <Text className="text-black font-semibold text-[18px]">
             {nickname}
           </Text>
 
-          <Text className="text-green-700 font- text-[17px] mt-2">
+          <Text className="text-green-700 text-[15px] mt-1">
             {email}
           </Text>
 
           {/* LEVEL · POINT */}
-          <View className="flex-row items-center gap-4 mt-2">
-            <Text className="text-gray-400 text-[17px]">LEVEL</Text>
-            <Text className="text-black text-[17px] font-medium">{level}</Text>
+          <View className="flex-row items-center mt-2 flex-wrap">
+            <Text className="text-gray-400 text-[14px] mr-1">LEVEL</Text>
+            <Text className="text-black text-[14px] font-medium mr-4">
+              {level}
+            </Text>
 
-            <Text className="text-gray-400 text-[17px] ml-4">POINT</Text>
-            <Text className="text-black text-[17px] font-medium">
+            <Text className="text-gray-400 text-[14px] mr-1">POINT</Text>
+            <Text className="text-black text-[14px] font-medium">
               {currentPoint}
               <Text className="text-gray-300">/{nextRequire}</Text>
             </Text>
@@ -82,14 +83,14 @@ const UserInfo = ({ nickname, email, level, point }: UserInfoProps) => {
       </View>
 
       {/* 레벨업 문구 */}
-      <Text className="text-[#00801A] text-right text-[16px] font-light mt-3 mr-2 ml-1 mb-1">
+      <Text className="text-[#00801A] text-right text-[14px] font-light mt-3 mb-1 pr-2">
         {level === 6 && currentPoint >= LEVEL_REQUIRE.max
           ? "더이상 채울 포인트가 없어요!"
           : `레벨업까지 ${remain}point 남았어요!`}
       </Text>
 
       {/* 게이지 바 */}
-      <View className="w-[350px] h-[11px] bg-[#D9D9D9] mx-auto rounded-[10px] mt-1 overflow-hidden">
+      <View className="w-full h-[10px] bg-[#D9D9D9] rounded-[10px] overflow-hidden">
         <LinearGradient
           colors={["#C9DD12", "#097745"]}
           start={{ x: 0, y: 0 }}

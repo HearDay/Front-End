@@ -17,7 +17,7 @@ export default function ChatInputBar({ onSend }: ChatInputBarProps) {
   return (
     <View className="w-full items-center bg-[#FEFFF5] px-4 pb-6">
       <View
-        className="flex-row items-center justify-between w-[340px] h-[50px] px-4 mb-7"
+        className="flex-row items-center justify-between w-[340px] h-[50px] px-4"
         style={{
           backgroundColor: "#F3FEEE",
           borderRadius: 8,

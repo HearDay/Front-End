@@ -15,7 +15,7 @@ interface EmailInputWithSelectProps {
   emailDomain: string;
   onChangeEmailDomain: (domain: string) => void;
   onPressVerify: () => void;
-  disabled?: boolean; 
+  disabled?: boolean;
   buttonType?: "verify" | "confirm";
 }
 
@@ -34,45 +34,35 @@ const EmailInputWithSelect = ({
   const buttonText = buttonType === "verify" ? "확인" : "본인인증";
 
   return (
-    <View className="flex-row items-center w-[350px] mx-auto mb-3 gap-2">
-      {/* 이메일 아이디 입력 */}
+    <View className="w-full max-w-[380px] flex-row items-center gap-2 ">
+      {/* 이메일 ID */}
       <View className="flex-1">
         <InputBox
           placeholder="이메일"
           value={emailId}
           onChangeText={onChangeEmailId}
-          variant="default"
           editable={!disabled}
-          style={{ width: 260, backgroundColor: disabled ? "#E5E5E5" : "#FEFFF5" }}
+          variant="default"
+          style={{
+            backgroundColor: disabled ? "#E5E5E5" : "#FEFFF5",
+          }}
         />
       </View>
 
-      {/* 도메인 선택 (disabled일 때 선택 불가능) */}
+      {/* 도메인 선택 */}
       <TouchableOpacity
         activeOpacity={0.8}
-        onPress={() => !disabled && setDropdownVisible(true)} 
+        onPress={() => !disabled && setDropdownVisible(true)}
         disabled={disabled}
-        style={{
-          borderColor: "#9CB59F",
-          borderWidth: 1,
-          borderTopLeftRadius: 0,
-          borderBottomLeftRadius: 0,
-          borderTopRightRadius: 10,
-          borderBottomRightRadius: 10,
-          backgroundColor: disabled ? "#E5E5E5" : "white",
-        }}
-        className="flex-row justify-between items-center px-3 w-[130px] h-[50px]"
+        className="flex-row items-center justify-between h-[48px] px-3 rounded-[10px] border border-[#9CB59F] bg-white"
+        style={{ opacity: disabled ? 0.5 : 1 }}
       >
-        <Text
-          className="text-[#1F2D1F] mr-1 text-[14px]"
-          style={{ color: disabled ? "#8A8A8A" : "#1F2D1F" }}
-        >
+        <Text className="text-[14px] text-[#1F2D1F] mr-1">
           {emailDomain}
         </Text>
-
         <Image
           source={require("../../../my-expo-app/assets/images/Down.png")}
-          style={{ width: 20, height: 20, opacity: disabled ? 0.4 : 1 }} 
+          className="w-4 h-4"
           resizeMode="contain"
         />
       </TouchableOpacity>
@@ -82,11 +72,11 @@ const EmailInputWithSelect = ({
         onPress={onPressVerify}
         activeOpacity={0.8}
         disabled={disabled}
-        className={`w-[80px] h-[50px] bg-white rounded-[10px] border border-[#1B8131] items-center justify-center ${
+        className={`h-[48px] px-4 rounded-[10px] border border-[#1B8131] items-center justify-center bg-white ${
           disabled ? "opacity-40" : "opacity-100"
         }`}
       >
-        <Text className="text-lg font-semibold text-[#1B8131]">
+        <Text className="text-[15px] font-semibold text-[#1B8131]">
           {buttonText}
         </Text>
       </TouchableOpacity>
@@ -103,7 +93,7 @@ const EmailInputWithSelect = ({
           onPress={() => setDropdownVisible(false)}
           className="flex-1 justify-center items-center bg-[rgba(0,0,0,0.3)]"
         >
-          <View className="bg-white w-[200px] rounded-[12px] border border-[#9CB59F] shadow-lg">
+          <View className="bg-white w-[220px] rounded-[12px] border border-[#9CB59F]">
             <FlatList
               data={domains.filter((d) => d !== emailDomain)}
               keyExtractor={(item) => item}
@@ -116,7 +106,9 @@ const EmailInputWithSelect = ({
                   }}
                   className="px-4 py-3"
                 >
-                  <Text className="text-[#1F2D1F] text-[14px]">{item}</Text>
+                  <Text className="text-[#1F2D1F] text-[14px]">
+                    {item}
+                  </Text>
                 </TouchableOpacity>
               )}
             />

@@ -6,17 +6,21 @@ import { fetchProfile } from "@/services/api/profile";
 import { ProfileData } from "@/types/auth/profile";
 import { Stack, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import {
+  Image,
+  SafeAreaView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 const Profile = () => {
   const router = useRouter();
   const [user, setUser] = useState<ProfileData | null>(null);
 
-  // 오늘 날짜 기준으로 year/month API 호출
   const today = new Date();
   const year = today.getFullYear();
   const month = today.getMonth() + 1;
-
 
   useEffect(() => {
     const load = async () => {
@@ -34,8 +38,7 @@ const Profile = () => {
   if (!user) return null;
 
   return (
-    <View className="flex-1 bg-white">
-      {/* 헤더 숨기기 */}
+    <SafeAreaView className="flex-1 bg-white">
       <Stack.Screen options={{ headerShown: false }} />
 
       {/* TopBar */}
@@ -47,27 +50,30 @@ const Profile = () => {
       {/* 설정 버튼 */}
       <TouchableOpacity
         onPress={() => router.push("/SettingPage")}
-        className="absolute"
-        style={{top: 33, right: 25 }}
+        className="absolute top-10 right-5 z-10"
+        activeOpacity={0.8}
       >
         <Image
           source={require("../../my-expo-app/assets/images/Setting.png")}
-          className="w-[24px] h-[24px]"
+          className="w-6 h-6"
+          resizeMode="contain"
         />
       </TouchableOpacity>
 
-      <View className="w-full items-center mt-2">
+      <View className="flex-1 items-center px-5">
 
-        {/* 사용자 정보 영역 */}
-        <UserInfo
-          nickname={user.nickname}
-          email={user.email}
-          level={user.level}   // 백엔드값 그대로
-          point={user.point}   // 누적 포인트
-        />
+        {/* 사용자 정보 */}
+        <View className="w-full max-w-[380px] mt-2">
+          <UserInfo
+            nickname={user.nickname}
+            email={user.email}
+            level={user.level}
+            point={user.point}
+          />
+        </View>
 
         {/* 프로필 편집 버튼 */}
-        <View className="w-[350px] h-[43px] justify-center mt-4 mb-6 border border-[#006716] rounded-[10px] overflow-hidden">
+        <View className="w-full max-w-[380px] justify-center h-[40px] mt-4 border border-[#006716] rounded-[10px] overflow-hidden">
           <PrimaryButton
             title="프로필 편집"
             variant="white"
@@ -76,14 +82,18 @@ const Profile = () => {
         </View>
 
         {/* 출석 현황 타이틀 */}
-        <Text className="w-full px-6 ml-5 text-[18px] font-bold text-[#002C09] mt-5 mb-1 ml-2">
-          출석 현황
-        </Text>
+        <View className="w-full max-w-[380px] mt-7 mb-1">
+          <Text className="text-[16px] ml-2 font-bold text-[#002C09]">
+            출석 현황
+          </Text>
+        </View>
 
-        {/* 캘린더 */}
-        <AttendanceCalendar attendance={user.attendance} />
+        {/* 출석 캘린더 */}
+        <View className="w-full max-w-[380px] items-center">
+          <AttendanceCalendar attendance={user.attendance} />
+        </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 

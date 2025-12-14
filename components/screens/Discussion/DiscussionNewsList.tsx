@@ -22,20 +22,20 @@ export function DiscussionNewsList({
   // id 기준 중복 제거
   const uniqueNews = useMemo(() => {
     const map = new Map<string, typeof news[number]>();
-
     news.forEach((item) => {
       map.set(String(item.id), item);
     });
-
     return Array.from(map.values());
   }, [news]);
 
   return (
-    <View className="flex-1">
+    <View className="flex-1 px-4">
       {/* 헤더 */}
-      <View className="px-4 pb-3">
+      <View className="pb-3">
         <View className="flex-row justify-between items-center mb-2">
-          <Text className="text-lg font-semibold">내가 본 뉴스</Text>
+          <Text className="text-[16px] sm:text-[17px] lg:text-[18px] font-semibold">
+            내가 본 뉴스
+          </Text>
 
           {/* 정렬 드롭다운 */}
           <View>
@@ -43,7 +43,7 @@ export function DiscussionNewsList({
               onPress={() => setShowDropdown((prev) => !prev)}
               className="flex-row items-center"
             >
-              <Text className="text-sm text-[#00801A] mr-1">
+              <Text className="text-[13px] sm:text-[14px] lg:text-[15px] text-[#00801A] mr-1">
                 {currentLabel}
               </Text>
               <Text className="text-[#00801A]">
@@ -63,7 +63,7 @@ export function DiscussionNewsList({
                     className="py-2 px-4"
                   >
                     <Text
-                      className={`text-sm ${
+                      className={`text-[13px] sm:text-[14px] lg:text-[15px] ${
                         sortBy === option.value
                           ? "text-[#00801A] font-bold"
                           : "text-gray-700"
@@ -86,11 +86,11 @@ export function DiscussionNewsList({
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 0 }}
+        contentContainerStyle={{ paddingBottom: 8 }}
       >
         {uniqueNews.length === 0 ? (
           <View className="flex-1 items-center justify-center py-20">
-            <Text className="text-gray-400 text-base">
+            <Text className="text-[14px] sm:text-[15px] lg:text-[16px] text-gray-400">
               본 뉴스가 없습니다
             </Text>
           </View>

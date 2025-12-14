@@ -25,24 +25,24 @@ export function DiscussionModal({
     >
       <View className="gap-3 mt-6">
         <TouchableOpacity
-          className="bg-[#DBFDE0] py-4 rounded-2xl"
+          className="bg-[#1B8131] py-3 rounded-2xl"
           onPress={() => onStartDiscussion("voice")}
         >
-          <Text className="text-center font-medium">음성으로 토론하기</Text>
+          <Text className="text-center text-white text-md font-semibold">음성으로 토론하기</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          className="bg-[#DBFDE0] py-4 rounded-2xl"
+          className="bg-[#1B8131] py-3 rounded-2xl"
           onPress={() => onStartDiscussion("chat")}
         >
-          <Text className="text-center font-medium">채팅으로 토론하기</Text>
+          <Text className="text-center text-white text-md font-semibold">채팅으로 토론하기</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          className="bg-[#DBFDE0] py-4 rounded-2xl"
+          className="bg-[#1B8131] py-3 rounded-2xl"
           onPress={onClose}
         >
-          <Text className="text-center font-medium">다음에 하기</Text>
+          <Text className="text-center text-white text-md font-semibold">다음에 하기</Text>
         </TouchableOpacity>
       </View>
     </Modal>

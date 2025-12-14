@@ -43,7 +43,7 @@ export function Modal({
           onPress={(e) => e.stopPropagation()}
         >
           {/* 제목 */}
-          <Text className="text-center text-xl text-normal text-gray-800 mt-2">
+          <Text className="text-center text-lg text-semibold text-gray-800 mt-2">
             {title}
           </Text>
 

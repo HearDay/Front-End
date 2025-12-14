@@ -59,8 +59,8 @@ export default function TabLayout() {
             <Image
               source={iconPath}
               style={{
-                width: 28,
-                height: 28,
+                width: 25,
+                height: 25,
                 resizeMode: "contain",
               }}
             />

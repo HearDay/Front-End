@@ -98,7 +98,7 @@ const NewsCardSlider = ({ updateTime, articles = [] }: NewsCardSliderProps) => {
               </View>
             </View>
             {updateTime && (
-              <Text className="absolute right-8 text-gray-500 text-xs whitespace-nowrap">
+              <Text className="absolute right-6 text-gray-400 text-[10px] whitespace-nowrap">
                 {updateTime} 업데이트
               </Text>
             )}
