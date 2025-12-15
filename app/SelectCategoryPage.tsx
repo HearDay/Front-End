@@ -4,36 +4,34 @@ import React, { useState } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 const categories = [
-  "경제",
-  "방송 / 연예",
-  "IT",
-  "쇼핑",
-  "생활",
-  "해외",
-  "스포츠",
-  "정치",
+  { label: "경제", value: "경제" },
+  { label: "방송 / 연예", value: "방송_연예" },
+  { label: "IT", value: "IT" },
+  { label: "쇼핑", value: "쇼핑" },
+  { label: "생활", value: "생활" },
+  { label: "해외", value: "해외" },
+  { label: "스포츠", value: "스포츠" },
+  { label: "정치", value: "정치" },
 ];
 
 const SelectCategoryPage = () => {
   const [selected, setSelected] = useState<string[]>([]);
   const router = useRouter();
 
-  // 카테고리 선택 (최대 3개)
-  const toggleSelect = (category: string) => {
+  const toggleSelect = (value: string) => {
     setSelected((prev) => {
-      if (prev.includes(category)) {
-        return prev.filter((p) => p !== category);
+      if (prev.includes(value)) {
+        return prev.filter((p) => p !== value);
       }
 
       if (prev.length >= 3) return prev;
 
-      return [...prev, category];
+      return [...prev, value];
     });
   };
 
-  // 다음 페이지 이동 + params 전달
   const goNext = () => {
-    if (selected.length === 0) return; 
+    if (selected.length === 0) return;
 
     router.push({
       pathname: "/SelectAgePage",
@@ -61,7 +59,6 @@ const SelectCategoryPage = () => {
           }}
           showsVerticalScrollIndicator={false}
         >
-          {/* 타이틀 */}
           <View className="items-center mb-10">
             <Text className="text-[22px] text-white font-semibold mb-2">
               어떤 뉴스를 선호하세요?
@@ -71,14 +68,13 @@ const SelectCategoryPage = () => {
             </Text>
           </View>
 
-          {/* 카테고리 버튼 */}
           <View className="flex-row flex-wrap justify-center w-full mt-10 gap-8 px-4">
-            {categories.map((category, idx) => {
-              const isSelected = selected.includes(category);
+            {categories.map(({ label, value }, idx) => {
+              const isSelected = selected.includes(value);
               return (
                 <TouchableOpacity
                   key={idx}
-                  onPress={() => toggleSelect(category)}
+                  onPress={() => toggleSelect(value)}
                   activeOpacity={0.8}
                   className={`w-[119px] h-[49px] rounded-full items-center justify-center ${
                     isSelected ? "bg-[#006716]" : "bg-[#D9EBCE]"
@@ -89,14 +85,13 @@ const SelectCategoryPage = () => {
                       isSelected ? "text-[#FBFFD3] font-semibold" : "text-black"
                     }`}
                   >
-                    {category}
+                    {label}
                   </Text>
                 </TouchableOpacity>
               );
             })}
           </View>
 
-          {/* 확인 버튼 → SelectAgePage 이동 */}
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={goNext}

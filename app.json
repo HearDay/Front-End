@@ -18,6 +18,7 @@
       }
     },
     "android": {
+      "package": "com.yourname.appname",
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.anonymous.HEARDAY",
