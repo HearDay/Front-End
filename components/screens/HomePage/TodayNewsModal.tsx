@@ -7,6 +7,7 @@ import {
   InteractionManager,
   Modal,
   PanResponder,
+  Platform,
   Pressable,
   Text,
   View,
@@ -33,7 +34,7 @@ interface TodayNewsModalProps {
   onNewsCardPress?: (newsId: string) => void
 }
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window')
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('screen')
 const SWIPE_THRESHOLD = -120
 const CARD_WIDTH = SCREEN_WIDTH - 100
 
@@ -285,20 +286,32 @@ export const TodayNewsModal = ({
       transparent
       animationType="slide"
       onRequestClose={onClose}
+      statusBarTranslucent={Platform.OS === 'android'}
     >
       <Pressable
-        className="flex-1 bg-black/50 justify-center"
-        style={{ paddingBottom: 80 }}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: SCREEN_WIDTH,
+          height: SCREEN_HEIGHT,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        }}
         onPress={onClose}
       >
-        <Pressable onPress={(e) => e.stopPropagation()}>
-          <Text className="text-white text-center text-[12px] mb-8 px-8">
-            옆으로 스크롤하여 다음 뉴스를 확인해보세요!
-          </Text>
-          <View className="items-center">
-            {newsItems.map((item, index) => renderCard(item, index))}
-          </View>
-        </Pressable>
+        <View
+          className="flex-1 justify-center"
+          style={{ paddingBottom: 150 }}
+        >
+          <Pressable onPress={(e) => e.stopPropagation()}>
+            <Text className="text-white text-center text-[12px] mb-8 px-8">
+              옆으로 스크롤하여 다음 뉴스를 확인해보세요!
+            </Text>
+            <View className="items-center">
+              {newsItems.map((item, index) => renderCard(item, index))}
+            </View>
+          </Pressable>
+        </View>
       </Pressable>
     </Modal>
   )

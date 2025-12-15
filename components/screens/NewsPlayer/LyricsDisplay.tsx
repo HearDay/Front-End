@@ -31,7 +31,7 @@ export const LyricsDisplay = memo(function LyricsDisplay({
       activeOpacity={0.9}
       disabled={!onPress}
     >
-      <View className={`px-6 ${Platform.OS === 'android' ? 'pt-20' : 'pt-14'}`}>
+    <View className={`px-6 ${Platform.OS === 'android' ? 'pt-[50px]' : 'pt-14'}`}>
         {currentLines.map((line, index) => (
           <Text
             key={index}
